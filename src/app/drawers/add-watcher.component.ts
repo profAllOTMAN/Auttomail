@@ -184,11 +184,11 @@ import { CommonModule } from '@angular/common';
 
         <!-- Footer -->
         <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-end gap-3">
-          <button (click)="closeDrawer.emit()" class="px-5 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+          <button (click)="closeDrawer.emit()" class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
             Cancel
           </button>
           <div class="relative inline-block">
-            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
+            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
               <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
               {{ mode === 'onboarding' ? 'Next Step' : 'Add rWatcher' }}
             </button>
@@ -197,7 +197,7 @@ import { CommonModule } from '@angular/common';
                 🤖 An rWatcher is the machine that runs your tasks. Click Next when ready!
                 <div class="absolute -bottom-1.5 right-8 w-3 h-3 bg-slate-800 rotate-45"></div>
               </div>
-              <div class="absolute inset-0 rounded-lg bg-primary/40 animate-ping z-0"></div>
+              <div class="absolute inset-0 rounded-full bg-primary/40 animate-ping z-0"></div>
             }
           </div>
         </footer>

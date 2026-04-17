@@ -1,9 +1,26 @@
-import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RouterOutlet} from '@angular/router';
+import {Router, RouterOutlet, NavigationEnd, RouterLink} from '@angular/router';
+import {filter} from 'rxjs/operators';
 import {AddWatcherDrawerComponent} from './drawers/add-watcher.component';
 import {AddScheduleDrawerComponent} from './drawers/add-schedule.component';
 import {CreateProcessMonitorDrawerComponent} from './drawers/create-process-monitor.component';
+
+export interface SubProcess {
+  id: string;
+  name: string;
+  status: 'passed' | 'failed' | 'running' | 'pending';
+  duration?: string;
+  transactions?: Transaction[];
+}
+
+export interface Transaction {
+  id: string;
+  name: string;
+  status: 'passed' | 'failed' | 'running' | 'pending';
+  duration?: string;
+  message?: string;
+}
 
 export interface ProcessMonitor {
   id: string;
@@ -15,6 +32,8 @@ export interface ProcessMonitor {
   message?: string;
   scenarioAssigned?: string;
   projectLinked?: string;
+  assignedRWatcherIds?: string[];
+  subProcesses?: SubProcess[];
 }
 
 export interface RWatcher {
@@ -37,8 +56,9 @@ export interface RWatcher {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
   imports: [
-    CommonModule, 
+    CommonModule,
     RouterOutlet,
+    RouterLink,
     AddWatcherDrawerComponent,
     AddScheduleDrawerComponent,
     CreateProcessMonitorDrawerComponent
@@ -46,26 +66,80 @@ export interface RWatcher {
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
+  constructor(private router: Router) {}
   activeDrawer = signal<'watcher' | 'schedule' | 'monitor' | null>(null);
   drawerMode = signal<'onboarding' | 'standalone'>('standalone');
-  completedSteps = signal<string[]>([]);
-  activeTab = signal<'dashboard' | 'process-monitor' | 'rwatchers' | 'help'>('dashboard');
+  completedSteps = signal<string[]>(['notifications', 'watcher', 'schedule', 'monitor']);
+  activeTab = signal<string>('dashboard');
+
+  ngOnInit() {
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd)
+    ).subscribe(e => {
+      const path = e.urlAfterRedirects.split('/')[1]?.split('?')[0] || 'dashboard';
+      const tabMap: Record<string, string> = {
+        'dashboard': 'dashboard',
+        'process-monitors': 'process-monitor',
+        'rwatchers': 'rwatchers',
+        'schedules': 'schedules',
+        'projects': 'projects',
+        'reports': 'reports',
+        'help': 'help'
+      };
+      this.activeTab.set(tabMap[path] || 'dashboard');
+    });
+  }
+
+  navigate(path: string) {
+    this.router.navigate([path]);
+  }
   showNotifications = signal<boolean>(false);
-  tourSkipped = signal<boolean>(false);
+  tourSkipped = signal<boolean>(true);
   editingMonitorId = signal<string | null>(null);
   monitorToDelete = signal<string | null>(null);
   seeItRunChecked = signal<boolean>(false);
   exportReportsChecked = signal<boolean>(false);
-  onboardingDismissed = signal<boolean>(false);
+  onboardingDismissed = signal<boolean>(true);
+  card2Steps = signal<string[]>([]);
+  card3Steps = signal<string[]>([]);
+  selectedMonitorId = signal<string | null>(null);
+  selectedHelpCard = signal<'process' | 'rwatchers' | 'calendar' | 'reports' | 'notifications' | null>('process');
+  installSteps = signal<string[]>(['download', 'login', 'botmanager', 'record']);
 
   allStepsComplete() {
-    return this.completedSteps().includes('monitor')
-      && this.seeItRunChecked()
-      && this.exportReportsChecked();
+    return this.completedSteps().includes('monitor') && this.seeItRunChecked();
   }
 
-  monitors = signal<ProcessMonitor[]>([]);
+  card1CompletedCount() {
+    let count = 4; // Download, Login, BotManager, Record — always pre-done
+    if (this.completedSteps().includes('notifications')) count++;
+    if (this.completedSteps().includes('watcher')) count++;
+    if (this.completedSteps().includes('schedule')) count++;
+    if (this.completedSteps().includes('monitor')) count++;
+    if (this.seeItRunChecked()) count++;
+    return count;
+  }
+
+  card2CompletedCount() {
+    const prereq = (this.card2Steps().includes('prereq') || this.completedSteps().includes('monitor')) ? 1 : 0;
+    const steps = ['threshold', 'recipients', 'test', 'history'].filter(s => this.card2Steps().includes(s)).length;
+    return prereq + steps;
+  }
+
+  toggleCard2Step(step: string) {
+    this.card2Steps.update(steps =>
+      steps.includes(step) ? steps.filter(s => s !== step) : [...steps, step]
+    );
+  }
+
+  toggleCard3Step(step: string) {
+    this.card3Steps.update(steps =>
+      steps.includes(step) ? steps.filter(s => s !== step) : [...steps, step]
+    );
+  }
+
+  monitors = signal<ProcessMonitor[]>(this.getDemoMonitors());
 
   rwatchers = signal<RWatcher[]>([
     {
@@ -257,10 +331,11 @@ export class App {
             resources: '1 rWatcher',
             message: 'Waiting for schedule',
             scenarioAssigned: 'Custom Scenario',
-            projectLinked: 'My First Project'
+            projectLinked: 'My First Project',
+            assignedRWatcherIds: ['1']
           }]);
         }
-        this.activeTab.set('process-monitor');
+        this.navigate('/process-monitors');
       }
       this.closeDrawer();
       return;
@@ -281,18 +356,8 @@ export class App {
       } else if (currentStep === 'schedule') {
         this.activeDrawer.set('monitor');
       } else if (currentStep === 'monitor') {
-        // Add the first monitor but stay on onboarding until manual checks done
-        this.monitors.set([{
-          id: '1',
-          name: 'Process Notepad',
-          status: 'running',
-          lastRun: 'Just now',
-          successRate: '100%',
-          resources: '1 rWatcher',
-          message: 'Processing items...',
-          scenarioAssigned: 'Notepad Data Entry',
-          projectLinked: 'My First Project'
-        }]);
+        // Add example monitors with assigned rWatchers
+        this.monitors.set(this.getDemoMonitors());
         this.activeDrawer.set(null);
       }
     } else {
@@ -306,6 +371,136 @@ export class App {
 
   dismissOnboarding() {
     this.onboardingDismissed.set(true);
-    this.activeTab.set('dashboard');
+    this.navigate('/dashboard');
+  }
+
+  getDemoMonitors(): ProcessMonitor[] {
+    return [
+      {
+        id: '1', name: 'Process Notepad', status: 'running', lastRun: 'Just now', successRate: '100%', resources: '3 rWatchers',
+        message: 'Processing items...', scenarioAssigned: 'Notepad Data Entry', projectLinked: 'My First Project', assignedRWatcherIds: ['1', '2', '3'],
+        subProcesses: [
+          { id: 'sp1', name: 'Open Application', status: 'passed', duration: '2s', transactions: [
+            { id: 't1', name: 'Launch Notepad', status: 'passed', duration: '1.2s', message: 'Window detected' },
+            { id: 't2', name: 'Verify Window Title', status: 'passed', duration: '0.8s', message: 'Title matched' }
+          ]},
+          { id: 'sp2', name: 'Data Entry', status: 'running', duration: '—', transactions: [
+            { id: 't3', name: 'Type Header Row', status: 'passed', duration: '1.5s', message: 'Text entered' },
+            { id: 't4', name: 'Type Data Rows', status: 'running', duration: '—', message: 'Processing row 42/100' },
+            { id: 't5', name: 'Save File', status: 'pending', message: 'Waiting...' }
+          ]},
+          { id: 'sp3', name: 'Validation', status: 'pending', transactions: [
+            { id: 't6', name: 'Verify Row Count', status: 'pending' },
+            { id: 't7', name: 'Checksum Validation', status: 'pending' }
+          ]}
+        ]
+      },
+      {
+        id: '2', name: 'SFDC Auth Monitor', status: 'running', lastRun: '3 min ago', successRate: '98%', resources: '2 rWatchers',
+        message: 'Auth flow validated', scenarioAssigned: 'SFDC Auth Flow', projectLinked: 'CRM Integration', assignedRWatcherIds: ['1', '2'],
+        subProcesses: [
+          { id: 'sp4', name: 'Login Flow', status: 'passed', duration: '4s', transactions: [
+            { id: 't8', name: 'Navigate to Login', status: 'passed', duration: '1.8s' },
+            { id: 't9', name: 'Enter Credentials', status: 'passed', duration: '1.2s' },
+            { id: 't10', name: 'MFA Verification', status: 'passed', duration: '1.0s' }
+          ]},
+          { id: 'sp5', name: 'Session Validation', status: 'passed', duration: '1.5s', transactions: [
+            { id: 't11', name: 'Check Token Expiry', status: 'passed', duration: '0.5s' },
+            { id: 't12', name: 'Verify Permissions', status: 'passed', duration: '1.0s' }
+          ]}
+        ]
+      },
+      {
+        id: '3', name: 'Legacy Data Sync', status: 'pending', lastRun: '1 hour ago', successRate: '95%', resources: '1 rWatcher',
+        message: 'Waiting for schedule', scenarioAssigned: 'Legacy Data Sync', projectLinked: 'Data Migration', assignedRWatcherIds: ['3'],
+        subProcesses: [
+          { id: 'sp6', name: 'Extract Records', status: 'passed', duration: '12s', transactions: [
+            { id: 't13', name: 'Query Source DB', status: 'passed', duration: '8s', message: '1,240 records' },
+            { id: 't14', name: 'Transform Fields', status: 'passed', duration: '4s' }
+          ]},
+          { id: 'sp7', name: 'Load to Target', status: 'failed', duration: '6s', transactions: [
+            { id: 't15', name: 'Batch Insert', status: 'passed', duration: '3s', message: '1,100 inserted' },
+            { id: 't16', name: 'Verify Integrity', status: 'failed', duration: '3s', message: '140 records mismatched' }
+          ]}
+        ]
+      },
+      {
+        id: '4', name: 'Invoice Processing', status: 'disabled', lastRun: '2 days ago', successRate: '100%', resources: '2 rWatchers',
+        message: 'Manually disabled', scenarioAssigned: 'Invoice OCR', projectLinked: 'Finance Automation', assignedRWatcherIds: ['1', '3']
+      }
+    ];
+  }
+
+  skipToDemo() {
+    this.monitors.set(this.getDemoMonitors());
+    this.completedSteps.set(['notifications', 'watcher', 'schedule', 'monitor']);
+    this.onboardingDismissed.set(true);
+  }
+
+  toggleRWatcherOnlineStatus(id: string) {
+    this.rwatchers.update(watchers => watchers.map(w => {
+      if (w.id === id) {
+        const newStatus: 'online' | 'offline' = w.status === 'offline' ? 'online' : 'offline';
+        return { ...w, status: newStatus, lastPing: newStatus === 'online' ? 'Just now' : w.lastPing };
+      }
+      return w;
+    }));
+  }
+
+  selectedMonitor() {
+    const id = this.selectedMonitorId();
+    if (!id && this.monitors().length > 0) return this.monitors()[0];
+    return this.monitors().find(m => m.id === id) ?? null;
+  }
+
+  watchersForMonitor(monitor: ProcessMonitor) {
+    const ids = monitor.assignedRWatcherIds;
+    if (!ids || ids.length === 0) return [];
+    return this.rwatchers().filter(w => ids.includes(w.id));
+  }
+
+  assignedWatcherSearch = signal<string>('');
+  expandedSubProcess = signal<string | null>(null);
+
+  toggleSubProcessExpand(id: string) {
+    this.expandedSubProcess.update(current => current === id ? null : id);
+  }
+
+  spTxnCount(sp: SubProcess) {
+    return sp.transactions?.length ?? 0;
+  }
+  spPassedCount(sp: SubProcess) {
+    return sp.transactions?.filter(t => t.status === 'passed').length ?? 0;
+  }
+  spFailedCount(sp: SubProcess) {
+    return sp.transactions?.filter(t => t.status === 'failed').length ?? 0;
+  }
+
+  monitorSubProcessTotal(m: ProcessMonitor) {
+    return m.subProcesses?.length ?? 0;
+  }
+  monitorSubProcessPassed(m: ProcessMonitor) {
+    return m.subProcesses?.filter(sp => sp.status === 'passed').length ?? 0;
+  }
+  monitorSubProcessFailed(m: ProcessMonitor) {
+    return m.subProcesses?.filter(sp => sp.status === 'failed').length ?? 0;
+  }
+  monitorTxnTotal(m: ProcessMonitor) {
+    return m.subProcesses?.reduce((sum, sp) => sum + (sp.transactions?.length ?? 0), 0) ?? 0;
+  }
+  monitorTxnPassed(m: ProcessMonitor) {
+    return m.subProcesses?.reduce((sum, sp) => sum + (sp.transactions?.filter(t => t.status === 'passed').length ?? 0), 0) ?? 0;
+  }
+  monitorTxnFailed(m: ProcessMonitor) {
+    return m.subProcesses?.reduce((sum, sp) => sum + (sp.transactions?.filter(t => t.status === 'failed').length ?? 0), 0) ?? 0;
+  }
+
+  runMonitorNow(id: string) {
+    this.monitors.update(monitors => monitors.map(m => {
+      if (m.id === id && m.status !== 'disabled') {
+        return { ...m, status: 'running' as const, message: 'Triggered manually', lastRun: 'Just now' };
+      }
+      return m;
+    }));
   }
 }

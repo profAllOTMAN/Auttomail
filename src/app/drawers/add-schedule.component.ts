@@ -77,83 +77,46 @@ import { CommonModule } from '@angular/common';
             </div>
           </section>
 
-          <!-- SCHEDULE TYPE -->
+          <!-- FREQUENCY -->
           <section class="px-6 py-5">
             <div class="mb-4">
-              <span class="text-[11px] font-bold tracking-widest text-primary uppercase">Schedule Type</span>
-              <p class="text-slate-500 text-xs mt-0.5">Choose how the schedule repeats.</p>
+              <span class="text-[11px] font-bold tracking-widest text-primary uppercase">Frequency</span>
+              <p class="text-slate-500 text-xs mt-0.5">How often should this schedule run?</p>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                (click)="scheduleType.set('interval')"
-                [class]="scheduleType() === 'interval'
-                  ? 'flex flex-col gap-1 p-4 rounded-lg border-2 border-primary bg-primary/5 text-left transition-all'
-                  : 'flex flex-col gap-1 p-4 rounded-lg border border-slate-200 bg-white text-left hover:border-slate-300 transition-all'"
-              >
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-[18px]" [class]="scheduleType() === 'interval' ? 'text-primary' : 'text-slate-400'">repeat</span>
-                  <span class="text-sm font-semibold" [class]="scheduleType() === 'interval' ? 'text-primary' : 'text-slate-700'">Interval</span>
-                </div>
-                <p class="text-xs text-slate-500">Run every X minutes or hours</p>
-              </button>
-              <button
-                type="button"
-                (click)="scheduleType.set('fixed')"
-                [class]="scheduleType() === 'fixed'
-                  ? 'flex flex-col gap-1 p-4 rounded-lg border-2 border-primary bg-primary/5 text-left transition-all'
-                  : 'flex flex-col gap-1 p-4 rounded-lg border border-slate-200 bg-white text-left hover:border-slate-300 transition-all'"
-              >
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-[18px]" [class]="scheduleType() === 'fixed' ? 'text-primary' : 'text-slate-400'">schedule</span>
-                  <span class="text-sm font-semibold" [class]="scheduleType() === 'fixed' ? 'text-primary' : 'text-slate-700'">Fixed Times</span>
-                </div>
-                <p class="text-xs text-slate-500">Run at specific times each day</p>
-              </button>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              @for (opt of frequencyOptions; track opt.value) {
+                <button
+                  type="button"
+                  (click)="selectedFrequency.set(opt.value)"
+                  [class]="selectedFrequency() === opt.value
+                    ? 'flex items-center gap-3 p-3 rounded-lg border-2 border-primary bg-primary/5 text-left transition-all'
+                    : 'flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white text-left hover:border-slate-300 transition-all'"
+                >
+                  <span class="material-symbols-outlined text-[18px]" [class]="selectedFrequency() === opt.value ? 'text-primary' : 'text-slate-400'">{{ opt.icon }}</span>
+                  <div>
+                    <span class="text-sm font-semibold block" [class]="selectedFrequency() === opt.value ? 'text-primary' : 'text-slate-700'">{{ opt.label }}</span>
+                    <span class="text-[11px] text-slate-500">{{ opt.desc }}</span>
+                  </div>
+                </button>
+              }
             </div>
-          </section>
 
-          <!-- INTERVAL CONFIGURATION -->
-          @if (scheduleType() === 'interval') {
-            <section class="px-6 py-5">
-              <div class="mb-4">
-                <span class="text-[11px] font-bold tracking-widest text-primary uppercase">Interval Configuration</span>
+            <!-- Time picker for daily/weekly -->
+            @if (selectedFrequency() === 'daily' || selectedFrequency() === 'weekly') {
+              <div class="flex flex-col gap-1.5 mt-4">
+                <label class="text-sm font-medium text-slate-700">Run at</label>
+                <input type="time" value="09:00" class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
               </div>
-              <div class="grid grid-cols-3 gap-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-sm font-medium text-slate-700">Every</label>
-                  <div class="relative">
-                    <select class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                      <option>5</option>
-                      <option>10</option>
-                      <option>15</option>
-                      <option>30</option>
-                      <option>60</option>
-                    </select>
-                    <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
-                      <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-sm font-medium text-slate-700">Unit</label>
-                  <div class="relative">
-                    <select class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                      <option>Minutes</option>
-                      <option>Hours</option>
-                    </select>
-                    <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
-                      <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-sm font-medium text-slate-700">Offset (min)</label>
-                  <input type="number" value="0" min="0" class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-                </div>
+            }
+
+            <!-- Interval picker for interval options -->
+            @if (selectedFrequency() === 'every15' || selectedFrequency() === 'hourly') {
+              <div class="bg-slate-50 rounded-lg p-3 mt-4 flex items-center gap-2 text-sm text-slate-600">
+                <span class="material-symbols-outlined text-[16px] text-primary">info</span>
+                Runs {{ selectedFrequency() === 'every15' ? 'every 15 minutes' : 'every hour' }} during active days.
               </div>
-            </section>
-          }
+            }
+          </section>
 
           <!-- ACTIVE DAYS -->
           <section class="px-6 py-5">
@@ -177,11 +140,11 @@ import { CommonModule } from '@angular/common';
 
         <!-- Footer -->
         <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-end gap-3">
-          <button (click)="closeDrawer.emit()" class="px-5 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+          <button (click)="closeDrawer.emit()" class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
             Cancel
           </button>
           <div class="relative inline-block">
-            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
+            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
               <span class="material-symbols-outlined text-[16px]">schedule</span>
               {{ mode === 'onboarding' ? 'Next Step' : 'Save Schedule' }}
             </button>
@@ -190,7 +153,7 @@ import { CommonModule } from '@angular/common';
                 ⏱️ Choose when your tasks should run automatically. Click Next to continue!
                 <div class="absolute -bottom-1.5 right-8 w-3 h-3 bg-slate-800 rotate-45"></div>
               </div>
-              <div class="absolute inset-0 rounded-lg bg-primary/40 animate-ping z-0"></div>
+              <div class="absolute inset-0 rounded-full bg-primary/40 animate-ping z-0"></div>
             }
           </div>
         </footer>
@@ -213,7 +176,14 @@ export class AddScheduleDrawerComponent {
   @Output() closeDrawer = new EventEmitter<void>();
   @Output() nextStep = new EventEmitter<void>();
 
-  scheduleType = signal<'interval' | 'fixed'>('interval');
+  selectedFrequency = signal<string>('every15');
+
+  frequencyOptions = [
+    { value: 'every15', label: 'Every 15 min', desc: 'High frequency checks', icon: 'speed' },
+    { value: 'hourly', label: 'Hourly', desc: 'Once per hour', icon: 'repeat' },
+    { value: 'daily', label: 'Daily', desc: 'Run once a day', icon: 'today' },
+    { value: 'weekly', label: 'Weekly', desc: 'Run once a week', icon: 'date_range' },
+  ];
 
   days = [
     { short: 'Mon', checked: true },
