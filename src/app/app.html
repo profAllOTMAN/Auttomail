@@ -130,80 +130,139 @@
         </div>
 
         <!-- KPI Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
           <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
             <div class="size-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-[20px]">monitoring</span>
             </div>
             <div>
               <p class="text-2xl font-bold text-slate-900">{{ monitors().length }}</p>
-              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Monitors</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Processes</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-semibold text-emerald-600">{{ activeProcessCount() }} Active</span>
+                <span class="text-[10px] text-slate-400">/</span>
+                <span class="text-[10px] font-semibold text-slate-500">{{ inactiveProcessCount() }} Inactive</span>
+              </div>
             </div>
           </div>
           <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
             <div class="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              <span class="material-symbols-outlined text-[20px]">desktop_windows</span>
             </div>
             <div>
-              <p class="text-2xl font-bold text-slate-900">{{ onlineRWatcherCount() }}</p>
-              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Online</p>
+              <p class="text-2xl font-bold text-slate-900">{{ rwatchers().length }}</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Watchers</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-semibold text-emerald-600">{{ activeWatcherCount() }} Active</span>
+                <span class="text-[10px] text-slate-400">/</span>
+                <span class="text-[10px] font-semibold text-slate-500">{{ inactiveWatcherCount() }} Inactive</span>
+              </div>
             </div>
           </div>
-          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
-            <div class="size-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-[20px]">sync</span>
+          <div class="lg:col-span-3 bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
+            <div class="size-10 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">dns</span>
             </div>
-            <div>
-              <p class="text-2xl font-bold text-slate-900">{{ busyRWatcherCount() }}</p>
-              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Busy</p>
-            </div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
-            <div class="size-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-[20px]">cloud_off</span>
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-slate-900">{{ offlineRWatcherCount() }}</p>
-              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Offline</p>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Bot Manager Status</p>
+              <div class="flex items-center gap-4 flex-wrap">
+                @for (bm of botManagerStatus(); track bm.name) {
+                  <div class="flex items-center gap-1.5">
+                    <span class="size-2 rounded-full" [class.bg-emerald-500]="bm.status === 'online'" [class.bg-red-500]="bm.status === 'offline'"></span>
+                    <span class="text-xs font-semibold text-slate-800">{{ bm.name }}</span>
+                    <span class="text-[10px] font-medium" [class.text-emerald-600]="bm.status === 'online'" [class.text-red-500]="bm.status === 'offline'">{{ bm.status }}</span>
+                  </div>
+                }
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Main split: Process list + Detail panel -->
+        <!-- Main split: Process list + Activity (left) | Detail panel (right) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          <!-- Process Monitor sidebar -->
-          <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Process Monitors</span>
-              <button (click)="navigate('/rwatchers')" class="text-[11px] font-semibold text-primary hover:underline">rWatchers</button>
-            </div>
-            <div class="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
-              @for (m of monitors(); track m.id) {
-                <div class="px-4 py-3 flex items-center gap-3 cursor-pointer transition-colors"
-                     [class.bg-primary/5]="selectedMonitor()?.id === m.id"
-                     [class.border-l-2]="selectedMonitor()?.id === m.id"
-                     [class.border-l-primary]="selectedMonitor()?.id === m.id"
-                     [class.hover:bg-slate-50]="selectedMonitor()?.id !== m.id"
-                     (click)="selectedMonitorId.set(m.id)">
-                  <div class="size-8 rounded-md flex items-center justify-center shrink-0"
-                       [class.bg-emerald-50]="m.status === 'running'" [class.text-emerald-600]="m.status === 'running'"
-                       [class.bg-slate-100]="m.status !== 'running'" [class.text-slate-500]="m.status !== 'running'">
-                    <span class="material-symbols-outlined text-[16px]">
-                      {{ m.status === 'running' ? 'check_circle' : (m.status === 'disabled' ? 'block' : 'schedule') }}
+          <!-- Left column: Process list + Activity stacked -->
+          <div class="flex flex-col gap-4">
+            <!-- Process Monitor sidebar (compact + search) -->
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+              <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Processes</span>
+                <button (click)="navigate('/rwatchers')" class="text-[11px] font-semibold text-primary hover:underline">rWatchers</button>
+              </div>
+              <!-- Search -->
+              <div class="px-3 py-2 border-b border-slate-100">
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-[14px] text-slate-400">search</span>
+                  </span>
+                  <input type="text" [value]="dashboardProcessSearch()" (input)="dashboardProcessSearch.set($any($event.target).value)"
+                         class="w-full pl-7 pr-2 py-1.5 text-[11px] border border-slate-200 rounded bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary"
+                         placeholder="Search processes..." />
+                </div>
+              </div>
+              <div class="divide-y divide-slate-50 max-h-[220px] overflow-y-auto">
+                @for (m of filteredDashboardMonitors(); track m.id) {
+                  <div class="px-4 py-2.5 flex items-center gap-3 cursor-pointer transition-colors"
+                       [class.bg-primary/5]="selectedMonitor()?.id === m.id"
+                       [class.border-l-2]="selectedMonitor()?.id === m.id"
+                       [class.border-l-primary]="selectedMonitor()?.id === m.id"
+                       [class.hover:bg-slate-50]="selectedMonitor()?.id !== m.id"
+                       (click)="selectedMonitorId.set(m.id)">
+                    <div class="size-7 rounded-md flex items-center justify-center shrink-0"
+                         [class.bg-emerald-50]="m.status === 'running'" [class.text-emerald-600]="m.status === 'running'"
+                         [class.bg-slate-100]="m.status !== 'running'" [class.text-slate-500]="m.status !== 'running'">
+                      <span class="material-symbols-outlined text-[14px]">
+                        {{ m.status === 'running' ? 'check_circle' : (m.status === 'disabled' ? 'block' : 'schedule') }}
+                      </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[11px] font-bold text-slate-800 truncate">{{ m.name }}</p>
+                      <p class="text-[10px] text-slate-500 truncate">{{ m.scenarioAssigned ?? 'No scenario' }}</p>
+                    </div>
+                    <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-md shrink-0"
+                          [class.bg-emerald-100]="m.status === 'running'" [class.text-emerald-700]="m.status === 'running'"
+                          [class.bg-slate-100]="m.status !== 'running'" [class.text-slate-600]="m.status !== 'running'">
+                      {{ m.successRate }}
                     </span>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-bold text-slate-800 truncate">{{ m.name }}</p>
-                    <p class="text-[10px] text-slate-500 truncate">{{ m.scenarioAssigned ?? 'No scenario' }}</p>
+                } @empty {
+                  <div class="px-4 py-4 text-center text-[11px] text-slate-400">No processes found.</div>
+                }
+              </div>
+            </div>
+
+            <!-- Activity timeline -->
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+              <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-slate-500">timeline</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Activity</span>
+              </div>
+              <div class="divide-y divide-slate-50 max-h-[220px] overflow-y-auto">
+                @for (item of timelineFeed(); track item.id) {
+                  <div class="px-4 py-2.5 flex items-start gap-2.5 hover:bg-slate-50/50 transition-colors">
+                    <div class="size-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                         [class.bg-emerald-100]="item.type === 'success'" [class.text-emerald-600]="item.type === 'success'"
+                         [class.bg-red-100]="item.type === 'failure'" [class.text-red-500]="item.type === 'failure'"
+                         [class.bg-blue-100]="item.type === 'executed' || item.type === 'info'" [class.text-blue-600]="item.type === 'executed' || item.type === 'info'"
+                         [class.bg-amber-100]="item.type === 'warning'" [class.text-amber-600]="item.type === 'warning'">
+                      <span class="material-symbols-outlined text-[12px]">{{ item.icon }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <p class="text-[11px] font-bold text-slate-800 truncate">{{ item.title }}</p>
+                        <span class="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded leading-none"
+                              [class.bg-blue-100]="item.badge === 'update'" [class.text-blue-600]="item.badge === 'update'"
+                              [class.bg-amber-100]="item.badge === 'warning'" [class.text-amber-600]="item.badge === 'warning'"
+                              [class.bg-red-100]="item.badge === 'alert'" [class.text-red-600]="item.badge === 'alert'">
+                          {{ item.badge }}
+                        </span>
+                      </div>
+                      <p class="text-[10px] text-slate-500 mt-0.5 truncate">{{ item.detail }}</p>
+                    </div>
+                    <span class="text-[9px] text-slate-400 shrink-0 mt-0.5">{{ item.timestamp }}</span>
                   </div>
-                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0"
-                        [class.bg-emerald-100]="m.status === 'running'" [class.text-emerald-700]="m.status === 'running'"
-                        [class.bg-slate-100]="m.status !== 'running'" [class.text-slate-600]="m.status !== 'running'">
-                    {{ m.successRate }}
-                  </span>
-                </div>
-              }
+                }
+              </div>
             </div>
           </div>
 
@@ -286,225 +345,234 @@
                 </div>
               </div>
 
-              <!-- Sub-Processes & Transactions -->
-              @if (monitor.subProcesses && monitor.subProcesses.length > 0) {
-                <!-- Summary counts bar -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-3">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Sub-Processes</span>
-                    <div class="flex items-center gap-4">
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-lg font-bold text-slate-900">{{ monitorSubProcessTotal(monitor) }}</span>
-                        <span class="text-[10px] text-slate-500">total</span>
-                      </div>
-                      <div class="h-5 w-px bg-slate-200"></div>
-                      <div class="flex items-center gap-1">
-                        <span class="size-2 rounded-full bg-emerald-500"></span>
-                        <span class="text-xs font-bold text-emerald-600">{{ monitorSubProcessPassed(monitor) }}</span>
-                        <span class="text-[10px] text-slate-400">passed</span>
-                      </div>
-                      @if (monitorSubProcessFailed(monitor) > 0) {
-                        <div class="flex items-center gap-1">
-                          <span class="size-2 rounded-full bg-red-500"></span>
-                          <span class="text-xs font-bold text-red-500">{{ monitorSubProcessFailed(monitor) }}</span>
-                          <span class="text-[10px] text-slate-400">failed</span>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                  <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-3">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Transactions</span>
-                    <div class="flex items-center gap-4">
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-lg font-bold text-slate-900">{{ monitorTxnTotal(monitor) }}</span>
-                        <span class="text-[10px] text-slate-500">total</span>
-                      </div>
-                      <div class="h-5 w-px bg-slate-200"></div>
-                      <div class="flex items-center gap-1">
-                        <span class="size-2 rounded-full bg-emerald-500"></span>
-                        <span class="text-xs font-bold text-emerald-600">{{ monitorTxnPassed(monitor) }}</span>
-                        <span class="text-[10px] text-slate-400">passed</span>
-                      </div>
-                      @if (monitorTxnFailed(monitor) > 0) {
-                        <div class="flex items-center gap-1">
-                          <span class="size-2 rounded-full bg-red-500"></span>
-                          <span class="text-xs font-bold text-red-500">{{ monitorTxnFailed(monitor) }}</span>
-                          <span class="text-[10px] text-slate-400">failed</span>
-                        </div>
-                      }
-                    </div>
-                  </div>
+              <!-- Tabbed detail card: Scenario | Sub-Processes | Transactions | Watchers -->
+              <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                <!-- Tab bar -->
+                <div class="px-4 py-2 border-b border-slate-100 bg-slate-50 flex items-center gap-1 overflow-x-auto">
+                  <button (click)="processDetailTab.set('scenario')"
+                          class="px-3 py-1.5 text-[11px] font-semibold rounded-full transition-colors whitespace-nowrap"
+                          [class.bg-primary]="processDetailTab() === 'scenario'" [class.text-white]="processDetailTab() === 'scenario'"
+                          [class.text-slate-600]="processDetailTab() !== 'scenario'" [class.hover:bg-slate-200]="processDetailTab() !== 'scenario'">
+                    Scenario
+                  </button>
+                  <button (click)="processDetailTab.set('watchers')"
+                          class="px-3 py-1.5 text-[11px] font-semibold rounded-full transition-colors whitespace-nowrap flex items-center gap-1"
+                          [class.bg-primary]="processDetailTab() === 'watchers'" [class.text-white]="processDetailTab() === 'watchers'"
+                          [class.text-slate-600]="processDetailTab() !== 'watchers'" [class.hover:bg-slate-200]="processDetailTab() !== 'watchers'">
+                    Watchers
+                    <span class="text-[9px] font-bold px-1 py-0.5 rounded-full"
+                          [class.bg-white/20]="processDetailTab() === 'watchers'"
+                          [class.bg-slate-200]="processDetailTab() !== 'watchers'">{{ watchersForMonitor(monitor).length }}</span>
+                  </button>
                 </div>
 
-                <!-- Sub-Process detail list -->
-                <div class="bg-white border border-slate-200 rounded-lg shadow-sm">
-                  <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Sub-Process Breakdown</span>
-                  </div>
-                  <div class="divide-y divide-slate-50">
-                    @for (sp of monitor.subProcesses; track sp.id) {
-                      <div>
-                        <div class="px-4 py-2.5 flex items-center gap-3 cursor-pointer hover:bg-slate-50/50 transition-colors"
-                             (click)="toggleSubProcessExpand(sp.id)">
-                          <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform"
-                                [class.rotate-90]="expandedSubProcess() === sp.id">
-                            chevron_right
-                          </span>
-                          <div class="size-6 rounded flex items-center justify-center shrink-0"
-                               [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-600]="sp.status === 'passed'"
-                               [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-600]="sp.status === 'running'"
-                               [class.bg-red-50]="sp.status === 'failed'" [class.text-red-500]="sp.status === 'failed'"
-                               [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-400]="sp.status === 'pending'">
-                            <span class="material-symbols-outlined text-[14px]">
-                              {{ sp.status === 'passed' ? 'check_circle' : (sp.status === 'running' ? 'sync' : (sp.status === 'failed' ? 'error' : 'schedule')) }}
-                            </span>
-                          </div>
-                          <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-slate-800">{{ sp.name }}</p>
-                          </div>
-                          @if (sp.duration) {
-                            <span class="text-[10px] text-slate-500 font-mono shrink-0">{{ sp.duration }}</span>
-                          }
-                          <!-- Transaction counts per sub-process -->
-                          @if (spTxnCount(sp) > 0) {
-                            <div class="flex items-center gap-1.5 shrink-0">
-                              <span class="text-[10px] text-slate-400">{{ spTxnCount(sp) }} txn</span>
-                              <span class="text-[10px] text-emerald-600 font-semibold">{{ spPassedCount(sp) }}P</span>
-                              @if (spFailedCount(sp) > 0) {
-                                <span class="text-[10px] text-red-500 font-semibold">{{ spFailedCount(sp) }}F</span>
-                              }
-                            </div>
-                          }
-                          <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
-                                [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-700]="sp.status === 'passed'"
-                                [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-700]="sp.status === 'running'"
-                                [class.bg-red-50]="sp.status === 'failed'" [class.text-red-600]="sp.status === 'failed'"
-                                [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-500]="sp.status === 'pending'">
-                            {{ sp.status === 'passed' ? 'Passed' : (sp.status === 'running' ? 'Running' : (sp.status === 'failed' ? 'Failed' : 'Pending')) }}
-                          </span>
-                        </div>
+                <!-- TAB: Scenario (sub-processes + transactions) -->
+                @if (processDetailTab() === 'scenario') {
+                  @if (monitor.subProcesses && monitor.subProcesses.length > 0) {
+                    <!-- Summary counts -->
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-6 text-[11px]">
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-slate-500 font-medium">Sub-Processes:</span>
+                        <span class="font-bold text-slate-800">{{ monitorSubProcessTotal(monitor) }}</span>
+                        <span class="text-emerald-600 font-semibold">{{ monitorSubProcessPassed(monitor) }}P</span>
+                        @if (monitorSubProcessFailed(monitor) > 0) {
+                          <span class="text-red-500 font-semibold">{{ monitorSubProcessFailed(monitor) }}F</span>
+                        }
+                      </div>
+                      <div class="h-4 w-px bg-slate-200"></div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-slate-500 font-medium">Transactions:</span>
+                        <span class="font-bold text-slate-800">{{ monitorTxnTotal(monitor) }}</span>
+                        <span class="text-emerald-600 font-semibold">{{ monitorTxnPassed(monitor) }}P</span>
+                        @if (monitorTxnFailed(monitor) > 0) {
+                          <span class="text-red-500 font-semibold">{{ monitorTxnFailed(monitor) }}F</span>
+                        }
+                      </div>
+                    </div>
 
-                        <!-- Expanded: Transactions -->
-                        @if (expandedSubProcess() === sp.id && sp.transactions) {
-                          <div class="bg-slate-50/70 border-t border-slate-100">
-                            <!-- Transaction summary for this sub-process -->
-                            <div class="px-4 py-1.5 flex items-center gap-3 text-[10px] border-b border-slate-100 bg-slate-50">
-                              <span class="text-slate-500 font-medium">{{ spTxnCount(sp) }} transactions:</span>
-                              <span class="flex items-center gap-1 text-emerald-600 font-semibold"><span class="size-1.5 rounded-full bg-emerald-500"></span> {{ spPassedCount(sp) }} passed</span>
-                              @if (spFailedCount(sp) > 0) {
-                                <span class="flex items-center gap-1 text-red-500 font-semibold"><span class="size-1.5 rounded-full bg-red-500"></span> {{ spFailedCount(sp) }} failed</span>
-                              }
+                    <div class="divide-y divide-slate-50 max-h-[350px] overflow-y-auto">
+                      @for (sp of monitor.subProcesses; track sp.id) {
+                        <div>
+                          <div class="px-4 py-2.5 flex items-center gap-3 cursor-pointer hover:bg-slate-50/50 transition-colors"
+                               (click)="toggleSubProcessExpand(sp.id)">
+                            <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform"
+                                  [class.rotate-90]="expandedSubProcess() === sp.id">
+                              chevron_right
+                            </span>
+                            <div class="size-6 rounded flex items-center justify-center shrink-0"
+                                 [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-600]="sp.status === 'passed'"
+                                 [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-600]="sp.status === 'running'"
+                                 [class.bg-red-50]="sp.status === 'failed'" [class.text-red-500]="sp.status === 'failed'"
+                                 [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-400]="sp.status === 'pending'">
+                              <span class="material-symbols-outlined text-[14px]">
+                                {{ sp.status === 'passed' ? 'check_circle' : (sp.status === 'running' ? 'sync' : (sp.status === 'failed' ? 'error' : 'schedule')) }}
+                              </span>
                             </div>
-                            @for (txn of sp.transactions; track txn.id) {
-                              <div class="pl-14 pr-4 py-2 flex items-center gap-3 border-b border-slate-100/50 last:border-b-0">
-                                <div class="size-5 rounded flex items-center justify-center shrink-0"
-                                     [class.bg-emerald-100]="txn.status === 'passed'" [class.text-emerald-600]="txn.status === 'passed'"
-                                     [class.bg-blue-100]="txn.status === 'running'" [class.text-blue-600]="txn.status === 'running'"
-                                     [class.bg-red-100]="txn.status === 'failed'" [class.text-red-500]="txn.status === 'failed'"
-                                     [class.bg-slate-100]="txn.status === 'pending'" [class.text-slate-400]="txn.status === 'pending'">
-                                  <span class="material-symbols-outlined text-[12px]">
-                                    {{ txn.status === 'passed' ? 'check' : (txn.status === 'running' ? 'sync' : (txn.status === 'failed' ? 'close' : 'remove')) }}
-                                  </span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                  <p class="text-[11px] font-semibold text-slate-700">{{ txn.name }}</p>
-                                  @if (txn.message) {
-                                    <p class="text-[10px] mt-0.5"
-                                       [class.text-slate-500]="txn.status !== 'failed'"
-                                       [class.text-red-500]="txn.status === 'failed'">{{ txn.message }}</p>
-                                  }
-                                </div>
-                                @if (txn.duration) {
-                                  <span class="text-[10px] text-slate-400 font-mono shrink-0">{{ txn.duration }}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-xs font-bold text-slate-800">{{ sp.name }}</p>
+                            </div>
+                            @if (sp.duration) {
+                              <span class="text-[10px] text-slate-500 font-mono shrink-0">{{ sp.duration }}</span>
+                            }
+                            @if (spTxnCount(sp) > 0) {
+                              <div class="flex items-center gap-1.5 shrink-0">
+                                <span class="text-[10px] text-slate-400">{{ spTxnCount(sp) }} txn</span>
+                                <span class="text-[10px] text-emerald-600 font-semibold">{{ spPassedCount(sp) }}P</span>
+                                @if (spFailedCount(sp) > 0) {
+                                  <span class="text-[10px] text-red-500 font-semibold">{{ spFailedCount(sp) }}F</span>
                                 }
                               </div>
                             }
+                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
+                                  [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-700]="sp.status === 'passed'"
+                                  [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-700]="sp.status === 'running'"
+                                  [class.bg-red-50]="sp.status === 'failed'" [class.text-red-600]="sp.status === 'failed'"
+                                  [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-500]="sp.status === 'pending'">
+                              {{ sp.status === 'passed' ? 'Passed' : (sp.status === 'running' ? 'Running' : (sp.status === 'failed' ? 'Failed' : 'Pending')) }}
+                            </span>
                           </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
 
-              <!-- Assigned rWatchers for this process -->
-              <div class="bg-white border border-slate-200 rounded-lg shadow-sm">
-                <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Assigned rWatchers</span>
-                    <span class="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{{ watchersForMonitor(monitor).length }}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    @if (watchersForMonitor(monitor).length > 3) {
-                      <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                          <span class="material-symbols-outlined text-[14px] text-slate-400">search</span>
-                        </span>
-                        <input type="text" [value]="assignedWatcherSearch()" (input)="assignedWatcherSearch.set($any($event.target).value)"
-                               class="pl-7 pr-2 py-1 text-[11px] border border-slate-200 rounded bg-slate-50 w-36 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary"
-                               placeholder="Filter watchers..." />
-                      </div>
+                          <!-- Expanded: Transactions -->
+                          @if (expandedSubProcess() === sp.id && sp.transactions) {
+                            <div class="bg-slate-50/70 border-t border-slate-100">
+                              @for (txn of sp.transactions; track txn.id) {
+                                <div class="pl-14 pr-4 py-2 flex items-center gap-3 border-b border-slate-100/50 last:border-b-0">
+                                  <div class="size-5 rounded flex items-center justify-center shrink-0"
+                                       [class.bg-emerald-100]="txn.status === 'passed'" [class.text-emerald-600]="txn.status === 'passed'"
+                                       [class.bg-blue-100]="txn.status === 'running'" [class.text-blue-600]="txn.status === 'running'"
+                                       [class.bg-red-100]="txn.status === 'failed'" [class.text-red-500]="txn.status === 'failed'"
+                                       [class.bg-slate-100]="txn.status === 'pending'" [class.text-slate-400]="txn.status === 'pending'">
+                                    <span class="material-symbols-outlined text-[12px]">
+                                      {{ txn.status === 'passed' ? 'check' : (txn.status === 'running' ? 'sync' : (txn.status === 'failed' ? 'close' : 'remove')) }}
+                                    </span>
+                                  </div>
+                                  <div class="flex-1 min-w-0">
+                                    <p class="text-[11px] font-semibold text-slate-700">{{ txn.name }}</p>
+                                    @if (txn.message) {
+                                      <p class="text-[10px] mt-0.5"
+                                         [class.text-slate-500]="txn.status !== 'failed'"
+                                         [class.text-red-500]="txn.status === 'failed'">{{ txn.message }}</p>
+                                    }
+                                  </div>
+                                  @if (txn.duration) {
+                                    <span class="text-[10px] text-slate-400 font-mono shrink-0">{{ txn.duration }}</span>
+                                  }
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="px-4 py-8 text-center">
+                      <span class="material-symbols-outlined text-2xl text-slate-300 mb-1">account_tree</span>
+                      <p class="text-xs text-slate-400">No scenario data available for this process.</p>
+                    </div>
+                  }
+                }
+
+                <!-- TAB: Watchers -->
+                @if (processDetailTab() === 'watchers') {
+                  <!-- Sub-tabs: All | Scenario 1 | Scenario 2 ... -->
+                  <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-1 overflow-x-auto">
+                    @for (tab of watcherSubTabs(); track tab.id) {
+                      <button (click)="watcherSubTab.set(tab.id)"
+                              class="px-2.5 py-1 text-[10px] font-semibold rounded-full transition-colors whitespace-nowrap"
+                              [class.bg-primary]="watcherSubTab() === tab.id" [class.text-white]="watcherSubTab() === tab.id"
+                              [class.text-slate-500]="watcherSubTab() !== tab.id" [class.hover:bg-slate-100]="watcherSubTab() !== tab.id"
+                              [class.bg-slate-50]="watcherSubTab() !== tab.id">
+                        {{ tab.label }}
+                      </button>
                     }
+                    <div class="flex-1"></div>
                     <button (click)="openDrawer('watcher', 'standalone')" class="text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5 shrink-0">
                       <span class="material-symbols-outlined text-[13px]">add</span> Add
                     </button>
                   </div>
-                </div>
 
-                <div class="max-h-[220px] overflow-y-auto divide-y divide-slate-50">
-                  @for (w of watchersForMonitor(monitor); track w.id) {
-                    @if (!assignedWatcherSearch() || w.alias.toLowerCase().includes(assignedWatcherSearch().toLowerCase()) || w.ipAddress.includes(assignedWatcherSearch())) {
-                      <div class="px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50/50 transition-colors">
-                        <div class="relative shrink-0">
-                          <div class="size-8 rounded-md flex items-center justify-center"
-                               [class.bg-emerald-50]="w.status === 'online'" [class.text-emerald-600]="w.status === 'online'"
-                               [class.bg-blue-50]="w.status === 'busy'" [class.text-blue-600]="w.status === 'busy'"
-                               [class.bg-slate-100]="w.status === 'offline'" [class.text-slate-400]="w.status === 'offline'">
-                            <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+                  <div class="max-h-[350px] overflow-y-auto divide-y divide-slate-50">
+                    @for (w of watchersForSubTab(); track w.id) {
+                      <div class="px-4 py-3 hover:bg-slate-50/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                          <div class="relative shrink-0">
+                            <div class="size-8 rounded-md flex items-center justify-center"
+                                 [class.bg-emerald-50]="w.status === 'online'" [class.text-emerald-600]="w.status === 'online'"
+                                 [class.bg-blue-50]="w.status === 'busy'" [class.text-blue-600]="w.status === 'busy'"
+                                 [class.bg-slate-100]="w.status === 'offline'" [class.text-slate-400]="w.status === 'offline'">
+                              <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+                            </div>
+                            <span class="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white"
+                                  [class.bg-emerald-500]="w.status === 'online'"
+                                  [class.bg-blue-500]="w.status === 'busy'"
+                                  [class.bg-slate-400]="w.status === 'offline'"></span>
                           </div>
-                          <span class="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white"
-                                [class.bg-emerald-500]="w.status === 'online'"
-                                [class.bg-blue-500]="w.status === 'busy'"
-                                [class.bg-slate-400]="w.status === 'offline'"></span>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-800 truncate">{{ w.alias }}</p>
+                            <div class="flex items-center gap-2 mt-0.5">
+                              <span class="text-[10px] text-slate-500 font-mono">{{ w.ipAddress }}</span>
+                              <span class="text-[10px] text-slate-400">&middot;</span>
+                              <span class="text-[10px] text-slate-500">{{ w.botManager }}</span>
+                            </div>
+                          </div>
+                          <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
+                                [class.bg-emerald-50]="w.status === 'online'" [class.text-emerald-700]="w.status === 'online'"
+                                [class.bg-blue-50]="w.status === 'busy'" [class.text-blue-700]="w.status === 'busy'"
+                                [class.bg-slate-100]="w.status === 'offline'" [class.text-slate-600]="w.status === 'offline'">
+                            {{ w.status === 'online' ? 'Online' : (w.status === 'busy' ? 'Busy' : 'Offline') }}
+                          </span>
+                          <button (click)="toggleRWatcherOnlineStatus(w.id)"
+                                  class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 focus:outline-none"
+                                  [class.bg-emerald-500]="w.status === 'online'"
+                                  [class.bg-blue-400]="w.status === 'busy'"
+                                  [class.bg-slate-300]="w.status === 'offline'"
+                                  [title]="w.status === 'offline' ? 'Activate' : 'Deactivate'">
+                            <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow-sm"
+                                  [class.translate-x-4]="w.status !== 'offline'"
+                                  [class.translate-x-0.5]="w.status === 'offline'"></span>
+                          </button>
                         </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-xs font-bold text-slate-800 truncate">{{ w.alias }}</p>
-                          <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[10px] text-slate-500 font-mono">{{ w.ipAddress }}</span>
-                            <span class="text-[10px] text-slate-400">&middot;</span>
-                            <span class="text-[10px] text-slate-500">{{ w.botManager }}</span>
+                        <!-- Watcher stats -->
+                        <div class="mt-2.5 ml-11 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Trend</span>
+                            @if (w.trendData) {
+                              <svg viewBox="0 0 60 20" class="w-14 h-5" preserveAspectRatio="none">
+                                <polyline fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                  [attr.points]="w.trendData.length >= 7 ? (
+                                    '0,' + (20 - w.trendData[0] * 0.2) + ' 10,' + (20 - w.trendData[1] * 0.2) + ' 20,' + (20 - w.trendData[2] * 0.2) + ' 30,' + (20 - w.trendData[3] * 0.2) + ' 40,' + (20 - w.trendData[4] * 0.2) + ' 50,' + (20 - w.trendData[5] * 0.2) + ' 60,' + (20 - w.trendData[6] * 0.2)
+                                  ) : ''" />
+                              </svg>
+                            }
+                          </div>
+                          <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Checks</span>
+                            <span class="text-xs font-bold text-slate-800">{{ w.totalChecks ?? 0 }}</span>
+                          </div>
+                          <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success / Fail</span>
+                            <div class="flex items-center gap-1.5">
+                              <span class="text-xs font-bold text-emerald-600">{{ w.successCount ?? 0 }}</span>
+                              <span class="text-[10px] text-slate-400">/</span>
+                              <span class="text-xs font-bold text-red-500">{{ w.failureCount ?? 0 }}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Resp. Time</span>
+                            <span class="text-xs font-bold text-slate-800">{{ w.avgResponseTime ?? '--' }}</span>
                           </div>
                         </div>
-                        <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
-                              [class.bg-emerald-50]="w.status === 'online'" [class.text-emerald-700]="w.status === 'online'"
-                              [class.bg-blue-50]="w.status === 'busy'" [class.text-blue-700]="w.status === 'busy'"
-                              [class.bg-slate-100]="w.status === 'offline'" [class.text-slate-600]="w.status === 'offline'">
-                          {{ w.status === 'online' ? 'Online' : (w.status === 'busy' ? 'Busy' : 'Offline') }}
-                        </span>
-                        <button (click)="toggleRWatcherOnlineStatus(w.id)"
-                                class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 focus:outline-none"
-                                [class.bg-emerald-500]="w.status === 'online'"
-                                [class.bg-blue-400]="w.status === 'busy'"
-                                [class.bg-slate-300]="w.status === 'offline'"
-                                [title]="w.status === 'offline' ? 'Activate' : 'Deactivate'">
-                          <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow-sm"
-                                [class.translate-x-4]="w.status !== 'offline'"
-                                [class.translate-x-0.5]="w.status === 'offline'"></span>
-                        </button>
+                      </div>
+                    } @empty {
+                      <div class="px-4 py-6 text-center">
+                        <span class="material-symbols-outlined text-2xl text-slate-300 mb-1">desktop_off</span>
+                        <p class="text-xs text-slate-400">No rWatchers found for this filter.</p>
                       </div>
                     }
-                  } @empty {
-                    <div class="px-4 py-6 text-center">
-                      <span class="material-symbols-outlined text-2xl text-slate-300 mb-1">desktop_off</span>
-                      <p class="text-xs text-slate-400">No rWatchers assigned to this process.</p>
-                      <button (click)="openDrawer('watcher', 'standalone')" class="mt-2 text-[11px] font-semibold text-primary hover:underline">Add rWatcher</button>
-                    </div>
-                  }
-                </div>
+                  </div>
 
-                @if (watchersForMonitor(monitor).length > 0) {
                   <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                    <span>{{ watchersForMonitor(monitor).length }} assigned</span>
+                    <span>{{ watchersForSubTab().length }} watchers</span>
                     <button (click)="navigate('/rwatchers')" class="font-semibold text-primary hover:underline">Manage all</button>
                   </div>
                 }
@@ -512,23 +580,80 @@
             }
           </div>
         </div>
+
       </div>
     } @else if (activeTab() === 'process-monitor') {
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4 sm:mt-6 mb-4 sm:mb-6">
-        <div class="relative w-full sm:max-w-md">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+      <div class="mt-4 sm:mt-6 space-y-4 mb-4 sm:mb-6">
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
+            <div class="size-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">monitoring</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">{{ monitors().length }}</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Processes</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-semibold text-emerald-600">{{ activeProcessCount() }} Active</span>
+                <span class="text-[10px] text-slate-400">/</span>
+                <span class="text-[10px] font-semibold text-slate-500">{{ inactiveProcessCount() }} Inactive</span>
+              </div>
+            </div>
           </div>
-          <input type="text" id="searchMonitors" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search monitors..." />
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
+            <div class="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">desktop_windows</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">{{ rwatchers().length }}</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Watchers</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-semibold text-emerald-600">{{ activeWatcherCount() }} Active</span>
+                <span class="text-[10px] text-slate-400">/</span>
+                <span class="text-[10px] font-semibold text-slate-500">{{ inactiveWatcherCount() }} Inactive</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="flex items-center gap-3 w-full sm:w-auto">
+
+        <!-- Filters Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="relative w-full sm:max-w-[200px]">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-slate-400 text-[16px]">search</span>
+            </div>
+            <input type="text" [value]="filterByProcess()" (input)="filterByProcess.set($any($event.target).value)"
+                   class="block w-full pl-9 pr-3 py-2 text-xs text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Filter by Process..." />
+          </div>
+          <select (change)="filterByBotManager.set($any($event.target).value)"
+                  class="w-full sm:w-auto px-3 py-2 text-xs text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            <option value="">All Bot Managers</option>
+            @for (bm of uniqueBotManagers(); track bm) {
+              <option [value]="bm">{{ bm }}</option>
+            }
+          </select>
+          <select (change)="filterByWatcher.set($any($event.target).value)"
+                  class="w-full sm:w-auto px-3 py-2 text-xs text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            <option value="">All Watchers</option>
+            @for (w of rwatchers(); track w.id) {
+              <option [value]="w.alias">{{ w.alias }}</option>
+            }
+          </select>
+          <select (change)="filterBySchedule.set($any($event.target).value)"
+                  class="w-full sm:w-auto px-3 py-2 text-xs text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            <option value="">All Schedules</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <div class="flex-1"></div>
           <button (click)="openDrawer('monitor', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> New Monitor
           </button>
         </div>
       </div>
       <div class="flex flex-col gap-3">
-        @for (monitor of monitors(); track monitor.id) {
+        @for (monitor of filteredMonitors(); track monitor.id) {
           <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col xl:flex-row xl:items-center justify-between w-full gap-4"
                [class.bg-slate-50]="monitor.status === 'disabled'"
                [class.opacity-75]="monitor.status === 'disabled'">
@@ -784,8 +909,32 @@
 
               <!-- Expanded Detail Panel -->
               @if (expandedRWatcher() === watcher.id) {
-                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4 space-y-4">
+                  <!-- Live Screen View -->
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Screen View</span>
+                    <div class="bg-slate-900 rounded-lg overflow-hidden aspect-video max-w-2xl flex items-center justify-center relative">
+                      @if (watcher.status === 'offline') {
+                        <div class="text-center">
+                          <span class="material-symbols-outlined text-3xl text-slate-600 mb-2">desktop_access_disabled</span>
+                          <p class="text-xs text-slate-500">Watcher is offline</p>
+                        </div>
+                      } @else {
+                        <div class="text-center">
+                          <span class="material-symbols-outlined text-4xl text-slate-500 mb-2">screen_share</span>
+                          <p class="text-xs text-slate-400">Live screen feed</p>
+                          <p class="text-[10px] text-slate-600 mt-1">{{ watcher.resolution }} &middot; {{ watcher.colorDepth }}</p>
+                        </div>
+                        <!-- Live indicator -->
+                        <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                          <span class="size-1.5 rounded-full bg-white animate-pulse"></span> LIVE
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Stats Grid -->
+                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                     <div class="flex flex-col gap-1">
                       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Resolution</span>
                       <span class="text-sm text-slate-800 font-medium">{{ watcher.resolution }}</span>
@@ -807,8 +956,45 @@
                       <span class="text-sm font-medium" [class.text-emerald-600]="watcher.status !== 'offline'" [class.text-slate-500]="watcher.status === 'offline'">{{ watcher.uptime }}</span>
                     </div>
                     <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned Monitors</span>
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monitors</span>
                       <span class="text-sm text-slate-800 font-medium">{{ watcher.assignedMonitors }} active</span>
+                    </div>
+                  </div>
+
+                  <!-- Performance Stats -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Checks</span>
+                      <span class="text-lg font-bold text-slate-900">{{ watcher.totalChecks ?? 0 }}</span>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success</span>
+                      <span class="text-lg font-bold text-emerald-600">{{ watcher.successCount ?? 0 }}</span>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Failures</span>
+                      <span class="text-lg font-bold text-red-500">{{ watcher.failureCount ?? 0 }}</span>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Response</span>
+                      <span class="text-lg font-bold text-slate-900">{{ watcher.avgResponseTime ?? '--' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Trend Chart -->
+                  <div class="bg-white rounded-lg border border-slate-200 p-3">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Success Rate Trend (Last 7 Days)</span>
+                    <div class="flex items-end gap-1 h-10">
+                      @if (watcher.trendData) {
+                        @for (val of watcher.trendData; track $index) {
+                          <div class="flex-1 rounded-t-sm transition-all"
+                               [style.height.%]="val"
+                               [class.bg-emerald-400]="val >= 90"
+                               [class.bg-amber-400]="val >= 50 && val < 90"
+                               [class.bg-red-400]="val > 0 && val < 50"
+                               [class.bg-slate-200]="val === 0"></div>
+                        }
+                      }
                     </div>
                   </div>
                 </div>
@@ -845,44 +1031,54 @@
             <div (click)="selectedHelpCard.set('process')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
               [ngClass]="selectedHelpCard() === 'process' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-full bg-blue-100 shrink-0"></div>
+                <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-blue-600">play_circle</span>
+                </div>
                 <span class="text-sm font-semibold text-slate-900">Run a Process</span>
               </div>
             </div>
 
-            <!-- Register rWatchers -->
+            <!-- Watcher -->
             <div (click)="selectedHelpCard.set('rwatchers')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
               [ngClass]="selectedHelpCard() === 'rwatchers' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-full bg-emerald-100 shrink-0"></div>
-                <span class="text-sm font-semibold text-slate-900">Register rWatchers</span>
+                <div class="size-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-emerald-600">desktop_windows</span>
+                </div>
+                <span class="text-sm font-semibold text-slate-900">Watcher</span>
               </div>
             </div>
 
-            <!-- Calendar Maintenance -->
+            <!-- Notification -->
+            <div (click)="selectedHelpCard.set('notifications')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
+              [ngClass]="selectedHelpCard() === 'notifications' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-amber-500">notifications_active</span>
+                </div>
+                <span class="text-sm font-semibold text-slate-900">Notifications</span>
+              </div>
+            </div>
+
+            <!-- Calendar Maintenance (empty) -->
             <div (click)="selectedHelpCard.set('calendar')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
               [ngClass]="selectedHelpCard() === 'calendar' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-full bg-violet-100 shrink-0"></div>
+                <div class="size-10 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-violet-500">calendar_month</span>
+                </div>
                 <span class="text-sm font-semibold text-slate-900">Calendar Maintenance</span>
               </div>
             </div>
 
-            <!-- Export Reports -->
+            <!-- Export Reports (empty) -->
             <div (click)="selectedHelpCard.set('reports')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
               [ngClass]="selectedHelpCard() === 'reports' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-full bg-cyan-100 shrink-0"></div>
+                <div class="size-10 rounded-full bg-cyan-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-cyan-600">download</span>
+                </div>
                 <span class="text-sm font-semibold text-slate-900">Export Reports</span>
-              </div>
-            </div>
-
-            <!-- Error Notifications -->
-            <div (click)="selectedHelpCard.set('notifications')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
-              [ngClass]="selectedHelpCard() === 'notifications' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
-              <div class="flex items-center gap-3">
-                <div class="size-10 rounded-full bg-amber-100 shrink-0"></div>
-                <span class="text-sm font-semibold text-slate-900">Error Notifications</span>
               </div>
             </div>
 
@@ -919,101 +1115,70 @@
                 </div>
                 <div>
                   <h3 class="text-base font-bold text-slate-900">Run a Process</h3>
-                  <p class="text-[11px] text-slate-400">Install, record a scenario, and launch your first process monitor.</p>
+                  <p class="text-[11px] text-slate-400">Follow these steps to record, configure, and run your first process.</p>
                 </div>
               </div>
 
-              <!-- Install phase -->
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Install</p>
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Checklist</p>
               <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5">
-                  <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                  <span class="text-xs text-slate-400 line-through">Download &amp; install Automai</span>
-                  <span class="text-[10px] text-slate-300 ml-auto">Director, BotManager, ScenarioBuilder installed</span>
-                </li>
-                <li class="flex items-center gap-2.5">
-                  <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                  <span class="text-xs text-slate-400 line-through">Log in to Director</span>
-                  <span class="text-[10px] text-slate-300 ml-auto">Signed in as Admin User</span>
-                </li>
-                <li class="flex items-center gap-2.5">
-                  <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                  <span class="text-xs text-slate-400 line-through">Verify BotManager is connected</span>
-                  <span class="text-[10px] text-slate-300 ml-auto">BotManager-1 online</span>
-                </li>
-              </ol>
-
-              <!-- Record phase -->
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Record</p>
-              <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5">
-                  <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                  <span class="text-xs text-slate-400 line-through">Record the scenario</span>
-                  <span class="text-[10px] text-slate-300 ml-auto">Scenario recorded &amp; validated</span>
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="completedSteps().includes('notifications') ? null : toggleNotifications()">
-                  @if (completedSteps().includes('notifications')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('record')">
+                  @if (helpRunProcessSteps().includes('record')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Send scenario to Director</span>
+                    <span class="text-xs text-slate-400 line-through">Record scenario</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Send scenario to Director</span>
+                    <span class="text-xs text-slate-600">Record scenario</span>
                   }
                 </li>
-              </ol>
-
-              <!-- Configure & Launch phase -->
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Configure &amp; Launch</p>
-              <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="completedSteps().includes('notifications') && !completedSteps().includes('watcher') ? openDrawer('watcher', 'onboarding') : null">
-                  @if (completedSteps().includes('watcher')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('send')">
+                  @if (helpRunProcessSteps().includes('send')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Add an rWatcher</span>
+                    <span class="text-xs text-slate-400 line-through">Send scenario</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Add an rWatcher</span>
+                    <span class="text-xs text-slate-600">Send scenario</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="completedSteps().includes('watcher') && !completedSteps().includes('schedule') ? openDrawer('schedule', 'onboarding') : null">
-                  @if (completedSteps().includes('schedule')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('addwatcher')">
+                  @if (helpRunProcessSteps().includes('addwatcher')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Create a schedule</span>
+                    <span class="text-xs text-slate-400 line-through">Add watcher (check watcher availability)</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Create a schedule</span>
+                    <span class="text-xs text-slate-600">Add watcher (check watcher availability)</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="completedSteps().includes('schedule') && !completedSteps().includes('monitor') ? openDrawer('monitor', 'onboarding') : null">
-                  @if (completedSteps().includes('monitor')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('addprocess')">
+                  @if (helpRunProcessSteps().includes('addprocess')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Create Process Monitor</span>
+                    <span class="text-xs text-slate-400 line-through">Add process and assign default schedule</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Create Process Monitor</span>
+                    <span class="text-xs text-slate-600">Add process and assign default schedule</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="seeItRunChecked.set(!seeItRunChecked())">
-                  @if (seeItRunChecked()) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('run')">
+                  @if (helpRunProcessSteps().includes('run')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">See it run</span>
+                    <span class="text-xs text-slate-400 line-through">Go to process monitor page and run the process</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">See it run</span>
+                    <span class="text-xs text-slate-600">Go to process monitor page and run the process</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="exportReportsChecked.set(!exportReportsChecked())">
-                  @if (exportReportsChecked()) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('queue')">
+                  @if (helpRunProcessSteps().includes('queue')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Export reports</span>
+                    <span class="text-xs text-slate-400 line-through">See it running in the queue</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Export reports</span>
+                    <span class="text-xs text-slate-600">See it running in the queue</span>
                   }
                 </li>
               </ol>
 
-              <button (click)="startOnboarding()" class="w-full py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">play_arrow</span> Start Guided Setup
+              <button (click)="navigate('/process-monitors')" class="w-full py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">play_arrow</span> Go to Process Monitors
               </button>
 
             } @else if (selectedHelpCard() === 'rwatchers') {
@@ -1022,44 +1187,53 @@
                   <span class="material-symbols-outlined text-[20px] text-emerald-600">desktop_windows</span>
                 </div>
                 <div>
-                  <h3 class="text-base font-bold text-slate-900">Register rWatchers</h3>
-                  <p class="text-[11px] text-slate-400">Set up bot desktops for scenario execution.</p>
+                  <h3 class="text-base font-bold text-slate-900">Watcher</h3>
+                  <p class="text-[11px] text-slate-400">Check and configure your watcher agents.</p>
                 </div>
               </div>
 
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Setup Steps</p>
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Checklist</p>
               <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard2Step('machine')">
-                  @if (card2Steps().includes('machine')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpWatcherStep('botmanager')">
+                  @if (helpWatcherSteps().includes('botmanager')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Prepare Windows machine</span>
+                    <span class="text-xs text-slate-400 line-through">Check status of Bot Manager and reload if needed</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Prepare Windows machine</span>
+                    <span class="text-xs text-slate-600">Check status of Bot Manager and reload if needed</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard2Step('ip')">
-                  @if (card2Steps().includes('ip')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpWatcherStep('add')">
+                  @if (helpWatcherSteps().includes('add')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Configure IP &amp; credentials</span>
+                    <span class="text-xs text-slate-400 line-through">Add watcher</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Configure IP &amp; credentials</span>
+                    <span class="text-xs text-slate-600">Add watcher</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard2Step('botmgr')">
-                  @if (card2Steps().includes('botmgr')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpWatcherStep('select')">
+                  @if (helpWatcherSteps().includes('select')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Assign to BotManager</span>
+                    <span class="text-xs text-slate-400 line-through">Select watcher</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Assign to BotManager</span>
+                    <span class="text-xs text-slate-600">Select watcher</span>
+                  }
+                </li>
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpWatcherStep('start')">
+                  @if (helpWatcherSteps().includes('start')) {
+                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
+                    <span class="text-xs text-slate-400 line-through">Start watcher</span>
+                  } @else {
+                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
+                    <span class="text-xs text-slate-600">Start watcher</span>
                   }
                 </li>
               </ol>
 
-              <button (click)="openDrawer('watcher', 'standalone')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">add</span> Add rWatcher
+              <button (click)="navigate('/rwatchers')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">desktop_windows</span> Go to Watchers
               </button>
 
             } @else if (selectedHelpCard() === 'calendar') {
@@ -1073,40 +1247,13 @@
                 </div>
               </div>
 
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Setup Steps</p>
-              <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard3Step('window')">
-                  @if (card3Steps().includes('window')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Define maintenance window</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Define maintenance window</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard3Step('schedule')">
-                  @if (card3Steps().includes('schedule')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Create recurring schedule</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Create recurring schedule</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard3Step('verify')">
-                  @if (card3Steps().includes('verify')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Confirm first run</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Confirm first run</span>
-                  }
-                </li>
-              </ol>
-
-              <button (click)="openDrawer('schedule', 'standalone')" class="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">calendar_add_on</span> Create Schedule
-              </button>
+              <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="size-14 rounded-full bg-violet-50 flex items-center justify-center mb-3">
+                  <span class="material-symbols-outlined text-2xl text-violet-400">calendar_month</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-600 mb-1">Coming Soon</p>
+                <p class="text-xs text-slate-400">Content will be added in a future update.</p>
+              </div>
 
             } @else if (selectedHelpCard() === 'reports') {
               <div class="flex items-center gap-3 mb-5">
@@ -1119,40 +1266,13 @@
                 </div>
               </div>
 
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Steps</p>
-              <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="seeItRunChecked.set(!seeItRunChecked())">
-                  @if (seeItRunChecked()) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">See your first run</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">See your first run</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="exportReportsChecked.set(!exportReportsChecked())">
-                  @if (exportReportsChecked()) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Download run results</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Download run results</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard3Step('share')">
-                  @if (card3Steps().includes('share')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Share with your team</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Share with your team</span>
-                  }
-                </li>
-              </ol>
-
-              <button class="w-full py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">download</span> Export Reports
-              </button>
+              <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="size-14 rounded-full bg-cyan-50 flex items-center justify-center mb-3">
+                  <span class="material-symbols-outlined text-2xl text-cyan-400">download</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-600 mb-1">Coming Soon</p>
+                <p class="text-xs text-slate-400">Content will be added in a future update.</p>
+              </div>
 
             } @else if (selectedHelpCard() === 'notifications') {
               <div class="flex items-center gap-3 mb-5">
@@ -1160,44 +1280,80 @@
                   <span class="material-symbols-outlined text-[20px] text-amber-500">notifications_active</span>
                 </div>
                 <div>
-                  <h3 class="text-base font-bold text-slate-900">Error Notifications</h3>
-                  <p class="text-[11px] text-slate-400">Configure alerts when processes fail or hit thresholds.</p>
+                  <h3 class="text-base font-bold text-slate-900">Notifications</h3>
+                  <p class="text-[11px] text-slate-400">Set up event notifications for your processes.</p>
                 </div>
               </div>
 
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Setup Steps</p>
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Checklist</p>
               <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard2Step('threshold')">
-                  @if (card2Steps().includes('threshold')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('goto')">
+                  @if (helpNotificationSteps().includes('goto')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Set failure threshold</span>
+                    <span class="text-xs text-slate-400 line-through">Go to process monitor</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Set failure threshold</span>
+                    <span class="text-xs text-slate-600">Go to process monitor</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard2Step('recipients')">
-                  @if (card2Steps().includes('recipients')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('select')">
+                  @if (helpNotificationSteps().includes('select')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Add recipients</span>
+                    <span class="text-xs text-slate-400 line-through">Select process</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Add recipients</span>
+                    <span class="text-xs text-slate-600">Select process</span>
                   }
                 </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleCard2Step('test')">
-                  @if (card2Steps().includes('test')) {
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('edit')">
+                  @if (helpNotificationSteps().includes('edit')) {
                     <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Send a test alert</span>
+                    <span class="text-xs text-slate-400 line-through">Edit process</span>
                   } @else {
                     <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Send a test alert</span>
+                    <span class="text-xs text-slate-600">Edit process</span>
+                  }
+                </li>
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('addevent')">
+                  @if (helpNotificationSteps().includes('addevent')) {
+                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
+                    <span class="text-xs text-slate-400 line-through">Add new event</span>
+                  } @else {
+                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
+                    <span class="text-xs text-slate-600">Add new event</span>
+                  }
+                </li>
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('choosetype')">
+                  @if (helpNotificationSteps().includes('choosetype')) {
+                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
+                    <span class="text-xs text-slate-400 line-through">Choose event type</span>
+                  } @else {
+                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
+                    <span class="text-xs text-slate-600">Choose event type</span>
+                  }
+                </li>
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('submit')">
+                  @if (helpNotificationSteps().includes('submit')) {
+                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
+                    <span class="text-xs text-slate-400 line-through">Submit</span>
+                  } @else {
+                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
+                    <span class="text-xs text-slate-600">Submit</span>
+                  }
+                </li>
+                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpNotificationStep('runprocess')">
+                  @if (helpNotificationSteps().includes('runprocess')) {
+                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
+                    <span class="text-xs text-slate-400 line-through">Run the process</span>
+                  } @else {
+                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
+                    <span class="text-xs text-slate-600">Run the process</span>
                   }
                 </li>
               </ol>
 
-              <button class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">notifications_active</span> Set Up Alerts
+              <button (click)="navigate('/process-monitors')" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">notifications_active</span> Go to Process Monitors
               </button>
             }
           </div>
@@ -1244,6 +1400,377 @@
             <span class="material-symbols-outlined text-[18px]">menu_book</span> Learn More
           </a>
         </div>
+      </div>
+    } @else if (activeTab() === 'help-new') {
+      <!-- Smart Add Process Wizard (hidden page /help/new) -->
+      <div class="mt-6 max-w-3xl mx-auto w-full">
+        <!-- Progress bar -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            @for (label of wizardStepLabels; track label; let i = $index) {
+              <div class="flex flex-col items-center gap-1.5 flex-1">
+                <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
+                  [ngClass]="i < wizardStep() ? 'bg-green-500 text-white' : i === wizardStep() ? 'bg-primary text-white ring-4 ring-primary/20' : 'bg-slate-200 text-slate-500'">
+                  @if (i < wizardStep()) {
+                    <span class="material-symbols-outlined text-sm">check</span>
+                  } @else {
+                    {{ i + 1 }}
+                  }
+                </div>
+                <span class="text-[10px] font-medium text-center leading-tight" [ngClass]="i <= wizardStep() ? 'text-primary' : 'text-slate-400'">{{ label }}</span>
+              </div>
+              @if (i < wizardStepLabels.length - 1) {
+                <div class="h-0.5 flex-1 mt-[-18px] mx-1 rounded-full transition-all duration-300" [ngClass]="i < wizardStep() ? 'bg-green-500' : 'bg-slate-200'"></div>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <!-- Step 0: Purpose -->
+          @if (wizardStep() === 0) {
+            <div class="p-8">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary">rocket_launch</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">What would you like to do?</h2>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Choose the type of process you want to create.</p>
+              <div class="grid grid-cols-2 gap-4">
+                <button (click)="wizardType.set('monitor')"
+                  class="group relative p-6 rounded-xl border-2 text-left transition-all duration-200"
+                  [ngClass]="wizardType() === 'monitor' ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'">
+                  <div class="size-12 rounded-xl flex items-center justify-center mb-4" [ngClass]="wizardType() === 'monitor' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
+                    <span class="material-symbols-outlined text-2xl">monitoring</span>
+                  </div>
+                  <h3 class="font-bold text-slate-900 mb-1">Monitor</h3>
+                  <p class="text-xs text-slate-500 leading-relaxed">Continuously watch and track a process, get alerts on failures, and monitor performance over time.</p>
+                  @if (wizardType() === 'monitor') {
+                    <div class="absolute top-3 right-3 size-6 rounded-full bg-primary text-white flex items-center justify-center">
+                      <span class="material-symbols-outlined text-sm">check</span>
+                    </div>
+                  }
+                </button>
+                <button (click)="wizardType.set('testing')"
+                  class="group relative p-6 rounded-xl border-2 text-left transition-all duration-200"
+                  [ngClass]="wizardType() === 'testing' ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'">
+                  <div class="size-12 rounded-xl flex items-center justify-center mb-4" [ngClass]="wizardType() === 'testing' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
+                    <span class="material-symbols-outlined text-2xl">science</span>
+                  </div>
+                  <h3 class="font-bold text-slate-900 mb-1">Testing</h3>
+                  <p class="text-xs text-slate-500 leading-relaxed">Run a process once or on-demand to validate scenarios, test automation flows, and verify correctness.</p>
+                  @if (wizardType() === 'testing') {
+                    <div class="absolute top-3 right-3 size-6 rounded-full bg-primary text-white flex items-center justify-center">
+                      <span class="material-symbols-outlined text-sm">check</span>
+                    </div>
+                  }
+                </button>
+              </div>
+            </div>
+
+          <!-- Step 1: Name -->
+          } @else if (wizardStep() === 1) {
+            <div class="p-8">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-violet-600">edit_note</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Name your process</h2>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Give it a descriptive name so you can find it later.</p>
+              <div class="relative">
+                <input type="text" [value]="wizardProcessName()" (input)="wizardProcessName.set($any($event.target).value)"
+                  placeholder="e.g. Login Flow Monitor, Invoice Processor..."
+                  class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+                @if (wizardProcessName().length === 0 || wizardFilteredNameSuggestions().length > 0) {
+                  <div class="mt-3">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Suggestions</p>
+                    <div class="flex flex-wrap gap-2">
+                      @for (s of wizardFilteredNameSuggestions(); track s) {
+                        <button (click)="wizardProcessName.set(s)"
+                          class="px-3 py-1.5 text-xs rounded-full border transition-all"
+                          [ngClass]="wizardProcessName() === s ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
+                          {{ s }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+          <!-- Step 2: Scenario & Project -->
+          } @else if (wizardStep() === 2) {
+            <div class="p-8">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-amber-600">folder_open</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Scenario & Project</h2>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Link a scenario and assign it to a project.</p>
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Scenario</label>
+                  <input type="text" [value]="wizardScenario()" (input)="wizardScenario.set($any($event.target).value)"
+                    placeholder="Search or type a scenario name..."
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    @for (s of wizardFilteredScenarioSuggestions(); track s) {
+                      <button (click)="wizardScenario.set(s)"
+                        class="px-3 py-1.5 text-xs rounded-full border transition-all"
+                        [ngClass]="wizardScenario() === s ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
+                        {{ s }}
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Project</label>
+                  <input type="text" [value]="wizardProject()" (input)="wizardProject.set($any($event.target).value)"
+                    placeholder="Search or type a project name..."
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    @for (s of wizardFilteredProjectSuggestions(); track s) {
+                      <button (click)="wizardProject.set(s)"
+                        class="px-3 py-1.5 text-xs rounded-full border transition-all"
+                        [ngClass]="wizardProject() === s ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
+                        {{ s }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          <!-- Step 3: Watchers -->
+          } @else if (wizardStep() === 3) {
+            <div class="p-8">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-emerald-600">visibility</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Assign Watchers</h2>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Select one or more rWatchers to run this process, or create a new one.</p>
+              <div class="space-y-3">
+                @for (w of rwatchers(); track w.id) {
+                  <button (click)="wizardToggleWatcher(w.id)"
+                    class="w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all duration-200"
+                    [ngClass]="wizardSelectedWatcherIds().includes(w.id) ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
+                    <div class="size-10 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="w.status === 'online' ? 'bg-green-100 text-green-600' : w.status === 'busy' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'">
+                      <span class="material-symbols-outlined">desktop_windows</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span class="font-semibold text-sm text-slate-900">{{ w.alias }}</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                          [ngClass]="w.status === 'online' ? 'bg-green-100 text-green-700' : w.status === 'busy' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">
+                          {{ w.status }}
+                        </span>
+                      </div>
+                      <p class="text-xs text-slate-500 truncate">{{ w.ipAddress }} · {{ w.botManager }}</p>
+                    </div>
+                    <div class="size-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                      [ngClass]="wizardSelectedWatcherIds().includes(w.id) ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+                      @if (wizardSelectedWatcherIds().includes(w.id)) {
+                        <span class="material-symbols-outlined text-sm">check</span>
+                      }
+                    </div>
+                  </button>
+                }
+              </div>
+              <button (click)="openDrawer('watcher', 'standalone')"
+                class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-500 hover:border-primary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">add</span> Create New Watcher
+              </button>
+            </div>
+
+          <!-- Step 4: Schedule -->
+          } @else if (wizardStep() === 4) {
+            <div class="p-8">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-blue-600">schedule</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Set a Schedule</h2>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Choose how often this process should run.</p>
+              <div class="space-y-3">
+                @for (opt of [
+                  {value: 'default', label: 'Default Schedule', desc: 'Every 30 minutes during business hours', icon: 'timer'},
+                  {value: 'hourly', label: 'Every Hour', desc: 'Run once per hour, 24/7', icon: 'update'},
+                  {value: 'daily', label: 'Daily', desc: 'Run once per day at 8:00 AM', icon: 'today'},
+                  {value: 'weekdays', label: 'Weekdays Only', desc: 'Run Mon-Fri at 9:00 AM', icon: 'date_range'},
+                  {value: 'custom', label: 'Custom Cron', desc: 'Define your own cron expression', icon: 'code'}
+                ]; track opt.value) {
+                  <button (click)="wizardSchedule.set(opt.value)"
+                    class="w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all duration-200"
+                    [ngClass]="wizardSchedule() === opt.value ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
+                    <div class="size-10 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="wizardSchedule() === opt.value ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'">
+                      <span class="material-symbols-outlined">{{ opt.icon }}</span>
+                    </div>
+                    <div class="flex-1">
+                      <span class="font-semibold text-sm text-slate-900">{{ opt.label }}</span>
+                      <p class="text-xs text-slate-500">{{ opt.desc }}</p>
+                    </div>
+                    <div class="size-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                      [ngClass]="wizardSchedule() === opt.value ? 'border-primary bg-primary' : 'border-slate-300'">
+                      @if (wizardSchedule() === opt.value) {
+                        <div class="size-2 rounded-full bg-white"></div>
+                      }
+                    </div>
+                  </button>
+                }
+              </div>
+              @if (wizardSchedule() === 'custom') {
+                <div class="mt-4">
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Cron Expression</label>
+                  <input type="text" [value]="wizardCustomCron()" (input)="wizardCustomCron.set($any($event.target).value)"
+                    placeholder="*/30 * * * *"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+                  <p class="text-xs text-slate-400 mt-1">Standard 5-field cron: minute hour day month weekday</p>
+                </div>
+              }
+            </div>
+
+          <!-- Step 5: Events -->
+          } @else if (wizardStep() === 5) {
+            <div class="p-8">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-rose-100 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-rose-600">notifications_active</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Event Notifications</h2>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Configure how you want to be notified. You can skip this step.</p>
+              <div class="space-y-4">
+                <div class="p-4 rounded-lg border border-slate-200">
+                  <h4 class="text-sm font-semibold text-slate-700 mb-3">Trigger When</h4>
+                  <div class="space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                      <button (click)="wizardToggleEvent('onFailure')"
+                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
+                        [ngClass]="wizardEvents().onFailure ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+                        @if (wizardEvents().onFailure) { <span class="material-symbols-outlined text-xs">check</span> }
+                      </button>
+                      <div>
+                        <span class="text-sm font-medium text-slate-700">On Failure</span>
+                        <p class="text-xs text-slate-400">Notify when the process fails or encounters errors</p>
+                      </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                      <button (click)="wizardToggleEvent('onSuccess')"
+                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
+                        [ngClass]="wizardEvents().onSuccess ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+                        @if (wizardEvents().onSuccess) { <span class="material-symbols-outlined text-xs">check</span> }
+                      </button>
+                      <div>
+                        <span class="text-sm font-medium text-slate-700">On Success</span>
+                        <p class="text-xs text-slate-400">Notify when the process completes successfully</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <div class="p-4 rounded-lg border border-slate-200">
+                  <h4 class="text-sm font-semibold text-slate-700 mb-3">Notify Via</h4>
+                  <div class="space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                      <button (click)="wizardToggleEvent('email')"
+                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
+                        [ngClass]="wizardEvents().email ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+                        @if (wizardEvents().email) { <span class="material-symbols-outlined text-xs">check</span> }
+                      </button>
+                      <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-400 text-lg">email</span>
+                        <span class="text-sm font-medium text-slate-700">Email</span>
+                      </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                      <button (click)="wizardToggleEvent('slack')"
+                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
+                        [ngClass]="wizardEvents().slack ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+                        @if (wizardEvents().slack) { <span class="material-symbols-outlined text-xs">check</span> }
+                      </button>
+                      <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-400 text-lg">tag</span>
+                        <span class="text-sm font-medium text-slate-700">Slack</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          <!-- Step 6: Confirmation -->
+          } @else if (wizardStep() === 6) {
+            <div class="p-8 text-center">
+              <div class="size-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-3xl text-green-600">check_circle</span>
+              </div>
+              <h2 class="text-xl font-bold text-slate-900 mb-2">Process Created!</h2>
+              <p class="text-sm text-slate-500 mb-6">Your process <strong class="text-slate-700">{{ wizardProcessName() }}</strong> has been created and is ready to run.</p>
+              <div class="bg-slate-50 rounded-lg p-4 text-left max-w-sm mx-auto mb-6 space-y-2">
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Type</span><span class="font-medium text-slate-700 capitalize">{{ wizardType() }}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Scenario</span><span class="font-medium text-slate-700">{{ wizardScenario() }}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Project</span><span class="font-medium text-slate-700">{{ wizardProject() }}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Watchers</span><span class="font-medium text-slate-700">{{ wizardSelectedWatcherIds().length }} assigned</span></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Schedule</span><span class="font-medium text-slate-700 capitalize">{{ wizardSchedule() }}</span></div>
+              </div>
+              <div class="flex items-center justify-center gap-3">
+                <button (click)="navigate('/process-monitors')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
+                  View in Process Monitors
+                </button>
+                <button (click)="wizardReset()" class="px-5 py-2.5 bg-white border border-slate-300 text-sm font-medium text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                  Create Another
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Footer navigation (not on confirmation step) -->
+          @if (wizardStep() < 6) {
+            <div class="bg-slate-50 px-8 py-4 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                @if (wizardStep() > 0) {
+                  <button (click)="wizardBack()" class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    <span class="material-symbols-outlined text-lg">arrow_back</span> Back
+                  </button>
+                }
+              </div>
+              <div class="flex items-center gap-3">
+                @if (wizardStep() === 5) {
+                  <button (click)="wizardSubmit()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2"
+                    [disabled]="!wizardCanProceed()">
+                    <span class="material-symbols-outlined text-lg">check</span> Create Process
+                  </button>
+                } @else {
+                  @if (wizardStep() >= 4) {
+                    <button (click)="wizardNext()" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                      Skip
+                    </button>
+                  }
+                  <button (click)="wizardNext()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                    [disabled]="!wizardCanProceed()">
+                    Continue <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Back to help link -->
+        @if (wizardStep() < 6) {
+          <div class="mt-4 text-center">
+            <button (click)="wizardReset(); navigate('/help')" class="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Help Center
+            </button>
+          </div>
+        }
       </div>
     }
   </main>

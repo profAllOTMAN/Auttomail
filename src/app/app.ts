@@ -50,6 +50,30 @@ export interface RWatcher {
   domain: string;
   assignedMonitors: number;
   uptime: string;
+  totalChecks?: number;
+  successCount?: number;
+  failureCount?: number;
+  avgResponseTime?: string;
+  trendData?: number[];
+  screenUrl?: string;
+}
+
+export interface Notification {
+  id: string;
+  type: 'success' | 'failure' | 'warning' | 'info';
+  title: string;
+  message: string;
+  timestamp: string;
+  processName?: string;
+}
+
+export interface LatestUpdate {
+  id: string;
+  type: 'success' | 'failure' | 'executed';
+  title: string;
+  detail: string;
+  timestamp: string;
+  icon: string;
 }
 
 @Component({
@@ -77,7 +101,13 @@ export class App implements OnInit {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {
-      const path = e.urlAfterRedirects.split('/')[1]?.split('?')[0] || 'dashboard';
+      const url = e.urlAfterRedirects;
+      // Check for multi-segment paths first
+      if (url.startsWith('/help/new')) {
+        this.activeTab.set('help-new');
+        return;
+      }
+      const path = url.split('/')[1]?.split('?')[0] || 'dashboard';
       const tabMap: Record<string, string> = {
         'dashboard': 'dashboard',
         'process-monitors': 'process-monitor',
@@ -141,6 +171,103 @@ export class App implements OnInit {
 
   monitors = signal<ProcessMonitor[]>(this.getDemoMonitors());
 
+  dashboardProcessSearch = signal<string>('');
+
+  filteredDashboardMonitors() {
+    const search = this.dashboardProcessSearch().toLowerCase();
+    if (!search) return this.monitors();
+    return this.monitors().filter(m =>
+      m.name.toLowerCase().includes(search) ||
+      (m.scenarioAssigned?.toLowerCase().includes(search) ?? false)
+    );
+  }
+
+  // Detail panel tabs for selected process
+  processDetailTab = signal<'scenario' | 'watchers'>('scenario');
+  watcherSubTab = signal<string>('all'); // 'all' or a monitor id
+
+  watcherSubTabs() {
+    const tabs: {id: string; label: string}[] = [{id: 'all', label: 'All'}];
+    for (const m of this.monitors()) {
+      if (m.scenarioAssigned) {
+        tabs.push({id: m.id, label: m.scenarioAssigned});
+      }
+    }
+    return tabs;
+  }
+
+  watchersForSubTab() {
+    const tab = this.watcherSubTab();
+    if (tab === 'all') return this.rwatchers();
+    const monitor = this.monitors().find(m => m.id === tab);
+    if (!monitor) return [];
+    return this.watchersForMonitor(monitor);
+  }
+
+  // Combined timeline: updates + alerts merged and sorted
+  timelineFeed() {
+    const updates = this.latestUpdates().map(u => ({
+      id: 'u-' + u.id,
+      badge: 'update' as const,
+      icon: u.icon,
+      title: u.title,
+      detail: u.detail,
+      timestamp: u.timestamp,
+      type: u.type,
+      processName: undefined as string | undefined
+    }));
+    const alerts = this.dashboardNotifications().map(n => ({
+      id: 'a-' + n.id,
+      badge: (n.type === 'warning' ? 'warning' : 'alert') as 'warning' | 'alert',
+      icon: n.type === 'failure' ? 'error' : (n.type === 'warning' ? 'warning' : (n.type === 'info' ? 'info' : 'check_circle')),
+      title: n.title,
+      detail: n.message,
+      timestamp: n.timestamp,
+      type: n.type,
+      processName: n.processName
+    }));
+    return [...updates, ...alerts];
+  }
+
+  // Process Monitor page filters
+  filterByProcess = signal<string>('');
+  filterByBotManager = signal<string>('');
+  filterByWatcher = signal<string>('');
+  filterBySchedule = signal<string>('');
+
+  // Help section step tracking
+  helpRunProcessSteps = signal<string[]>([]);
+  helpWatcherSteps = signal<string[]>([]);
+  helpNotificationSteps = signal<string[]>([]);
+
+  toggleHelpRunProcessStep(step: string) {
+    this.helpRunProcessSteps.update(s => s.includes(step) ? s.filter(x => x !== step) : [...s, step]);
+  }
+  toggleHelpWatcherStep(step: string) {
+    this.helpWatcherSteps.update(s => s.includes(step) ? s.filter(x => x !== step) : [...s, step]);
+  }
+  toggleHelpNotificationStep(step: string) {
+    this.helpNotificationSteps.update(s => s.includes(step) ? s.filter(x => x !== step) : [...s, step]);
+  }
+
+  // Dashboard notifications & updates
+  dashboardNotifications = signal<Notification[]>([
+    { id: '1', type: 'failure', title: 'Process Failed', message: 'Legacy Data Sync failed — 140 records mismatched during integrity check.', timestamp: '1 hour ago', processName: 'Legacy Data Sync' },
+    { id: '2', type: 'warning', title: 'Watcher Offline', message: 'rWatcher002 has gone offline. SFDC Auth Monitor may be affected.', timestamp: '2 hours ago' },
+    { id: '3', type: 'info', title: 'Schedule Updated', message: 'Invoice Processing schedule changed to weekdays only.', timestamp: '5 hours ago', processName: 'Invoice Processing' }
+  ]);
+
+  latestUpdates = signal<LatestUpdate[]>([
+    { id: '1', type: 'success', title: 'Last Successful Run', detail: 'SFDC Auth Monitor completed all checks', timestamp: '3 min ago', icon: 'check_circle' },
+    { id: '2', type: 'failure', title: 'Last Failure', detail: 'Legacy Data Sync — 140 records mismatched', timestamp: '1 hour ago', icon: 'error' },
+    { id: '3', type: 'executed', title: 'Last Executed', detail: 'Process Notepad is currently running', timestamp: 'Just now', icon: 'play_circle' }
+  ]);
+
+  botManagerStatus = signal<{name: string; status: 'online' | 'offline'}[]>([
+    { name: 'BotManager-1', status: 'online' },
+    { name: 'BotManager-2', status: 'online' }
+  ]);
+
   rwatchers = signal<RWatcher[]>([
     {
       id: '1',
@@ -155,7 +282,13 @@ export class App implements OnInit {
       username: 'CORP\\auto_user1',
       domain: 'CORP',
       assignedMonitors: 2,
-      uptime: '14d 6h 32m'
+      uptime: '14d 6h 32m',
+      totalChecks: 1240,
+      successCount: 1220,
+      failureCount: 20,
+      avgResponseTime: '1.2s',
+      trendData: [95, 97, 98, 96, 99, 100, 98],
+      screenUrl: ''
     },
     {
       id: '2',
@@ -170,7 +303,13 @@ export class App implements OnInit {
       username: 'CORP\\auto_user2',
       domain: 'CORP',
       assignedMonitors: 1,
-      uptime: '--'
+      uptime: '--',
+      totalChecks: 580,
+      successCount: 560,
+      failureCount: 20,
+      avgResponseTime: '2.1s',
+      trendData: [90, 92, 88, 85, 0, 0, 0],
+      screenUrl: ''
     },
     {
       id: '3',
@@ -185,7 +324,13 @@ export class App implements OnInit {
       username: 'CORP\\auto_user3',
       domain: 'CORP',
       assignedMonitors: 3,
-      uptime: '7d 12h 15m'
+      uptime: '7d 12h 15m',
+      totalChecks: 890,
+      successCount: 845,
+      failureCount: 45,
+      avgResponseTime: '3.4s',
+      trendData: [92, 94, 91, 95, 93, 96, 94],
+      screenUrl: ''
     }
   ]);
 
@@ -495,6 +640,53 @@ export class App implements OnInit {
     return m.subProcesses?.reduce((sum, sp) => sum + (sp.transactions?.filter(t => t.status === 'failed').length ?? 0), 0) ?? 0;
   }
 
+  // Dashboard KPIs
+  activeProcessCount() {
+    return this.monitors().filter(m => m.status === 'running' || m.status === 'pending').length;
+  }
+  inactiveProcessCount() {
+    return this.monitors().filter(m => m.status === 'disabled').length;
+  }
+  activeWatcherCount() {
+    return this.rwatchers().filter(w => w.status === 'online' || w.status === 'busy').length;
+  }
+  inactiveWatcherCount() {
+    return this.rwatchers().filter(w => w.status === 'offline').length;
+  }
+  botManagerStatusLine() {
+    return this.botManagerStatus().map(b => `${b.name}: ${b.status}`).join(' | ');
+  }
+
+  // Process Monitor page filtered list
+  filteredMonitors() {
+    let list = this.monitors();
+    const proc = this.filterByProcess().toLowerCase();
+    const bot = this.filterByBotManager().toLowerCase();
+    const watcher = this.filterByWatcher().toLowerCase();
+    if (proc) {
+      list = list.filter(m => m.name.toLowerCase().includes(proc));
+    }
+    if (bot) {
+      list = list.filter(m => {
+        const watchers = this.watchersForMonitor(m);
+        return watchers.some(w => w.botManager.toLowerCase().includes(bot));
+      });
+    }
+    if (watcher) {
+      list = list.filter(m => {
+        const watchers = this.watchersForMonitor(m);
+        return watchers.some(w => w.alias.toLowerCase().includes(watcher));
+      });
+    }
+    return list;
+  }
+
+  // Unique bot managers for filter dropdown
+  uniqueBotManagers() {
+    const set = new Set(this.rwatchers().map(w => w.botManager));
+    return Array.from(set);
+  }
+
   runMonitorNow(id: string) {
     this.monitors.update(monitors => monitors.map(m => {
       if (m.id === id && m.status !== 'disabled') {
@@ -503,4 +695,110 @@ export class App implements OnInit {
       return m;
     }));
   }
+
+  // ── Smart Add Process Wizard ──
+  wizardStep = signal<number>(0);
+  wizardType = signal<'monitor' | 'testing' | null>(null);
+  wizardProcessName = signal<string>('');
+  wizardScenario = signal<string>('');
+  wizardProject = signal<string>('');
+  wizardSelectedWatcherIds = signal<string[]>([]);
+  wizardSchedule = signal<string>('default');
+  wizardCustomCron = signal<string>('');
+  wizardEvents = signal<{email: boolean; slack: boolean; onFailure: boolean; onSuccess: boolean}>({
+    email: false, slack: false, onFailure: true, onSuccess: false
+  });
+  wizardNameSuggestions = signal<string[]>([
+    'Web App Health Check', 'Login Flow Monitor', 'API Response Validator',
+    'Data Pipeline Sync', 'Invoice Processor', 'Email Campaign Tracker',
+    'Dashboard Load Test', 'Payment Gateway Check'
+  ]);
+  wizardScenarioSuggestions = signal<string[]>([
+    'End-to-End Login', 'Data Entry Automation', 'Report Generation',
+    'File Upload Flow', 'Search & Filter', 'Form Submission'
+  ]);
+  wizardProjectSuggestions = signal<string[]>([
+    'My First Project', 'CRM Integration', 'Finance Automation',
+    'Data Migration', 'QA Regression Suite'
+  ]);
+
+  wizardFilteredNameSuggestions() {
+    const q = this.wizardProcessName().toLowerCase();
+    if (!q) return this.wizardNameSuggestions();
+    return this.wizardNameSuggestions().filter(s => s.toLowerCase().includes(q));
+  }
+
+  wizardFilteredScenarioSuggestions() {
+    const q = this.wizardScenario().toLowerCase();
+    if (!q) return this.wizardScenarioSuggestions();
+    return this.wizardScenarioSuggestions().filter(s => s.toLowerCase().includes(q));
+  }
+
+  wizardFilteredProjectSuggestions() {
+    const q = this.wizardProject().toLowerCase();
+    if (!q) return this.wizardProjectSuggestions();
+    return this.wizardProjectSuggestions().filter(s => s.toLowerCase().includes(q));
+  }
+
+  wizardToggleWatcher(id: string) {
+    this.wizardSelectedWatcherIds.update(ids =>
+      ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]
+    );
+  }
+
+  wizardToggleEvent(key: 'email' | 'slack' | 'onFailure' | 'onSuccess') {
+    this.wizardEvents.update(ev => ({...ev, [key]: !ev[key]}));
+  }
+
+  wizardCanProceed() {
+    const step = this.wizardStep();
+    if (step === 0) return this.wizardType() !== null;
+    if (step === 1) return this.wizardProcessName().trim().length > 0;
+    if (step === 2) return this.wizardScenario().trim().length > 0 && this.wizardProject().trim().length > 0;
+    if (step === 3) return this.wizardSelectedWatcherIds().length > 0;
+    return true;
+  }
+
+  wizardNext() {
+    if (this.wizardCanProceed() && this.wizardStep() < 5) {
+      this.wizardStep.update(s => s + 1);
+    }
+  }
+
+  wizardBack() {
+    if (this.wizardStep() > 0) {
+      this.wizardStep.update(s => s - 1);
+    }
+  }
+
+  wizardReset() {
+    this.wizardStep.set(0);
+    this.wizardType.set(null);
+    this.wizardProcessName.set('');
+    this.wizardScenario.set('');
+    this.wizardProject.set('');
+    this.wizardSelectedWatcherIds.set([]);
+    this.wizardSchedule.set('default');
+    this.wizardCustomCron.set('');
+    this.wizardEvents.set({email: false, slack: false, onFailure: true, onSuccess: false});
+  }
+
+  wizardSubmit() {
+    const newId = (this.monitors().length + 1).toString();
+    this.monitors.update(m => [...m, {
+      id: newId,
+      name: this.wizardProcessName(),
+      status: 'pending' as const,
+      lastRun: 'Never',
+      successRate: '--',
+      resources: `${this.wizardSelectedWatcherIds().length} rWatcher${this.wizardSelectedWatcherIds().length > 1 ? 's' : ''}`,
+      message: 'Created via wizard',
+      scenarioAssigned: this.wizardScenario(),
+      projectLinked: this.wizardProject(),
+      assignedRWatcherIds: this.wizardSelectedWatcherIds()
+    }]);
+    this.wizardStep.set(6); // confirmation step
+  }
+
+  wizardStepLabels = ['Purpose', 'Name', 'Scenario & Project', 'Watchers', 'Schedule', 'Events', 'Done'];
 }
