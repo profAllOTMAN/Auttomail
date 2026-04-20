@@ -103,6 +103,14 @@ export class App implements OnInit {
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
       // Check for multi-segment paths first
+      if (url.startsWith('/help/new3')) {
+        this.activeTab.set('help-new3');
+        return;
+      }
+      if (url.startsWith('/help/new2')) {
+        this.activeTab.set('help-new2');
+        return;
+      }
       if (url.startsWith('/help/new')) {
         this.activeTab.set('help-new');
         return;
@@ -836,5 +844,169 @@ export class App implements OnInit {
 
   wizardRemoveEvent(index: number) {
     this.wizardConfiguredEvents.update(evts => evts.filter((_, i) => i !== index));
+  }
+
+  // ── help/new2: Smart Command Builder ──
+  cmdTokens = signal<{key: string; value: string; label: string}[]>([]);
+  cmdCurrentField = signal<'action' | 'name' | 'project' | 'scenario' | 'watcher' | 'schedule' | 'done'>('action');
+  cmdInputValue = signal<string>('');
+  cmdShowDropdown = signal<boolean>(false);
+
+  cmdFieldConfig(): {placeholder: string; options: string[]; icon: string; label: string} {
+    const field = this.cmdCurrentField();
+    const q = this.cmdInputValue().toLowerCase();
+    const filter = (arr: string[]) => q ? arr.filter(s => s.toLowerCase().includes(q)) : arr;
+    switch (field) {
+      case 'action': return {placeholder: 'What do you want to do?', options: filter(['CREATE MONITOR']), icon: 'play_arrow', label: 'Action'};
+      case 'name': return {placeholder: 'Process name...', options: filter(['Web App Health Check', 'Login Flow Monitor', 'API Response Validator', 'Data Pipeline Sync', 'Invoice Processor']), icon: 'badge', label: 'Name'};
+      case 'project': return {placeholder: 'Select project...', options: filter(this.wizardProjectSuggestions()), icon: 'folder', label: 'Project'};
+      case 'scenario': return {placeholder: 'Select scenario...', options: filter(this.wizardScenarioSuggestions()), icon: 'description', label: 'Scenario'};
+      case 'watcher': return {placeholder: 'Assign watcher...', options: filter(this.rwatchers().map(w => w.alias)), icon: 'visibility', label: 'Watcher'};
+      case 'schedule': return {placeholder: 'Set schedule...', options: filter(['Every 30 min', 'Every Hour', 'Daily at 8 AM', 'Weekdays at 9 AM']), icon: 'schedule', label: 'Schedule'};
+      default: return {placeholder: '', options: [], icon: 'check', label: 'Done'};
+    }
+  }
+
+  cmdSelectOption(value: string) {
+    const field = this.cmdCurrentField();
+    const labelMap: Record<string, string> = {action: 'Action', name: 'Name', project: 'Project', scenario: 'Scenario', watcher: 'Watcher', schedule: 'Schedule'};
+    this.cmdTokens.update(t => [...t, {key: field, value, label: labelMap[field] || field}]);
+    this.cmdInputValue.set('');
+    this.cmdShowDropdown.set(false);
+    const flow: ('action' | 'name' | 'project' | 'scenario' | 'watcher' | 'schedule' | 'done')[] = ['action', 'name', 'project', 'scenario', 'watcher', 'schedule', 'done'];
+    const idx = flow.indexOf(field);
+    this.cmdCurrentField.set(flow[idx + 1] || 'done');
+  }
+
+  cmdRemoveToken(index: number) {
+    const tokens = this.cmdTokens();
+    const removedKey = tokens[index].key;
+    // Remove this token and all after it
+    this.cmdTokens.set(tokens.slice(0, index));
+    this.cmdCurrentField.set(removedKey as any);
+    this.cmdInputValue.set('');
+  }
+
+  cmdSubmit() {
+    const get = (key: string) => this.cmdTokens().find(t => t.key === key)?.value || '';
+    const watcherAlias = get('watcher');
+    const watcherIds = this.rwatchers().filter(w => w.alias === watcherAlias).map(w => w.id);
+    const newId = (this.monitors().length + 1).toString();
+    this.monitors.update(m => [...m, {
+      id: newId,
+      name: get('name'),
+      status: 'pending' as const,
+      lastRun: 'Never',
+      successRate: '--',
+      resources: `${watcherIds.length || 1} rWatcher${watcherIds.length > 1 ? 's' : ''}`,
+      message: 'Created via command builder',
+      scenarioAssigned: get('scenario'),
+      projectLinked: get('project'),
+      assignedRWatcherIds: watcherIds.length > 0 ? watcherIds : ['1']
+    }]);
+    this.cmdCurrentField.set('done');
+  }
+
+  cmdReset() {
+    this.cmdTokens.set([]);
+    this.cmdCurrentField.set('action');
+    this.cmdInputValue.set('');
+    this.cmdShowDropdown.set(false);
+  }
+
+  // ── help/new3: Chat Agent ──
+  chatMessages = signal<{role: 'agent' | 'user'; text: string; options?: string[]}[]>([
+    {role: 'agent', text: 'Hi! I\'m your process setup assistant. What would you like to do?', options: ['Create a Process Monitor', 'Help me decide']}
+  ]);
+  chatInput = signal<string>('');
+  chatPhase = signal<'goal' | 'name' | 'project' | 'scenario' | 'watcher' | 'schedule' | 'confirm' | 'done'>('goal');
+  chatProcessData = signal<{name: string; project: string; scenario: string; watcher: string; schedule: string}>({name: '', project: '', scenario: '', watcher: '', schedule: ''});
+
+  chatSendOption(option: string) {
+    this.chatMessages.update(m => [...m, {role: 'user', text: option}]);
+    this.chatProcessResponse(option);
+  }
+
+  chatSend() {
+    const text = this.chatInput().trim();
+    if (!text) return;
+    this.chatMessages.update(m => [...m, {role: 'user', text}]);
+    this.chatInput.set('');
+    this.chatProcessResponse(text);
+  }
+
+  private chatProcessResponse(input: string) {
+    const phase = this.chatPhase();
+    setTimeout(() => {
+      switch (phase) {
+        case 'goal':
+          this.chatPhase.set('name');
+          this.chatMessages.update(m => [...m, {role: 'agent', text: 'Great! Let\'s create a process monitor. What would you like to name it?', options: ['Web App Health Check', 'Login Flow Monitor', 'Data Pipeline Sync']}]);
+          break;
+        case 'name':
+          this.chatProcessData.update(d => ({...d, name: input}));
+          this.chatPhase.set('project');
+          this.chatMessages.update(m => [...m, {role: 'agent', text: `"${input}" — nice name! Which project does this belong to?`, options: this.wizardProjectSuggestions()}]);
+          break;
+        case 'project':
+          this.chatProcessData.update(d => ({...d, project: input}));
+          this.chatPhase.set('scenario');
+          this.chatMessages.update(m => [...m, {role: 'agent', text: `Project set to "${input}". Now, which scenario should this monitor run?`, options: this.wizardScenarioSuggestions()}]);
+          break;
+        case 'scenario':
+          this.chatProcessData.update(d => ({...d, scenario: input}));
+          this.chatPhase.set('watcher');
+          this.chatMessages.update(m => [...m, {role: 'agent', text: 'Which watcher should run this process?', options: this.rwatchers().map(w => `${w.alias} (${w.status})`)}]);
+          break;
+        case 'watcher':
+          this.chatProcessData.update(d => ({...d, watcher: input.split(' (')[0]}));
+          this.chatPhase.set('schedule');
+          this.chatMessages.update(m => [...m, {role: 'agent', text: 'Almost done! How often should this run?', options: ['Every 30 min', 'Every Hour', 'Daily at 8 AM', 'Weekdays at 9 AM']}]);
+          break;
+        case 'schedule':
+          this.chatProcessData.update(d => ({...d, schedule: input}));
+          this.chatPhase.set('confirm');
+          const data = this.chatProcessData();
+          this.chatMessages.update(m => [...m, {
+            role: 'agent',
+            text: `Here's your process summary:\n\n• Name: ${data.name}\n• Project: ${data.project}\n• Scenario: ${data.scenario}\n• Watcher: ${data.watcher}\n• Schedule: ${input}\n\nShall I create this?`,
+            options: ['Yes, create it!', 'Start over']
+          }]);
+          break;
+        case 'confirm':
+          if (input.toLowerCase().includes('yes') || input.toLowerCase().includes('create')) {
+            const d = this.chatProcessData();
+            const watcherIds = this.rwatchers().filter(w => w.alias === d.watcher).map(w => w.id);
+            const newId = (this.monitors().length + 1).toString();
+            this.monitors.update(monitors => [...monitors, {
+              id: newId, name: d.name, status: 'pending' as const, lastRun: 'Never', successRate: '--',
+              resources: `${watcherIds.length || 1} rWatcher${watcherIds.length > 1 ? 's' : ''}`,
+              message: 'Created via chat agent', scenarioAssigned: d.scenario, projectLinked: d.project,
+              assignedRWatcherIds: watcherIds.length > 0 ? watcherIds : ['1']
+            }]);
+            this.chatPhase.set('done');
+            this.chatMessages.update(m => [...m, {role: 'agent', text: `Done! "${d.name}" has been created and is ready in your Process Monitors.`, options: ['View Process Monitors', 'Create another']}]);
+          } else {
+            this.chatReset();
+          }
+          break;
+        case 'done':
+          if (input.toLowerCase().includes('view')) {
+            this.navigate('/process-monitors');
+          } else {
+            this.chatReset();
+          }
+          break;
+      }
+    }, 300);
+  }
+
+  chatReset() {
+    this.chatMessages.set([
+      {role: 'agent', text: 'Hi! I\'m your process setup assistant. What would you like to do?', options: ['Create a Process Monitor', 'Help me decide']}
+    ]);
+    this.chatPhase.set('goal');
+    this.chatProcessData.set({name: '', project: '', scenario: '', watcher: '', schedule: ''});
+    this.chatInput.set('');
   }
 }
