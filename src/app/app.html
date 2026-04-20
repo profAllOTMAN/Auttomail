@@ -1598,9 +1598,9 @@
                 @for (opt of [
                   {value: 'default', label: 'Default Schedule', desc: 'Every 30 minutes during business hours', icon: 'timer'},
                   {value: 'hourly', label: 'Every Hour', desc: 'Run once per hour, 24/7', icon: 'update'},
+                  {value: '15min', label: 'Every 15 Minutes', desc: 'High frequency — runs 4 times per hour', icon: 'speed'},
                   {value: 'daily', label: 'Daily', desc: 'Run once per day at 8:00 AM', icon: 'today'},
-                  {value: 'weekdays', label: 'Weekdays Only', desc: 'Run Mon-Fri at 9:00 AM', icon: 'date_range'},
-                  {value: 'custom', label: 'Custom Cron', desc: 'Define your own cron expression', icon: 'code'}
+                  {value: 'weekdays', label: 'Weekdays Only', desc: 'Run Mon-Fri at 9:00 AM', icon: 'date_range'}
                 ]; track opt.value) {
                   <button (click)="wizardSchedule.set(opt.value)"
                     class="w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all duration-200"
@@ -1622,15 +1622,10 @@
                   </button>
                 }
               </div>
-              @if (wizardSchedule() === 'custom') {
-                <div class="mt-4">
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Cron Expression</label>
-                  <input type="text" [value]="wizardCustomCron()" (input)="wizardCustomCron.set($any($event.target).value)"
-                    placeholder="*/30 * * * *"
-                    class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
-                  <p class="text-xs text-slate-400 mt-1">Standard 5-field cron: minute hour day month weekday</p>
-                </div>
-              }
+              <button (click)="openDrawer('schedule', 'standalone')"
+                class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-500 hover:border-primary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">add</span> Create New Schedule
+              </button>
             </div>
 
           <!-- Step 5: Events (optional) -->
@@ -1650,12 +1645,12 @@
                   @for (evt of wizardConfiguredEvents(); track $index; let i = $index) {
                     <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50">
                       <div class="size-8 rounded-lg flex items-center justify-center shrink-0"
-                        [ngClass]="evt.type === 'on_failure' ? 'bg-red-100 text-red-600' : evt.type === 'on_success' ? 'bg-green-100 text-green-600' : evt.type === 'on_timeout' ? 'bg-amber-100 text-amber-600' : 'bg-orange-100 text-orange-600'">
-                        <span class="material-symbols-outlined text-sm">{{ evt.type === 'on_failure' ? 'error' : evt.type === 'on_success' ? 'check_circle' : evt.type === 'on_timeout' ? 'timer_off' : 'warning' }}</span>
+                        [ngClass]="evt.level === 'critical' ? 'bg-red-100 text-red-600' : evt.level === 'warning' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'">
+                        <span class="material-symbols-outlined text-sm">{{ evt.level === 'critical' ? 'error' : evt.level === 'warning' ? 'warning' : 'info' }}</span>
                       </div>
                       <div class="flex-1 min-w-0">
-                        <span class="text-sm font-medium text-slate-800">{{ evt.name }}</span>
-                        <p class="text-xs text-slate-500 truncate">{{ evt.type | titlecase }} · {{ evt.severity | titlecase }} · {{ evt.recipients || 'No recipients' }}</p>
+                        <span class="text-sm font-medium text-slate-800">{{ evt.metric }} {{ evt.condition }} {{ evt.threshold }}</span>
+                        <p class="text-xs text-slate-500 truncate">{{ evt.level | titlecase }} · {{ evt.action }} → {{ evt.recipients || 'No recipients' }}</p>
                       </div>
                       <button (click)="wizardRemoveEvent(i)" class="size-7 rounded-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                         <span class="material-symbols-outlined text-lg">close</span>
@@ -1739,107 +1734,109 @@
       </div>
 
     } @else if (activeTab() === 'help-new2') {
-      <!-- Smart Command Builder (hidden page /help/new2) -->
+      <!-- Smart Setup Builder (hidden page /help/new2) -->
       <div class="mt-6 max-w-3xl mx-auto w-full">
         <div class="mb-6">
           <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
-            <div class="size-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-              <span class="material-symbols-outlined text-indigo-600">terminal</span>
+            <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary">bolt</span>
             </div>
-            Smart Command Builder
+            Quick Setup
           </h1>
-          <p class="text-sm text-slate-500 mt-1 ml-[52px]">Build your process setup like a query — select each element step by step.</p>
+          <p class="text-sm text-slate-500 mt-1 ml-[52px]">Build your process by selecting each element — each choice unlocks the next step.</p>
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-          <!-- Command bar -->
-          <div class="p-4 border-b border-slate-100 bg-slate-900 rounded-t-xl">
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-2 font-mono">
-              <span class="text-green-400">automai</span><span class="text-slate-600">></span>
-              <span class="text-slate-400">process-builder</span>
-            </div>
-            <div class="flex flex-wrap items-center gap-1.5 min-h-[40px]">
-              <!-- Tokens -->
-              @for (token of cmdTokens(); track $index; let i = $index) {
-                <button (click)="cmdRemoveToken(i)"
-                  class="group inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 hover:bg-red-500/20 hover:text-red-300 hover:border-red-400/30 transition-all">
-                  <span class="text-[10px] text-indigo-400/70 uppercase group-hover:text-red-400/70">{{ token.label }}:</span>
-                  {{ token.value }}
-                  <span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100 transition-opacity">close</span>
-                </button>
-              }
+          <div class="p-6 space-y-4">
 
-              <!-- Input or done state -->
-              @if (cmdCurrentField() !== 'done') {
-                <div class="relative flex-1 min-w-[200px]">
-                  <input type="text" [value]="cmdInputValue()" (input)="cmdInputValue.set($any($event.target).value)"
-                    (focus)="cmdShowDropdown.set(true)"
-                    [placeholder]="cmdFieldConfig().placeholder"
-                    class="w-full bg-transparent text-white text-sm px-2 py-1.5 focus:outline-none placeholder:text-slate-500 font-mono" />
-                </div>
-              } @else {
-                <span class="text-green-400 text-sm font-mono animate-pulse">✓ Ready to create</span>
-              }
-            </div>
-          </div>
-
-          <!-- Dropdown options -->
-          @if (cmdCurrentField() !== 'done') {
-            <div class="p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <span class="material-symbols-outlined text-lg text-slate-400">{{ cmdFieldConfig().icon }}</span>
-                <h3 class="text-sm font-semibold text-slate-700">Select {{ cmdFieldConfig().label }}</h3>
-                <span class="text-xs text-slate-400">— click to add or type to filter</span>
-              </div>
-              <div class="grid grid-cols-1 gap-1.5">
-                @for (opt of cmdFieldConfig().options; track opt) {
-                  <button (click)="cmdSelectOption(opt)"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm hover:bg-primary/5 hover:text-primary transition-colors border border-transparent hover:border-primary/20 group">
-                    <span class="material-symbols-outlined text-lg text-slate-300 group-hover:text-primary transition-colors">arrow_right</span>
-                    <span class="font-medium">{{ opt }}</span>
-                  </button>
-                }
-                @if (cmdFieldConfig().options.length === 0 && cmdInputValue().trim().length > 0) {
-                  <button (click)="cmdSelectOption(cmdInputValue())"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm hover:bg-primary/5 hover:text-primary transition-colors border border-dashed border-slate-200 hover:border-primary/30 group">
-                    <span class="material-symbols-outlined text-lg text-slate-300 group-hover:text-primary transition-colors">add</span>
-                    <span class="font-medium">Use "{{ cmdInputValue() }}"</span>
+            <!-- Selected tokens summary -->
+            @if (cmdTokens().length > 0) {
+              <div class="flex flex-wrap items-center gap-2 pb-4 border-b border-slate-100">
+                @for (token of cmdTokens(); track $index; let i = $index) {
+                  <button (click)="cmdRemoveToken(i)"
+                    class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all">
+                    <span class="text-[10px] text-primary/60 uppercase group-hover:text-red-400">{{ token.label }}:</span>
+                    {{ token.value }}
+                    <span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">close</span>
                   </button>
                 }
               </div>
-            </div>
-          } @else {
-            <!-- Summary & submit -->
-            <div class="p-6">
-              <h3 class="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
-              <div class="bg-slate-50 rounded-lg p-4 space-y-2 mb-4">
-                @for (token of cmdTokens(); track $index) {
-                  <div class="flex justify-between text-sm">
-                    <span class="text-slate-500 capitalize">{{ token.label }}</span>
-                    <span class="font-medium text-slate-700">{{ token.value }}</span>
+            }
+
+            <!-- Current field selection -->
+            @if (cmdCurrentField() !== 'done') {
+              <div>
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="size-8 rounded-lg flex items-center justify-center bg-primary/10">
+                    <span class="material-symbols-outlined text-primary text-lg">{{ cmdFieldConfig().icon }}</span>
                   </div>
-                }
-              </div>
-              <div class="flex items-center gap-3">
-                <button (click)="cmdSubmit()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
-                  <span class="material-symbols-outlined text-lg">check</span> Create Process
-                </button>
-                <button (click)="cmdReset()" class="px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                  Start Over
-                </button>
-              </div>
-            </div>
-          }
-        </div>
+                  <div>
+                    <h3 class="text-sm font-semibold text-slate-900">{{ cmdFieldConfig().label }}</h3>
+                    <p class="text-xs text-slate-400">Select an option or type to filter</p>
+                  </div>
+                </div>
 
-        <!-- Process created confirmation -->
-        @if (cmdCurrentField() === 'done' && cmdTokens().length === 0) {
-          <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <span class="material-symbols-outlined text-green-600">check_circle</span>
-            <span class="text-sm text-green-800 font-medium">Process created successfully!</span>
-            <button (click)="navigate('/process-monitors')" class="ml-auto text-sm font-medium text-green-700 hover:text-green-900 underline">View Monitors</button>
+                <!-- Search input -->
+                <div class="relative mb-3">
+                  <span class="material-symbols-outlined text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 text-lg">search</span>
+                  <input type="text" [value]="cmdInputValue()" (input)="cmdInputValue.set($any($event.target).value)"
+                    [placeholder]="cmdFieldConfig().placeholder"
+                    class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+                </div>
+
+                <!-- Dropdown options -->
+                <div class="border border-slate-200 rounded-lg max-h-[220px] overflow-y-auto divide-y divide-slate-100">
+                  @for (opt of cmdFieldConfig().options; track opt) {
+                    <button (click)="cmdSelectOption(opt)"
+                      class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-primary/5 transition-colors group">
+                      <span class="material-symbols-outlined text-base text-slate-300 group-hover:text-primary transition-colors">chevron_right</span>
+                      <span class="font-medium text-slate-700 group-hover:text-primary">{{ opt }}</span>
+                    </button>
+                  }
+                  @if (cmdFieldConfig().options.length === 0 && cmdInputValue().trim().length > 0) {
+                    <button (click)="cmdSelectOption(cmdInputValue())"
+                      class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-primary/5 transition-colors group">
+                      <span class="material-symbols-outlined text-base text-slate-300 group-hover:text-primary">add_circle</span>
+                      <span class="font-medium text-slate-700 group-hover:text-primary">Create "{{ cmdInputValue() }}"</span>
+                    </button>
+                  }
+                  @if (cmdFieldConfig().options.length === 0 && cmdInputValue().trim().length === 0) {
+                    <div class="px-4 py-6 text-center text-sm text-slate-400">
+                      <span class="material-symbols-outlined text-2xl mb-1 block">search_off</span>
+                      No options found. Type to create one.
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <!-- Summary & submit -->
+              <div>
+                <div class="flex items-center gap-2 mb-4">
+                  <div class="size-8 rounded-lg bg-green-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 text-lg">fact_check</span>
+                  </div>
+                  <h3 class="text-sm font-semibold text-slate-900">Review & Create</h3>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-4 space-y-2.5 mb-4 border border-slate-100">
+                  @for (token of cmdTokens(); track $index) {
+                    <div class="flex justify-between text-sm">
+                      <span class="text-slate-500">{{ token.label }}</span>
+                      <span class="font-medium text-slate-800">{{ token.value }}</span>
+                    </div>
+                  }
+                </div>
+                <div class="flex items-center gap-3">
+                  <button (click)="cmdSubmit()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">check</span> Create Process
+                  </button>
+                  <button (click)="cmdReset()" class="px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                    Start Over
+                  </button>
+                </div>
+              </div>
+            }
           </div>
-        }
+        </div>
 
         <div class="mt-4 text-center">
           <button (click)="cmdReset(); navigate('/help')" class="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center gap-1">
@@ -1997,93 +1994,124 @@
   </div>
 }
 
-<!-- Wizard Event Popup -->
+<!-- Wizard Event Popup — Set threshold and event -->
 @if (wizardEventPopupOpen()) {
   <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="size-9 rounded-lg bg-rose-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-rose-600">notification_add</span>
-          </div>
-          <h3 class="text-lg font-bold text-slate-900">Add Event</h3>
-        </div>
+        <h3 class="text-lg font-bold text-slate-900">Set threshold and event</h3>
         <button (click)="wizardEventPopupOpen.set(false)" class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      <div class="p-6 space-y-4">
-        <!-- Event Name -->
+      <div class="p-6 space-y-5">
+        <!-- Select monitoring item -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Event Name</label>
-          <input type="text" [value]="wizardEventName()" (input)="wizardEventName.set($any($event.target).value)"
-            placeholder="e.g. Failure Alert, Success Notification..."
-            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+          <label class="block text-sm font-medium text-primary mb-1.5">Select monitoring item</label>
+          <select [value]="wizardEventMonitoringItem()" (change)="wizardEventMonitoringItem.set($any($event.target).value)"
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+            <option value="">— Select —</option>
+            @for (m of monitors(); track m.id) {
+              <option [value]="m.name">{{ m.name }}</option>
+            }
+            @if (wizardProcessName()) {
+              <option [value]="wizardProcessName()">{{ wizardProcessName() }} (current)</option>
+            }
+          </select>
         </div>
 
-        <!-- Event Type -->
+        <!-- Notify options -->
+        <div class="flex items-center gap-6">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <button (click)="wizardEventContinuousNotify.update(v => !v)"
+              class="size-4 rounded border flex items-center justify-center transition-all"
+              [ngClass]="wizardEventContinuousNotify() ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+              @if (wizardEventContinuousNotify()) { <span class="material-symbols-outlined text-[10px]">check</span> }
+            </button>
+            <span class="text-sm text-slate-700">Continuously Notify</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <button (click)="wizardEventNotifyWhenFinished.update(v => !v)"
+              class="size-4 rounded border flex items-center justify-center transition-all"
+              [ngClass]="wizardEventNotifyWhenFinished() ? 'border-primary bg-primary text-white' : 'border-slate-300'">
+              @if (wizardEventNotifyWhenFinished()) { <span class="material-symbols-outlined text-[10px]">check</span> }
+            </button>
+            <span class="text-sm text-slate-700">Notify when event finished</span>
+          </label>
+        </div>
+
+        <!-- When response time -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Event Type</label>
-          <div class="grid grid-cols-2 gap-2">
-            @for (t of [
-              {value: 'on_failure', label: 'On Failure', icon: 'error', color: 'red'},
-              {value: 'on_success', label: 'On Success', icon: 'check_circle', color: 'green'},
-              {value: 'on_timeout', label: 'On Timeout', icon: 'timer_off', color: 'amber'},
-              {value: 'on_warning', label: 'On Warning', icon: 'warning', color: 'orange'}
-            ]; track t.value) {
-              <button (click)="wizardEventType.set($any(t.value))"
-                class="flex items-center gap-2 p-2.5 rounded-lg border-2 text-left text-sm transition-all"
-                [ngClass]="wizardEventType() === t.value ? 'border-primary bg-primary/5 font-medium' : 'border-slate-200 hover:border-slate-300'">
-                <span class="material-symbols-outlined text-lg"
-                  [ngClass]="t.color === 'red' ? 'text-red-500' : t.color === 'green' ? 'text-green-500' : t.color === 'amber' ? 'text-amber-500' : 'text-orange-500'">{{ t.icon }}</span>
-                {{ t.label }}
-              </button>
-            }
+          <label class="block text-sm font-medium text-primary mb-1.5">When response time</label>
+          <div class="grid grid-cols-3 gap-2">
+            <select [value]="wizardEventMetric()" (change)="wizardEventMetric.set($any($event.target).value)"
+              class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+              <option>Response time</option>
+              <option>Error rate</option>
+              <option>Success rate</option>
+              <option>Duration</option>
+            </select>
+            <select [value]="wizardEventCondition()" (change)="wizardEventCondition.set($any($event.target).value)"
+              class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+              <option>is greater than</option>
+              <option>is less than</option>
+              <option>equals</option>
+              <option>is not equal to</option>
+            </select>
+            <input type="text" [value]="wizardEventThreshold()" (input)="wizardEventThreshold.set($any($event.target).value)"
+              class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
         </div>
 
-        <!-- Severity -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Severity</label>
-          <div class="flex gap-2">
-            @for (s of [
-              {value: 'critical', label: 'Critical', cls: 'bg-red-100 text-red-700 border-red-200'},
-              {value: 'high', label: 'High', cls: 'bg-orange-100 text-orange-700 border-orange-200'},
-              {value: 'medium', label: 'Medium', cls: 'bg-amber-100 text-amber-700 border-amber-200'},
-              {value: 'low', label: 'Low', cls: 'bg-slate-100 text-slate-600 border-slate-200'}
-            ]; track s.value) {
-              <button (click)="wizardEventSeverity.set($any(s.value))"
-                class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                [ngClass]="wizardEventSeverity() === s.value ? s.cls + ' ring-2 ring-offset-1 ring-primary/30' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'">
-                {{ s.label }}
-              </button>
-            }
+        <!-- Where + Event level -->
+        <div class="grid grid-cols-3 gap-2">
+          <input type="text" value="1" readonly
+            class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-slate-50 text-slate-500" />
+          <div>
+            <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-1">Where</label>
+            <select [value]="wizardEventWhere()" (change)="wizardEventWhere.set($any($event.target).value)"
+              class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+              <option>any location</option>
+              <option>specific watcher</option>
+              <option>specific project</option>
+            </select>
           </div>
+          <div>
+            <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-1">Event level</label>
+            <select [value]="wizardEventLevel()" (change)="wizardEventLevel.set($any($event.target).value)"
+              class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+              <option>warning</option>
+              <option>critical</option>
+              <option>info</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Do -->
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1.5">Do</label>
+          <select [value]="wizardEventAction()" (change)="wizardEventAction.set($any($event.target).value)"
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+            <option>Email</option>
+            <option>Slack</option>
+            <option>Webhook</option>
+            <option>SMS</option>
+          </select>
         </div>
 
         <!-- Recipients -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Recipients <span class="text-xs text-slate-400 font-normal">(comma-separated emails)</span></label>
           <input type="text" [value]="wizardEventRecipients()" (input)="wizardEventRecipients.set($any($event.target).value)"
-            placeholder="team@company.com, admin@company.com"
-            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
-        </div>
-
-        <!-- Custom Message -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">Message <span class="text-xs text-slate-400 font-normal">(optional)</span></label>
-          <textarea [value]="wizardEventMessage()" (input)="wizardEventMessage.set($any($event.target).value)"
-            placeholder="Custom notification message..."
-            rows="2"
-            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+            placeholder="john@doe.com"
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
         </div>
       </div>
       <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-        <button (click)="wizardEventPopupOpen.set(false)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+        <button (click)="wizardEventPopupOpen.set(false)" class="px-5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
           Cancel
         </button>
         <button (click)="wizardSaveEvent()" class="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
-          Add Event
+          Save
         </button>
       </div>
     </div>
