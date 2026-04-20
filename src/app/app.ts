@@ -754,9 +754,10 @@ export class App implements OnInit {
     const step = this.wizardStep();
     if (step === 0) return this.wizardType() !== null;
     if (step === 1) return this.wizardProcessName().trim().length > 0;
-    if (step === 2) return this.wizardScenario().trim().length > 0 && this.wizardProject().trim().length > 0;
+    if (step === 2) return this.wizardProject().trim().length > 0 && this.wizardScenario().trim().length > 0;
     if (step === 3) return this.wizardSelectedWatcherIds().length > 0;
-    return true;
+    if (step === 4) return this.wizardSchedule().length > 0;
+    return true; // step 5 (events) is always optional
   }
 
   wizardNext() {
@@ -781,6 +782,8 @@ export class App implements OnInit {
     this.wizardSchedule.set('default');
     this.wizardCustomCron.set('');
     this.wizardEvents.set({email: false, slack: false, onFailure: true, onSuccess: false});
+    this.wizardConfiguredEvents.set([]);
+    this.wizardEventPopupOpen.set(false);
   }
 
   wizardSubmit() {
@@ -800,5 +803,38 @@ export class App implements OnInit {
     this.wizardStep.set(6); // confirmation step
   }
 
-  wizardStepLabels = ['Purpose', 'Name', 'Scenario & Project', 'Watchers', 'Schedule', 'Events', 'Done'];
+  wizardStepLabels = ['Purpose', 'Name', 'Project & Scenario', 'Watchers', 'Schedule', 'Events', 'Done'];
+
+  // Event popup
+  wizardEventPopupOpen = signal<boolean>(false);
+  wizardEventName = signal<string>('');
+  wizardEventType = signal<'on_failure' | 'on_success' | 'on_timeout' | 'on_warning'>('on_failure');
+  wizardEventSeverity = signal<'critical' | 'high' | 'medium' | 'low'>('high');
+  wizardEventRecipients = signal<string>('');
+  wizardEventMessage = signal<string>('');
+  wizardConfiguredEvents = signal<{name: string; type: string; severity: string; recipients: string; message: string}[]>([]);
+
+  wizardOpenEventPopup() {
+    this.wizardEventName.set('');
+    this.wizardEventType.set('on_failure');
+    this.wizardEventSeverity.set('high');
+    this.wizardEventRecipients.set('');
+    this.wizardEventMessage.set('');
+    this.wizardEventPopupOpen.set(true);
+  }
+
+  wizardSaveEvent() {
+    this.wizardConfiguredEvents.update(evts => [...evts, {
+      name: this.wizardEventName() || `Event ${evts.length + 1}`,
+      type: this.wizardEventType(),
+      severity: this.wizardEventSeverity(),
+      recipients: this.wizardEventRecipients(),
+      message: this.wizardEventMessage()
+    }]);
+    this.wizardEventPopupOpen.set(false);
+  }
+
+  wizardRemoveEvent(index: number) {
+    this.wizardConfiguredEvents.update(evts => evts.filter((_, i) => i !== index));
+  }
 }

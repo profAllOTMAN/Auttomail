@@ -1452,19 +1452,14 @@
                     </div>
                   }
                 </button>
-                <button (click)="wizardType.set('testing')"
-                  class="group relative p-6 rounded-xl border-2 text-left transition-all duration-200"
-                  [ngClass]="wizardType() === 'testing' ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'">
-                  <div class="size-12 rounded-xl flex items-center justify-center mb-4" [ngClass]="wizardType() === 'testing' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'">
+                <button disabled
+                  class="group relative p-6 rounded-xl border-2 text-left opacity-50 cursor-not-allowed border-slate-200">
+                  <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Coming Soon</div>
+                  <div class="size-12 rounded-xl flex items-center justify-center mb-4 bg-slate-100 text-slate-400">
                     <span class="material-symbols-outlined text-2xl">science</span>
                   </div>
-                  <h3 class="font-bold text-slate-900 mb-1">Testing</h3>
-                  <p class="text-xs text-slate-500 leading-relaxed">Run a process once or on-demand to validate scenarios, test automation flows, and verify correctness.</p>
-                  @if (wizardType() === 'testing') {
-                    <div class="absolute top-3 right-3 size-6 rounded-full bg-primary text-white flex items-center justify-center">
-                      <span class="material-symbols-outlined text-sm">check</span>
-                    </div>
-                  }
+                  <h3 class="font-bold text-slate-400 mb-1">Testing</h3>
+                  <p class="text-xs text-slate-400 leading-relaxed">Run a process once or on-demand to validate scenarios, test automation flows, and verify correctness.</p>
                 </button>
               </div>
             </div>
@@ -1500,32 +1495,17 @@
               </div>
             </div>
 
-          <!-- Step 2: Scenario & Project -->
+          <!-- Step 2: Project & Scenario -->
           } @else if (wizardStep() === 2) {
             <div class="p-8">
               <div class="flex items-center gap-3 mb-2">
                 <div class="size-10 rounded-lg bg-amber-100 flex items-center justify-center">
                   <span class="material-symbols-outlined text-amber-600">folder_open</span>
                 </div>
-                <h2 class="text-xl font-bold text-slate-900">Scenario & Project</h2>
+                <h2 class="text-xl font-bold text-slate-900">Project & Scenario</h2>
               </div>
-              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Link a scenario and assign it to a project.</p>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Select a project first, then choose its scenario.</p>
               <div class="space-y-5">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Scenario</label>
-                  <input type="text" [value]="wizardScenario()" (input)="wizardScenario.set($any($event.target).value)"
-                    placeholder="Search or type a scenario name..."
-                    class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
-                  <div class="flex flex-wrap gap-2 mt-2">
-                    @for (s of wizardFilteredScenarioSuggestions(); track s) {
-                      <button (click)="wizardScenario.set(s)"
-                        class="px-3 py-1.5 text-xs rounded-full border transition-all"
-                        [ngClass]="wizardScenario() === s ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
-                        {{ s }}
-                      </button>
-                    }
-                  </div>
-                </div>
                 <div>
                   <label class="block text-sm font-medium text-slate-700 mb-1.5">Project</label>
                   <input type="text" [value]="wizardProject()" (input)="wizardProject.set($any($event.target).value)"
@@ -1536,6 +1516,22 @@
                       <button (click)="wizardProject.set(s)"
                         class="px-3 py-1.5 text-xs rounded-full border transition-all"
                         [ngClass]="wizardProject() === s ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
+                        {{ s }}
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div [ngClass]="wizardProject().trim().length === 0 ? 'opacity-50 pointer-events-none' : ''">
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Scenario <span class="text-xs text-slate-400 font-normal">(belongs to selected project)</span></label>
+                  <input type="text" [value]="wizardScenario()" (input)="wizardScenario.set($any($event.target).value)"
+                    placeholder="Search or type a scenario name..."
+                    [disabled]="wizardProject().trim().length === 0"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all disabled:bg-slate-50 disabled:cursor-not-allowed" />
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    @for (s of wizardFilteredScenarioSuggestions(); track s) {
+                      <button (click)="wizardScenario.set(s)"
+                        class="px-3 py-1.5 text-xs rounded-full border transition-all"
+                        [ngClass]="wizardScenario() === s ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
                         {{ s }}
                       </button>
                     }
@@ -1637,7 +1633,7 @@
               }
             </div>
 
-          <!-- Step 5: Events -->
+          <!-- Step 5: Events (optional) -->
           } @else if (wizardStep() === 5) {
             <div class="p-8">
               <div class="flex items-center gap-3 mb-2">
@@ -1646,63 +1642,34 @@
                 </div>
                 <h2 class="text-xl font-bold text-slate-900">Event Notifications</h2>
               </div>
-              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Configure how you want to be notified. You can skip this step.</p>
-              <div class="space-y-4">
-                <div class="p-4 rounded-lg border border-slate-200">
-                  <h4 class="text-sm font-semibold text-slate-700 mb-3">Trigger When</h4>
-                  <div class="space-y-3">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                      <button (click)="wizardToggleEvent('onFailure')"
-                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
-                        [ngClass]="wizardEvents().onFailure ? 'border-primary bg-primary text-white' : 'border-slate-300'">
-                        @if (wizardEvents().onFailure) { <span class="material-symbols-outlined text-xs">check</span> }
-                      </button>
-                      <div>
-                        <span class="text-sm font-medium text-slate-700">On Failure</span>
-                        <p class="text-xs text-slate-400">Notify when the process fails or encounters errors</p>
+              <p class="text-sm text-slate-500 mb-6 ml-[52px]">Set up event alerts for this process. This step is optional — you can add events later.</p>
+
+              <!-- List of configured events -->
+              @if (wizardConfiguredEvents().length > 0) {
+                <div class="space-y-2 mb-4">
+                  @for (evt of wizardConfiguredEvents(); track $index; let i = $index) {
+                    <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50">
+                      <div class="size-8 rounded-lg flex items-center justify-center shrink-0"
+                        [ngClass]="evt.type === 'on_failure' ? 'bg-red-100 text-red-600' : evt.type === 'on_success' ? 'bg-green-100 text-green-600' : evt.type === 'on_timeout' ? 'bg-amber-100 text-amber-600' : 'bg-orange-100 text-orange-600'">
+                        <span class="material-symbols-outlined text-sm">{{ evt.type === 'on_failure' ? 'error' : evt.type === 'on_success' ? 'check_circle' : evt.type === 'on_timeout' ? 'timer_off' : 'warning' }}</span>
                       </div>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                      <button (click)="wizardToggleEvent('onSuccess')"
-                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
-                        [ngClass]="wizardEvents().onSuccess ? 'border-primary bg-primary text-white' : 'border-slate-300'">
-                        @if (wizardEvents().onSuccess) { <span class="material-symbols-outlined text-xs">check</span> }
-                      </button>
-                      <div>
-                        <span class="text-sm font-medium text-slate-700">On Success</span>
-                        <p class="text-xs text-slate-400">Notify when the process completes successfully</p>
+                      <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-800">{{ evt.name }}</span>
+                        <p class="text-xs text-slate-500 truncate">{{ evt.type | titlecase }} · {{ evt.severity | titlecase }} · {{ evt.recipients || 'No recipients' }}</p>
                       </div>
-                    </label>
-                  </div>
+                      <button (click)="wizardRemoveEvent(i)" class="size-7 rounded-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                      </button>
+                    </div>
+                  }
                 </div>
-                <div class="p-4 rounded-lg border border-slate-200">
-                  <h4 class="text-sm font-semibold text-slate-700 mb-3">Notify Via</h4>
-                  <div class="space-y-3">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                      <button (click)="wizardToggleEvent('email')"
-                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
-                        [ngClass]="wizardEvents().email ? 'border-primary bg-primary text-white' : 'border-slate-300'">
-                        @if (wizardEvents().email) { <span class="material-symbols-outlined text-xs">check</span> }
-                      </button>
-                      <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-slate-400 text-lg">email</span>
-                        <span class="text-sm font-medium text-slate-700">Email</span>
-                      </div>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                      <button (click)="wizardToggleEvent('slack')"
-                        class="size-5 rounded border-2 flex items-center justify-center transition-all"
-                        [ngClass]="wizardEvents().slack ? 'border-primary bg-primary text-white' : 'border-slate-300'">
-                        @if (wizardEvents().slack) { <span class="material-symbols-outlined text-xs">check</span> }
-                      </button>
-                      <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-slate-400 text-lg">tag</span>
-                        <span class="text-sm font-medium text-slate-700">Slack</span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
+              }
+
+              <!-- Add Event button -->
+              <button (click)="wizardOpenEventPopup()"
+                class="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-500 hover:border-primary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">add</span> Add Event
+              </button>
             </div>
 
           <!-- Step 6: Confirmation -->
@@ -1743,16 +1710,14 @@
               </div>
               <div class="flex items-center gap-3">
                 @if (wizardStep() === 5) {
-                  <button (click)="wizardSubmit()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2"
-                    [disabled]="!wizardCanProceed()">
+                  <!-- Events step: skip or create -->
+                  <button (click)="wizardSubmit()" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                    Skip & Create
+                  </button>
+                  <button (click)="wizardSubmit()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
                     <span class="material-symbols-outlined text-lg">check</span> Create Process
                   </button>
                 } @else {
-                  @if (wizardStep() >= 4) {
-                    <button (click)="wizardNext()" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
-                      Skip
-                    </button>
-                  }
                   <button (click)="wizardNext()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                     [disabled]="!wizardCanProceed()">
                     Continue <span class="material-symbols-outlined text-lg">arrow_forward</span>
@@ -1847,6 +1812,99 @@
         </button>
         <button (click)="executeDelete()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">
           Delete Monitor
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Wizard Event Popup -->
+@if (wizardEventPopupOpen()) {
+  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="size-9 rounded-lg bg-rose-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-rose-600">notification_add</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Add Event</h3>
+        </div>
+        <button (click)="wizardEventPopupOpen.set(false)" class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <!-- Event Name -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Event Name</label>
+          <input type="text" [value]="wizardEventName()" (input)="wizardEventName.set($any($event.target).value)"
+            placeholder="e.g. Failure Alert, Success Notification..."
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+        </div>
+
+        <!-- Event Type -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Event Type</label>
+          <div class="grid grid-cols-2 gap-2">
+            @for (t of [
+              {value: 'on_failure', label: 'On Failure', icon: 'error', color: 'red'},
+              {value: 'on_success', label: 'On Success', icon: 'check_circle', color: 'green'},
+              {value: 'on_timeout', label: 'On Timeout', icon: 'timer_off', color: 'amber'},
+              {value: 'on_warning', label: 'On Warning', icon: 'warning', color: 'orange'}
+            ]; track t.value) {
+              <button (click)="wizardEventType.set($any(t.value))"
+                class="flex items-center gap-2 p-2.5 rounded-lg border-2 text-left text-sm transition-all"
+                [ngClass]="wizardEventType() === t.value ? 'border-primary bg-primary/5 font-medium' : 'border-slate-200 hover:border-slate-300'">
+                <span class="material-symbols-outlined text-lg"
+                  [ngClass]="t.color === 'red' ? 'text-red-500' : t.color === 'green' ? 'text-green-500' : t.color === 'amber' ? 'text-amber-500' : 'text-orange-500'">{{ t.icon }}</span>
+                {{ t.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Severity</label>
+          <div class="flex gap-2">
+            @for (s of [
+              {value: 'critical', label: 'Critical', cls: 'bg-red-100 text-red-700 border-red-200'},
+              {value: 'high', label: 'High', cls: 'bg-orange-100 text-orange-700 border-orange-200'},
+              {value: 'medium', label: 'Medium', cls: 'bg-amber-100 text-amber-700 border-amber-200'},
+              {value: 'low', label: 'Low', cls: 'bg-slate-100 text-slate-600 border-slate-200'}
+            ]; track s.value) {
+              <button (click)="wizardEventSeverity.set($any(s.value))"
+                class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+                [ngClass]="wizardEventSeverity() === s.value ? s.cls + ' ring-2 ring-offset-1 ring-primary/30' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'">
+                {{ s.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Recipients -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Recipients <span class="text-xs text-slate-400 font-normal">(comma-separated emails)</span></label>
+          <input type="text" [value]="wizardEventRecipients()" (input)="wizardEventRecipients.set($any($event.target).value)"
+            placeholder="team@company.com, admin@company.com"
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+        </div>
+
+        <!-- Custom Message -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Message <span class="text-xs text-slate-400 font-normal">(optional)</span></label>
+          <textarea [value]="wizardEventMessage()" (input)="wizardEventMessage.set($any($event.target).value)"
+            placeholder="Custom notification message..."
+            rows="2"
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+        </div>
+      </div>
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+        <button (click)="wizardEventPopupOpen.set(false)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">
+          Cancel
+        </button>
+        <button (click)="wizardSaveEvent()" class="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
+          Add Event
         </button>
       </div>
     </div>
