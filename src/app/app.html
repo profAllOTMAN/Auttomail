@@ -1733,118 +1733,6 @@
         }
       </div>
 
-    } @else if (activeTab() === 'help-new2') {
-      <!-- Smart Setup Builder (hidden page /help/new2) -->
-      <div class="mt-6 max-w-3xl mx-auto w-full">
-        <div class="mb-6">
-          <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
-            <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-primary">bolt</span>
-            </div>
-            Quick Setup
-          </h1>
-          <p class="text-sm text-slate-500 mt-1 ml-[52px]">Build your process by selecting each element — each choice unlocks the next step.</p>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-          <div class="p-6 space-y-4">
-
-            <!-- Selected tokens summary -->
-            @if (cmdTokens().length > 0) {
-              <div class="flex flex-wrap items-center gap-2 pb-4 border-b border-slate-100">
-                @for (token of cmdTokens(); track $index; let i = $index) {
-                  <button (click)="cmdRemoveToken(i)"
-                    class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all">
-                    <span class="text-[10px] text-primary/60 uppercase group-hover:text-red-400">{{ token.label }}:</span>
-                    {{ token.value }}
-                    <span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">close</span>
-                  </button>
-                }
-              </div>
-            }
-
-            <!-- Current field selection -->
-            @if (cmdCurrentField() !== 'done') {
-              <div>
-                <div class="flex items-center gap-2 mb-3">
-                  <div class="size-8 rounded-lg flex items-center justify-center bg-primary/10">
-                    <span class="material-symbols-outlined text-primary text-lg">{{ cmdFieldConfig().icon }}</span>
-                  </div>
-                  <div>
-                    <h3 class="text-sm font-semibold text-slate-900">{{ cmdFieldConfig().label }}</h3>
-                    <p class="text-xs text-slate-400">Select an option or type to filter</p>
-                  </div>
-                </div>
-
-                <!-- Search input -->
-                <div class="relative mb-3">
-                  <span class="material-symbols-outlined text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 text-lg">search</span>
-                  <input type="text" [value]="cmdInputValue()" (input)="cmdInputValue.set($any($event.target).value)"
-                    [placeholder]="cmdFieldConfig().placeholder"
-                    class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
-                </div>
-
-                <!-- Dropdown options -->
-                <div class="border border-slate-200 rounded-lg max-h-[220px] overflow-y-auto divide-y divide-slate-100">
-                  @for (opt of cmdFieldConfig().options; track opt) {
-                    <button (click)="cmdSelectOption(opt)"
-                      class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-primary/5 transition-colors group">
-                      <span class="material-symbols-outlined text-base text-slate-300 group-hover:text-primary transition-colors">chevron_right</span>
-                      <span class="font-medium text-slate-700 group-hover:text-primary">{{ opt }}</span>
-                    </button>
-                  }
-                  @if (cmdFieldConfig().options.length === 0 && cmdInputValue().trim().length > 0) {
-                    <button (click)="cmdSelectOption(cmdInputValue())"
-                      class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-primary/5 transition-colors group">
-                      <span class="material-symbols-outlined text-base text-slate-300 group-hover:text-primary">add_circle</span>
-                      <span class="font-medium text-slate-700 group-hover:text-primary">Create "{{ cmdInputValue() }}"</span>
-                    </button>
-                  }
-                  @if (cmdFieldConfig().options.length === 0 && cmdInputValue().trim().length === 0) {
-                    <div class="px-4 py-6 text-center text-sm text-slate-400">
-                      <span class="material-symbols-outlined text-2xl mb-1 block">search_off</span>
-                      No options found. Type to create one.
-                    </div>
-                  }
-                </div>
-              </div>
-            } @else {
-              <!-- Summary & submit -->
-              <div>
-                <div class="flex items-center gap-2 mb-4">
-                  <div class="size-8 rounded-lg bg-green-100 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-green-600 text-lg">fact_check</span>
-                  </div>
-                  <h3 class="text-sm font-semibold text-slate-900">Review & Create</h3>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-4 space-y-2.5 mb-4 border border-slate-100">
-                  @for (token of cmdTokens(); track $index) {
-                    <div class="flex justify-between text-sm">
-                      <span class="text-slate-500">{{ token.label }}</span>
-                      <span class="font-medium text-slate-800">{{ token.value }}</span>
-                    </div>
-                  }
-                </div>
-                <div class="flex items-center gap-3">
-                  <button (click)="cmdSubmit()" class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-lg">check</span> Create Process
-                  </button>
-                  <button (click)="cmdReset()" class="px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
-                    Start Over
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-
-        <div class="mt-4 text-center">
-          <button (click)="cmdReset(); navigate('/help')" class="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Help Center
-          </button>
-        </div>
-      </div>
-
     } @else if (activeTab() === 'help-new3') {
       <!-- Chat Agent (hidden page /help/new3) -->
       <div class="mt-6 max-w-2xl mx-auto w-full">
@@ -1904,6 +1792,18 @@
                         <button (click)="chatSendOption(opt)"
                           class="px-3 py-1.5 text-xs font-medium rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
                           {{ opt }}
+                        </button>
+                      }
+                    </div>
+                  }
+                  <!-- Action buttons (post-creation) -->
+                  @if (msg.actions && msg.actions.length > 0) {
+                    <div class="grid grid-cols-2 gap-1.5 mt-1">
+                      @for (act of msg.actions; track act.action) {
+                        <button (click)="chatHandleAction(act.action)"
+                          class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 bg-white hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all shadow-sm">
+                          <span class="material-symbols-outlined text-base">{{ act.icon }}</span>
+                          {{ act.label }}
                         </button>
                       }
                     </div>
