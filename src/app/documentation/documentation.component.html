@@ -919,25 +919,27 @@
             </div>
           </div>
 
-          <!-- Process Monitors -->
+          <!-- Process Monitor Card — Anatomy -->
           <div class="bg-white border border-slate-200 rounded-xl p-6">
             <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px] text-violet-500">monitoring</span>
-              Process Monitor List
+              Process Monitor Card
             </h3>
-            <p class="text-xs text-slate-500 mb-4">The table view listing all process monitors with actions.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-xs text-slate-500 mb-5">Each process monitor is a horizontal card with three zones. Edit and Delete have moved into a <code class="text-[11px] bg-slate-100 px-1 py-0.5 rounded">more_vert</code> overflow menu.</p>
+
+            <!-- Old vs New comparison -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div class="border border-red-100 rounded-lg overflow-hidden">
                 <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
                   <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
                   <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Old Design</span>
                 </div>
                 <div class="p-4 space-y-2 text-xs text-slate-600">
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Standard HTML table with columns: Actions, ID, Process monitor, Project, Schedule name, Description, rWatchers</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Action icons: play/stop/delete/clipboard as small icon buttons</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Standard HTML table row with columns: Actions, ID, Process monitor, Project, Schedule, Description, rWatchers</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> <strong>Edit &amp; Delete</strong> exposed as inline icon buttons in every row</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Play/Stop/Clipboard as small separate icon buttons in Actions column</div>
                   <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> rWatcher assignments shown as blue link pills</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Simple pagination (items per page dropdown, basic page nav)</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> "Add process monitor" button with green circle icon</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Simple pagination bar, "Add process monitor" button with green icon</div>
                 </div>
               </div>
               <div class="border border-emerald-100 rounded-lg overflow-hidden">
@@ -946,24 +948,118 @@
                   <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
                 </div>
                 <div class="p-4 space-y-2 text-xs text-slate-600">
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Card-based list with status dot indicators and progress bars</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Inline KPIs per monitor: success rate ring, resources, status badge</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Quick actions: Run Now (green), Edit, Delete with hover states</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer for creating/editing (not page navigation)</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Filter KPI cards at top: total processes, active/inactive counts, watcher counts</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Horizontal card (<code class="text-[10px]">rounded-lg shadow-sm</code>) with 3 zones: Identity, Stats, Actions</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> <strong>Edit &amp; Delete hidden inside</strong> <code class="text-[10px]">more_vert</code> dots menu (hover to reveal)</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Primary actions exposed: <strong>Enable/Disable toggle</strong> + <strong>Run/Stop button</strong></div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> KPI filter cards at top: process count + watcher count with active/inactive split</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer for create/edit — no page navigation</div>
                 </div>
+              </div>
+            </div>
+
+            <!-- Card Anatomy diagram -->
+            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Card Anatomy</p>
+            <div class="border border-slate-200 rounded-lg p-4 bg-slate-50 mb-5">
+              <div class="flex flex-col xl:flex-row xl:items-center gap-4">
+                <!-- Zone 1: Identity -->
+                <div class="xl:min-w-[240px] flex items-center gap-3 border border-blue-200 rounded-lg p-3 bg-blue-50/50 relative">
+                  <span class="absolute -top-2 left-3 text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 rounded">ZONE 1 — Identity</span>
+                  <div class="size-9 flex items-center justify-center rounded-md bg-blue-100 text-blue-600 shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">autorenew</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-xs font-bold text-slate-900">Process Notepad</span>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                      <span class="text-[10px] font-medium text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-md flex items-center gap-1"><span class="material-symbols-outlined text-[10px]">sync</span> Running</span>
+                      <span class="text-[10px] text-slate-400">Processing items...</span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
+                      <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[10px]">account_tree</span> Notepad Data Entry</span>
+                      <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[10px]">folder</span> My First Project</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zone 2: Stats -->
+                <div class="flex-1 flex items-center gap-6 border border-amber-200 rounded-lg p-3 bg-amber-50/50 relative">
+                  <span class="absolute -top-2 left-3 text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 rounded">ZONE 2 — Stats</span>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">Last Run</span>
+                    <span class="text-[11px] font-semibold text-slate-700">Just now</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">Success Rate</span>
+                    <span class="text-[11px] font-bold text-emerald-600">100%</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">Resources</span>
+                    <span class="text-[11px] font-semibold text-slate-700 flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px] text-slate-400">desktop_windows</span> 3 rWatchers</span>
+                  </div>
+                </div>
+
+                <!-- Zone 3: Actions -->
+                <div class="xl:w-auto flex items-center gap-3 border border-emerald-200 rounded-lg p-3 bg-emerald-50/50 relative shrink-0">
+                  <span class="absolute -top-2 left-3 text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 rounded">ZONE 3 — Actions</span>
+                  <!-- Toggle -->
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-medium text-slate-600">Enabled</span>
+                    <div class="relative inline-flex h-4 w-7 items-center rounded-full bg-primary">
+                      <span class="inline-block h-2.5 w-2.5 transform rounded-full bg-white translate-x-3.5"></span>
+                    </div>
+                  </div>
+                  <!-- Run/Stop -->
+                  <div class="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md bg-red-50 text-red-600">
+                    <span class="material-symbols-outlined text-[12px]">stop</span> Stop
+                  </div>
+                  <!-- Dots menu -->
+                  <div class="flex flex-col items-center">
+                    <div class="size-6 flex items-center justify-center rounded-md bg-white border border-slate-200 text-slate-400">
+                      <span class="material-symbols-outlined text-[16px]">more_vert</span>
+                    </div>
+                    <div class="mt-1 bg-white border border-slate-200 rounded-md shadow-sm text-[9px] text-slate-600 w-24 overflow-hidden">
+                      <div class="px-2 py-1 flex items-center gap-1 border-b border-slate-100"><span class="material-symbols-outlined text-[10px]">edit</span> Edit</div>
+                      <div class="px-2 py-1 flex items-center gap-1 text-red-500"><span class="material-symbols-outlined text-[10px]">delete</span> Delete</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- What changed callout -->
+            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Key Changes</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="bg-slate-50 rounded-lg p-3">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="material-symbols-outlined text-[14px] text-primary">swap_horiz</span>
+                  <span class="text-[11px] font-bold text-slate-800">Edit &amp; Delete</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> Visible icon buttons in every table row. <strong class="text-emerald-500">New:</strong> Hidden inside <code class="text-[9px]">more_vert</code> dots menu — hover or click to reveal. Reduces visual clutter.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="material-symbols-outlined text-[14px] text-primary">toggle_on</span>
+                  <span class="text-[11px] font-bold text-slate-800">Enable / Disable</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> No toggle — status changed via separate action. <strong class="text-emerald-500">New:</strong> Inline toggle switch (<code class="text-[9px]">h-5 w-9 rounded-full</code>) with primary/slate color states.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="material-symbols-outlined text-[14px] text-primary">play_arrow</span>
+                  <span class="text-[11px] font-bold text-slate-800">Run / Stop</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> Separate play and stop icon buttons. <strong class="text-emerald-500">New:</strong> Single toggle button — primary "Run" or red "Stop" — context-aware with disabled state when monitor is off.</p>
               </div>
             </div>
           </div>
 
-          <!-- Process Monitor Detail / Edit -->
+          <!-- Process Monitor Detail / Edit — Drawer -->
           <div class="bg-white border border-slate-200 rounded-xl p-6">
             <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px] text-amber-500">edit_note</span>
               Process Monitor Detail / Edit
             </h3>
-            <p class="text-xs text-slate-500 mb-4">The form for creating or editing a process monitor with its 3 sections.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-xs text-slate-500 mb-4">Create or edit a process monitor — full-page form became a slide-in drawer.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               <div class="border border-red-100 rounded-lg overflow-hidden">
                 <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
                   <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
@@ -983,24 +1079,58 @@
                   <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
                 </div>
                 <div class="p-4 space-y-2 text-xs text-slate-600">
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer (right side panel) instead of full-page navigation</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Same 3-section concept but within drawer: Info, Watchers, Events</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Rounded inputs with focus rings, consistent spacing tokens</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer (right side, max-w <code class="text-[10px]">680px</code>) instead of full-page navigation</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Same 3-section concept within drawer: Info, Distribution, Events</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Rounded inputs with <code class="text-[10px]">focus:ring-2 focus:ring-primary/20</code></div>
                   <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Event popup: "Set threshold and event" modal with monitoring item, conditions, action type</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Save/Cancel buttons with primary/secondary styling, no full-page reload</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Sticky footer: Cancel + primary CTA, no full-page reload</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Drawer Anatomy -->
+            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Drawer Sections</p>
+            <div class="space-y-2">
+              <div class="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
+                <span class="size-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                <div>
+                  <span class="text-[11px] font-bold text-slate-800">Basic Information</span>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Monitor Name (required), Project dropdown, Process/Scenario dropdown</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
+                <span class="size-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                <div>
+                  <span class="text-[11px] font-bold text-slate-800">Execution Strategy</span>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Schedule dropdown with "+ Add New" shortcut, Maintenance Calendar</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
+                <span class="size-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                <div>
+                  <span class="text-[11px] font-bold text-slate-800">Distribution</span>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Radio toggle: Individual vs Group. Then rWatcher/Group dropdown selection</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
+                <span class="size-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                <div>
+                  <span class="text-[11px] font-bold text-slate-800">Event Triggers</span>
+                  <p class="text-[10px] text-slate-500 mt-0.5">"+ Add Rule" button opens threshold/event modal. Rules listed as removable chips</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- rWatchers -->
+          <!-- rWatcher Card — Anatomy -->
           <div class="bg-white border border-slate-200 rounded-xl p-6">
             <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px] text-emerald-500">desktop_windows</span>
-              rWatchers Management
+              rWatcher Card
             </h3>
-            <p class="text-xs text-slate-500 mb-4">The rWatchers list page and the "Add new rWatcher" form.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-xs text-slate-500 mb-5">Each rWatcher is a card with a colored left border, expandable detail panel, and a <code class="text-[11px] bg-slate-100 px-1 py-0.5 rounded">more_vert</code> menu for Edit, Restart, and Remove.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div class="border border-red-100 rounded-lg overflow-hidden">
                 <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
                   <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
@@ -1008,10 +1138,10 @@
                 </div>
                 <div class="p-4 space-y-2 text-xs text-slate-600">
                   <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Tabbed view: rWatchers | BotManagers tabs at top</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Table with checkbox column, icons, rWatcher name (blue link), Username</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Action buttons: Add new, Stop, Start rWatchers</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> "Add new rWatcher" opens as right-side panel overlay</div>
-                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Form fields: BotManager dropdown, username/password/domain inputs, alias, description, RDP parameters (resolution, color depth, IP, timeout)</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Table with checkbox, icon, rWatcher name (blue link), Username</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Bulk actions: Add new, Stop, Start rWatchers buttons above table</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> "Add new rWatcher" opens as a right-side panel overlay</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Fields: BotManager dropdown, username/password/domain, alias, description, RDP parameters</div>
                 </div>
               </div>
               <div class="border border-emerald-100 rounded-lg overflow-hidden">
@@ -1020,11 +1150,69 @@
                   <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
                 </div>
                 <div class="p-4 space-y-2 text-xs text-slate-600">
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Card-based grid layout with status dot, alias, IP, bot manager per card</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Live status toggle switch (online/offline) per watcher</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> KPI stats: trend chart, checks count, success/fail, response time</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Card list with colored left border: <strong>emerald</strong>=online, <strong>blue</strong>=busy, <strong>slate</strong>=offline</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> <strong>Details/Less</strong> toggle expands inline panel with full KPIs, screen preview, specs</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> <strong>Dots menu</strong> (<code class="text-[10px]">more_vert</code>): Edit Configuration, Restart Connection, Remove rWatcher</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> KPI header cards: Online count, Busy count, Offline count</div>
                   <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer for "Add new rWatcher" with same fields, modern inputs</div>
-                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Screen preview placeholder for live watcher view</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- rWatcher Card Anatomy -->
+            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Card Anatomy</p>
+            <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+              <div class="flex flex-col xl:flex-row xl:items-center gap-4">
+                <!-- Zone 1: Identity -->
+                <div class="xl:min-w-[220px] flex items-center gap-3 border border-emerald-200 rounded-lg p-3 bg-emerald-50/50 relative" style="border-left: 3px solid #34d399;">
+                  <span class="absolute -top-2 left-3 text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 rounded">Identity &amp; Status</span>
+                  <div class="size-8 flex items-center justify-center rounded-md bg-emerald-100 text-emerald-600 shrink-0">
+                    <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[11px] font-bold text-slate-900">rWatcher001</span>
+                    <span class="text-[9px] font-medium text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded w-fit flex items-center gap-0.5"><span class="size-1 rounded-full bg-emerald-500"></span> Online</span>
+                    <span class="text-[9px] text-slate-400 mt-0.5 truncate">Primary watcher for NYC office</span>
+                  </div>
+                </div>
+
+                <!-- Zone 2: Quick Stats -->
+                <div class="flex-1 flex items-center gap-5 border border-amber-200 rounded-lg p-3 bg-amber-50/50 relative">
+                  <span class="absolute -top-2 left-3 text-[9px] font-bold text-amber-500 bg-amber-50 px-1.5 rounded">Quick Stats</span>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">IP</span>
+                    <span class="text-[10px] font-semibold text-slate-700 font-mono">192.168.1.105</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">BotManager</span>
+                    <span class="text-[10px] font-semibold text-slate-700">BotManager-1</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">Last Ping</span>
+                    <span class="text-[10px] font-semibold text-slate-700">Just now</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">Monitors</span>
+                    <span class="text-[10px] font-semibold text-slate-700">2</span>
+                  </div>
+                </div>
+
+                <!-- Zone 3: Actions -->
+                <div class="xl:w-auto flex items-center gap-2 border border-violet-200 rounded-lg p-3 bg-violet-50/50 relative shrink-0">
+                  <span class="absolute -top-2 left-3 text-[9px] font-bold text-violet-500 bg-violet-50 px-1.5 rounded">Actions</span>
+                  <div class="flex items-center gap-1 text-[10px] font-medium text-slate-600 px-2 py-1 rounded-md bg-white border border-slate-200">
+                    <span class="material-symbols-outlined text-[12px]">expand_more</span> Details
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <div class="size-6 flex items-center justify-center rounded-md bg-white border border-slate-200 text-slate-400">
+                      <span class="material-symbols-outlined text-[14px]">more_vert</span>
+                    </div>
+                    <div class="mt-1 bg-white border border-slate-200 rounded-md shadow-sm text-[9px] text-slate-600 w-28 overflow-hidden">
+                      <div class="px-2 py-1 flex items-center gap-1 border-b border-slate-100"><span class="material-symbols-outlined text-[10px]">edit</span> Edit Config</div>
+                      <div class="px-2 py-1 flex items-center gap-1 border-b border-slate-100"><span class="material-symbols-outlined text-[10px]">restart_alt</span> Restart</div>
+                      <div class="px-2 py-1 flex items-center gap-1 text-red-500"><span class="material-symbols-outlined text-[10px]">delete</span> Remove</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
