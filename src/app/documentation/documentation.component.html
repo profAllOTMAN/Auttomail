@@ -803,6 +803,312 @@
         </div>
       </section>
 
+      <!-- ============================================================ -->
+      <!-- OLD VS NEW DESIGN -->
+      <!-- ============================================================ -->
+      <section id="doc-migration" class="doc-section scroll-mt-20">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-amber-600">compare</span>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Old vs New Design</h2>
+            <p class="text-sm text-slate-500">Key differences between the legacy Automai Watcher UI and the new design system</p>
+          </div>
+        </div>
+
+        <!-- Global Design Changes -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
+          <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-primary">palette</span>
+            Global Design Changes
+          </h3>
+          <div class="overflow-hidden rounded-lg border border-slate-200">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200">
+                  <th class="text-left px-4 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-1/4">Aspect</th>
+                  <th class="text-left px-4 py-2.5 text-[11px] font-bold text-red-400 uppercase tracking-wider w-[37.5%]">
+                    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">close</span> Old Design</span>
+                  </th>
+                  <th class="text-left px-4 py-2.5 text-[11px] font-bold text-emerald-500 uppercase tracking-wider w-[37.5%]">
+                    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">check</span> New Design</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Framework</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">Server-rendered HTML, jQuery-based interactions</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Angular 21 SSR with signals, standalone components, OnPush change detection</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Styling</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">Bootstrap-based with inline styles, no design tokens</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Tailwind CSS v4 with custom theme tokens (<code class="text-[10px] bg-slate-100 px-1 py-0.5 rounded">--color-primary: #335A85</code>)</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Typography</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">System fonts, inconsistent sizes</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Inter font family (300-700), standardized scale from 10px to 24px</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Icons</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">Mixed icon sets (Font Awesome, custom SVGs)</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Unified Material Symbols Outlined from Google CDN</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Colors</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">Dark navy (#1a2332) header, muted grays, no semantic system</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Brand primary (#335A85), semantic colors (success/warning/danger), full slate scale</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Layout</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">Fixed-width containers, float-based layout</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Responsive flex/grid layout, max-w-7xl container, mobile-friendly</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 text-xs font-semibold text-slate-700">Navigation</td>
+                  <td class="px-4 py-3 text-xs text-slate-500">Traditional horizontal tabs with underline active state</td>
+                  <td class="px-4 py-3 text-xs text-slate-700">Pill-style rounded tabs with filled active state, icon support</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Component-by-Component Comparison -->
+        <div class="space-y-5">
+
+          <!-- Dashboard -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-blue-500">dashboard</span>
+              Dashboard
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">The main overview screen with system KPIs and process status.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Old -->
+              <div class="border border-red-100 rounded-lg overflow-hidden">
+                <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
+                  <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Old Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Simple filter bar with severity badges (Success, Failure, Critical, Warning, Info, Unknown)</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Sort dropdown and time interval filter only</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Empty state: plain text "no process monitor data available"</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> No KPI cards, no real-time status overview</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> No notification center or timeline feed</div>
+                </div>
+              </div>
+              <!-- New -->
+              <div class="border border-emerald-100 rounded-lg overflow-hidden">
+                <div class="bg-emerald-50 px-3 py-2 border-b border-emerald-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-emerald-500">check</span>
+                  <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> KPI cards showing Processes (Active/Inactive), Watchers (Active/Inactive), Bot Manager status</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Timeline feed with latest updates + notification alerts</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Process drill-down: click a process to see assigned watchers</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Each watcher expands to show scenario, sub-processes, transactions with KPIs</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Inline trend charts, success/fail counts, response time per watcher</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Process Monitors -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-violet-500">monitoring</span>
+              Process Monitor List
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">The table view listing all process monitors with actions.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="border border-red-100 rounded-lg overflow-hidden">
+                <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
+                  <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Old Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Standard HTML table with columns: Actions, ID, Process monitor, Project, Schedule name, Description, rWatchers</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Action icons: play/stop/delete/clipboard as small icon buttons</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> rWatcher assignments shown as blue link pills</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Simple pagination (items per page dropdown, basic page nav)</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> "Add process monitor" button with green circle icon</div>
+                </div>
+              </div>
+              <div class="border border-emerald-100 rounded-lg overflow-hidden">
+                <div class="bg-emerald-50 px-3 py-2 border-b border-emerald-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-emerald-500">check</span>
+                  <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Card-based list with status dot indicators and progress bars</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Inline KPIs per monitor: success rate ring, resources, status badge</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Quick actions: Run Now (green), Edit, Delete with hover states</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer for creating/editing (not page navigation)</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Filter KPI cards at top: total processes, active/inactive counts, watcher counts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Process Monitor Detail / Edit -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-amber-500">edit_note</span>
+              Process Monitor Detail / Edit
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">The form for creating or editing a process monitor with its 3 sections.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="border border-red-100 rounded-lg overflow-hidden">
+                <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
+                  <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Old Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Full-page layout with 3 numbered green-bordered sections</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> <strong>Section 1</strong>: Name, Project dropdown, Process dropdown, Schedule dropdown, Maintenance calendar, Description</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> <strong>Section 2</strong>: rWatcher Distribution — dropdown for type + selected watcher chips with blue remove pills</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> <strong>Section 3</strong>: Events table — Process monitor item + "+ New event" button, columns: Raise, When, Do</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Top bar has "Process monitors" breadcrumb + "Publish" button (blue)</div>
+                </div>
+              </div>
+              <div class="border border-emerald-100 rounded-lg overflow-hidden">
+                <div class="bg-emerald-50 px-3 py-2 border-b border-emerald-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-emerald-500">check</span>
+                  <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer (right side panel) instead of full-page navigation</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Same 3-section concept but within drawer: Info, Watchers, Events</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Rounded inputs with focus rings, consistent spacing tokens</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Event popup: "Set threshold and event" modal with monitoring item, conditions, action type</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Save/Cancel buttons with primary/secondary styling, no full-page reload</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- rWatchers -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-emerald-500">desktop_windows</span>
+              rWatchers Management
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">The rWatchers list page and the "Add new rWatcher" form.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="border border-red-100 rounded-lg overflow-hidden">
+                <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
+                  <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Old Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Tabbed view: rWatchers | BotManagers tabs at top</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Table with checkbox column, icons, rWatcher name (blue link), Username</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Action buttons: Add new, Stop, Start rWatchers</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> "Add new rWatcher" opens as right-side panel overlay</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Form fields: BotManager dropdown, username/password/domain inputs, alias, description, RDP parameters (resolution, color depth, IP, timeout)</div>
+                </div>
+              </div>
+              <div class="border border-emerald-100 rounded-lg overflow-hidden">
+                <div class="bg-emerald-50 px-3 py-2 border-b border-emerald-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-emerald-500">check</span>
+                  <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Card-based grid layout with status dot, alias, IP, bot manager per card</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Live status toggle switch (online/offline) per watcher</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> KPI stats: trend chart, checks count, success/fail, response time</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Slide-in drawer for "Add new rWatcher" with same fields, modern inputs</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Screen preview placeholder for live watcher view</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Setup -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-red-500">notifications_active</span>
+              Event / Threshold Setup
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">The "Set threshold and event" modal for configuring process monitor alerts.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="border border-red-100 rounded-lg overflow-hidden">
+                <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-red-400">close</span>
+                  <span class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Old Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Modal dialog with "Set threshold and event" title</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Select monitoring item (dropdown)</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Checkboxes: "Continuously Notify", "Notify when event finished"</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Condition builder: "Response time" + "is greater than" + threshold value</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Where + Event level dropdowns, Email action with recipient field</div>
+                  <div class="flex items-start gap-2"><span class="text-red-300 mt-0.5">&#8226;</span> Cancel/Save buttons, basic modal styling</div>
+                </div>
+              </div>
+              <div class="border border-emerald-100 rounded-lg overflow-hidden">
+                <div class="bg-emerald-50 px-3 py-2 border-b border-emerald-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[14px] text-emerald-500">check</span>
+                  <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">New Design</span>
+                </div>
+                <div class="p-4 space-y-2 text-xs text-slate-600">
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Same field structure preserved (familiar to existing users)</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Modernized with rounded inputs, focus rings, consistent spacing</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Color-coded sections: blue for "Select monitoring item", amber for "When", emerald for "Do"</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Action type expanded: Email, Slack, Webhook, SMS options</div>
+                  <div class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">&#8226;</span> Primary/secondary button styling with shadow and hover states</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Interactions -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-primary">touch_app</span>
+              Key Interaction Changes
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="material-symbols-outlined text-[16px] text-primary">open_in_new</span>
+                  <span class="text-xs font-bold text-slate-800">Navigation Model</span>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> Full-page navigations between list and detail views. <strong class="text-emerald-500">New:</strong> Tab-based SPA with slide-in drawers for all CRUD — no page reloads.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="material-symbols-outlined text-[16px] text-primary">view_in_ar</span>
+                  <span class="text-xs font-bold text-slate-800">Drill-Down Pattern</span>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> Separate Scenario and Watchers tabs in process detail. <strong class="text-emerald-500">New:</strong> Watcher-first list — click a watcher to expand and see its scenario, sub-processes, and transactions inline.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="material-symbols-outlined text-[16px] text-primary">smart_toy</span>
+                  <span class="text-xs font-bold text-slate-800">Guided Onboarding</span>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> Help page with links to docs. <strong class="text-emerald-500">New:</strong> Step-by-step wizard (/help/new) and AI chat agent (/help/new3) for guided process setup with inline validation.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="material-symbols-outlined text-[16px] text-primary">notifications</span>
+                  <span class="text-xs font-bold text-slate-800">Status Feedback</span>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed"><strong class="text-red-400">Old:</strong> Static status text in table cells. <strong class="text-emerald-500">New:</strong> Live status dots, toggle switches, trend sparklines, animated typing indicators, and semantic color badges throughout.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       <!-- Footer -->
       <div class="border-t border-slate-200 pt-8 pb-4 text-center">
         <p class="text-xs text-slate-400">Automai Watcher Design System v1.0 — Generated for development team handoff</p>

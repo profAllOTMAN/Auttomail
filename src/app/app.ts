@@ -189,26 +189,11 @@ export class App implements OnInit {
     );
   }
 
-  // Detail panel tabs for selected process
-  processDetailTab = signal<'scenario' | 'watchers'>('scenario');
-  watcherSubTab = signal<string>('all'); // 'all' or a monitor id
+  // Expanded watcher in dashboard drill-down (shows scenario/sub-process/transactions)
+  expandedDashboardWatcher = signal<string | null>(null);
 
-  watcherSubTabs() {
-    const tabs: {id: string; label: string}[] = [{id: 'all', label: 'All'}];
-    for (const m of this.monitors()) {
-      if (m.scenarioAssigned) {
-        tabs.push({id: m.id, label: m.scenarioAssigned});
-      }
-    }
-    return tabs;
-  }
-
-  watchersForSubTab() {
-    const tab = this.watcherSubTab();
-    if (tab === 'all') return this.rwatchers();
-    const monitor = this.monitors().find(m => m.id === tab);
-    if (!monitor) return [];
-    return this.watchersForMonitor(monitor);
+  toggleDashboardWatcher(id: string) {
+    this.expandedDashboardWatcher.update(current => current === id ? null : id);
   }
 
   // Combined timeline: updates + alerts merged and sorted

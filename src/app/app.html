@@ -114,11 +114,6 @@
          routerLink="/help">
         Help
       </a>
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full border flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'documentation' ? 'border-primary text-primary bg-primary/5' : 'border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/documentation">
-        <span class="material-symbols-outlined text-[16px]">menu_book</span> Design System
-      </a>
     </div>
   </nav>
 
@@ -350,156 +345,31 @@
                 </div>
               </div>
 
-              <!-- Tabbed detail card: Scenario | Sub-Processes | Transactions | Watchers -->
+              <!-- Watchers list with expandable scenario/sub-process/transaction drill-down -->
               <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-                <!-- Tab bar -->
-                <div class="px-4 py-2 border-b border-slate-100 bg-slate-50 flex items-center gap-1 overflow-x-auto">
-                  <button (click)="processDetailTab.set('scenario')"
-                          class="px-3 py-1.5 text-[11px] font-semibold rounded-full transition-colors whitespace-nowrap"
-                          [class.bg-primary]="processDetailTab() === 'scenario'" [class.text-white]="processDetailTab() === 'scenario'"
-                          [class.text-slate-600]="processDetailTab() !== 'scenario'" [class.hover:bg-slate-200]="processDetailTab() !== 'scenario'">
-                    Scenario
-                  </button>
-                  <button (click)="processDetailTab.set('watchers')"
-                          class="px-3 py-1.5 text-[11px] font-semibold rounded-full transition-colors whitespace-nowrap flex items-center gap-1"
-                          [class.bg-primary]="processDetailTab() === 'watchers'" [class.text-white]="processDetailTab() === 'watchers'"
-                          [class.text-slate-600]="processDetailTab() !== 'watchers'" [class.hover:bg-slate-200]="processDetailTab() !== 'watchers'">
-                    Watchers
-                    <span class="text-[9px] font-bold px-1 py-0.5 rounded-full"
-                          [class.bg-white/20]="processDetailTab() === 'watchers'"
-                          [class.bg-slate-200]="processDetailTab() !== 'watchers'">{{ watchersForMonitor(monitor).length }}</span>
+                <!-- Header -->
+                <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-primary">desktop_windows</span>
+                    <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Assigned Watchers</span>
+                    <span class="text-[10px] font-bold text-white bg-primary px-1.5 py-0.5 rounded-full">{{ watchersForMonitor(monitor).length }}</span>
+                  </div>
+                  <button (click)="openDrawer('watcher', 'standalone')" class="text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5 shrink-0">
+                    <span class="material-symbols-outlined text-[13px]">add</span> Add
                   </button>
                 </div>
 
-                <!-- TAB: Scenario (sub-processes + transactions) -->
-                @if (processDetailTab() === 'scenario') {
-                  @if (monitor.subProcesses && monitor.subProcesses.length > 0) {
-                    <!-- Summary counts -->
-                    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-6 text-[11px]">
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-slate-500 font-medium">Sub-Processes:</span>
-                        <span class="font-bold text-slate-800">{{ monitorSubProcessTotal(monitor) }}</span>
-                        <span class="text-emerald-600 font-semibold">{{ monitorSubProcessPassed(monitor) }}P</span>
-                        @if (monitorSubProcessFailed(monitor) > 0) {
-                          <span class="text-red-500 font-semibold">{{ monitorSubProcessFailed(monitor) }}F</span>
-                        }
-                      </div>
-                      <div class="h-4 w-px bg-slate-200"></div>
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-slate-500 font-medium">Transactions:</span>
-                        <span class="font-bold text-slate-800">{{ monitorTxnTotal(monitor) }}</span>
-                        <span class="text-emerald-600 font-semibold">{{ monitorTxnPassed(monitor) }}P</span>
-                        @if (monitorTxnFailed(monitor) > 0) {
-                          <span class="text-red-500 font-semibold">{{ monitorTxnFailed(monitor) }}F</span>
-                        }
-                      </div>
-                    </div>
-
-                    <div class="divide-y divide-slate-50 max-h-[350px] overflow-y-auto">
-                      @for (sp of monitor.subProcesses; track sp.id) {
-                        <div>
-                          <div class="px-4 py-2.5 flex items-center gap-3 cursor-pointer hover:bg-slate-50/50 transition-colors"
-                               (click)="toggleSubProcessExpand(sp.id)">
-                            <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform"
-                                  [class.rotate-90]="expandedSubProcess() === sp.id">
-                              chevron_right
-                            </span>
-                            <div class="size-6 rounded flex items-center justify-center shrink-0"
-                                 [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-600]="sp.status === 'passed'"
-                                 [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-600]="sp.status === 'running'"
-                                 [class.bg-red-50]="sp.status === 'failed'" [class.text-red-500]="sp.status === 'failed'"
-                                 [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-400]="sp.status === 'pending'">
-                              <span class="material-symbols-outlined text-[14px]">
-                                {{ sp.status === 'passed' ? 'check_circle' : (sp.status === 'running' ? 'sync' : (sp.status === 'failed' ? 'error' : 'schedule')) }}
-                              </span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                              <p class="text-xs font-bold text-slate-800">{{ sp.name }}</p>
-                            </div>
-                            @if (sp.duration) {
-                              <span class="text-[10px] text-slate-500 font-mono shrink-0">{{ sp.duration }}</span>
-                            }
-                            @if (spTxnCount(sp) > 0) {
-                              <div class="flex items-center gap-1.5 shrink-0">
-                                <span class="text-[10px] text-slate-400">{{ spTxnCount(sp) }} txn</span>
-                                <span class="text-[10px] text-emerald-600 font-semibold">{{ spPassedCount(sp) }}P</span>
-                                @if (spFailedCount(sp) > 0) {
-                                  <span class="text-[10px] text-red-500 font-semibold">{{ spFailedCount(sp) }}F</span>
-                                }
-                              </div>
-                            }
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
-                                  [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-700]="sp.status === 'passed'"
-                                  [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-700]="sp.status === 'running'"
-                                  [class.bg-red-50]="sp.status === 'failed'" [class.text-red-600]="sp.status === 'failed'"
-                                  [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-500]="sp.status === 'pending'">
-                              {{ sp.status === 'passed' ? 'Passed' : (sp.status === 'running' ? 'Running' : (sp.status === 'failed' ? 'Failed' : 'Pending')) }}
-                            </span>
-                          </div>
-
-                          <!-- Expanded: Transactions -->
-                          @if (expandedSubProcess() === sp.id && sp.transactions) {
-                            <div class="bg-slate-50/70 border-t border-slate-100">
-                              @for (txn of sp.transactions; track txn.id) {
-                                <div class="pl-14 pr-4 py-2 flex items-center gap-3 border-b border-slate-100/50 last:border-b-0">
-                                  <div class="size-5 rounded flex items-center justify-center shrink-0"
-                                       [class.bg-emerald-100]="txn.status === 'passed'" [class.text-emerald-600]="txn.status === 'passed'"
-                                       [class.bg-blue-100]="txn.status === 'running'" [class.text-blue-600]="txn.status === 'running'"
-                                       [class.bg-red-100]="txn.status === 'failed'" [class.text-red-500]="txn.status === 'failed'"
-                                       [class.bg-slate-100]="txn.status === 'pending'" [class.text-slate-400]="txn.status === 'pending'">
-                                    <span class="material-symbols-outlined text-[12px]">
-                                      {{ txn.status === 'passed' ? 'check' : (txn.status === 'running' ? 'sync' : (txn.status === 'failed' ? 'close' : 'remove')) }}
-                                    </span>
-                                  </div>
-                                  <div class="flex-1 min-w-0">
-                                    <p class="text-[11px] font-semibold text-slate-700">{{ txn.name }}</p>
-                                    @if (txn.message) {
-                                      <p class="text-[10px] mt-0.5"
-                                         [class.text-slate-500]="txn.status !== 'failed'"
-                                         [class.text-red-500]="txn.status === 'failed'">{{ txn.message }}</p>
-                                    }
-                                  </div>
-                                  @if (txn.duration) {
-                                    <span class="text-[10px] text-slate-400 font-mono shrink-0">{{ txn.duration }}</span>
-                                  }
-                                </div>
-                              }
-                            </div>
-                          }
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <div class="px-4 py-8 text-center">
-                      <span class="material-symbols-outlined text-2xl text-slate-300 mb-1">account_tree</span>
-                      <p class="text-xs text-slate-400">No scenario data available for this process.</p>
-                    </div>
-                  }
-                }
-
-                <!-- TAB: Watchers -->
-                @if (processDetailTab() === 'watchers') {
-                  <!-- Sub-tabs: All | Scenario 1 | Scenario 2 ... -->
-                  <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-1 overflow-x-auto">
-                    @for (tab of watcherSubTabs(); track tab.id) {
-                      <button (click)="watcherSubTab.set(tab.id)"
-                              class="px-2.5 py-1 text-[10px] font-semibold rounded-full transition-colors whitespace-nowrap"
-                              [class.bg-primary]="watcherSubTab() === tab.id" [class.text-white]="watcherSubTab() === tab.id"
-                              [class.text-slate-500]="watcherSubTab() !== tab.id" [class.hover:bg-slate-100]="watcherSubTab() !== tab.id"
-                              [class.bg-slate-50]="watcherSubTab() !== tab.id">
-                        {{ tab.label }}
-                      </button>
-                    }
-                    <div class="flex-1"></div>
-                    <button (click)="openDrawer('watcher', 'standalone')" class="text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5 shrink-0">
-                      <span class="material-symbols-outlined text-[13px]">add</span> Add
-                    </button>
-                  </div>
-
-                  <div class="max-h-[350px] overflow-y-auto divide-y divide-slate-50">
-                    @for (w of watchersForSubTab(); track w.id) {
-                      <div class="px-4 py-3 hover:bg-slate-50/50 transition-colors">
+                <div class="max-h-[450px] overflow-y-auto divide-y divide-slate-100">
+                  @for (w of watchersForMonitor(monitor); track w.id) {
+                    <div>
+                      <!-- Watcher row (clickable) -->
+                      <div class="px-4 py-3 cursor-pointer hover:bg-slate-50/50 transition-colors"
+                           (click)="toggleDashboardWatcher(w.id)">
                         <div class="flex items-center gap-3">
+                          <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform duration-200"
+                                [class.rotate-90]="expandedDashboardWatcher() === w.id">
+                            chevron_right
+                          </span>
                           <div class="relative shrink-0">
                             <div class="size-8 rounded-md flex items-center justify-center"
                                  [class.bg-emerald-50]="w.status === 'online'" [class.text-emerald-600]="w.status === 'online'"
@@ -520,13 +390,28 @@
                               <span class="text-[10px] text-slate-500">{{ w.botManager }}</span>
                             </div>
                           </div>
+                          <!-- Watcher KPI summary (visible in collapsed state) -->
+                          <div class="hidden sm:flex items-center gap-3 shrink-0">
+                            <div class="text-center">
+                              <span class="text-[9px] text-slate-400 block">Checks</span>
+                              <span class="text-[11px] font-bold text-slate-800">{{ w.totalChecks ?? 0 }}</span>
+                            </div>
+                            <div class="text-center">
+                              <span class="text-[9px] text-slate-400 block">Success</span>
+                              <span class="text-[11px] font-bold text-emerald-600">{{ w.successCount ?? 0 }}</span>
+                            </div>
+                            <div class="text-center">
+                              <span class="text-[9px] text-slate-400 block">Fail</span>
+                              <span class="text-[11px] font-bold text-red-500">{{ w.failureCount ?? 0 }}</span>
+                            </div>
+                          </div>
                           <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
                                 [class.bg-emerald-50]="w.status === 'online'" [class.text-emerald-700]="w.status === 'online'"
                                 [class.bg-blue-50]="w.status === 'busy'" [class.text-blue-700]="w.status === 'busy'"
                                 [class.bg-slate-100]="w.status === 'offline'" [class.text-slate-600]="w.status === 'offline'">
                             {{ w.status === 'online' ? 'Online' : (w.status === 'busy' ? 'Busy' : 'Offline') }}
                           </span>
-                          <button (click)="toggleRWatcherOnlineStatus(w.id)"
+                          <button (click)="toggleRWatcherOnlineStatus(w.id); $event.stopPropagation()"
                                   class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 focus:outline-none"
                                   [class.bg-emerald-500]="w.status === 'online'"
                                   [class.bg-blue-400]="w.status === 'busy'"
@@ -537,50 +422,149 @@
                                   [class.translate-x-0.5]="w.status === 'offline'"></span>
                           </button>
                         </div>
-                        <!-- Watcher stats -->
-                        <div class="mt-2.5 ml-11 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Trend</span>
-                            @if (w.trendData) {
-                              <svg viewBox="0 0 60 20" class="w-14 h-5" preserveAspectRatio="none">
-                                <polyline fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                  [attr.points]="w.trendData.length >= 7 ? (
-                                    '0,' + (20 - w.trendData[0] * 0.2) + ' 10,' + (20 - w.trendData[1] * 0.2) + ' 20,' + (20 - w.trendData[2] * 0.2) + ' 30,' + (20 - w.trendData[3] * 0.2) + ' 40,' + (20 - w.trendData[4] * 0.2) + ' 50,' + (20 - w.trendData[5] * 0.2) + ' 60,' + (20 - w.trendData[6] * 0.2)
-                                  ) : ''" />
-                              </svg>
-                            }
-                          </div>
-                          <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Checks</span>
-                            <span class="text-xs font-bold text-slate-800">{{ w.totalChecks ?? 0 }}</span>
-                          </div>
-                          <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success / Fail</span>
-                            <div class="flex items-center gap-1.5">
-                              <span class="text-xs font-bold text-emerald-600">{{ w.successCount ?? 0 }}</span>
-                              <span class="text-[10px] text-slate-400">/</span>
-                              <span class="text-xs font-bold text-red-500">{{ w.failureCount ?? 0 }}</span>
+                      </div>
+
+                      <!-- Expanded: Watcher details with scenario/sub-process/transaction KPIs -->
+                      @if (expandedDashboardWatcher() === w.id) {
+                        <div class="bg-slate-50/70 border-t border-slate-100 animate-[fadeIn_0.15s_ease-out]">
+                          <!-- Watcher stats row -->
+                          <div class="px-4 py-3 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Trend</span>
+                              @if (w.trendData) {
+                                <svg viewBox="0 0 60 20" class="w-14 h-5" preserveAspectRatio="none">
+                                  <polyline fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                    [attr.points]="w.trendData.length >= 7 ? (
+                                      '0,' + (20 - w.trendData[0] * 0.2) + ' 10,' + (20 - w.trendData[1] * 0.2) + ' 20,' + (20 - w.trendData[2] * 0.2) + ' 30,' + (20 - w.trendData[3] * 0.2) + ' 40,' + (20 - w.trendData[4] * 0.2) + ' 50,' + (20 - w.trendData[5] * 0.2) + ' 60,' + (20 - w.trendData[6] * 0.2)
+                                    ) : ''" />
+                                </svg>
+                              }
+                            </div>
+                            <div>
+                              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Checks</span>
+                              <span class="text-xs font-bold text-slate-800">{{ w.totalChecks ?? 0 }}</span>
+                            </div>
+                            <div>
+                              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success / Fail</span>
+                              <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-emerald-600">{{ w.successCount ?? 0 }}</span>
+                                <span class="text-[10px] text-slate-400">/</span>
+                                <span class="text-xs font-bold text-red-500">{{ w.failureCount ?? 0 }}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Response</span>
+                              <span class="text-xs font-bold text-slate-800">{{ w.avgResponseTime ?? '--' }}</span>
                             </div>
                           </div>
-                          <div>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Resp. Time</span>
-                            <span class="text-xs font-bold text-slate-800">{{ w.avgResponseTime ?? '--' }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    } @empty {
-                      <div class="px-4 py-6 text-center">
-                        <span class="material-symbols-outlined text-2xl text-slate-300 mb-1">desktop_off</span>
-                        <p class="text-xs text-slate-400">No rWatchers found for this filter.</p>
-                      </div>
-                    }
-                  </div>
 
-                  <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                    <span>{{ watchersForSubTab().length }} watchers</span>
-                    <button (click)="navigate('/rwatchers')" class="font-semibold text-primary hover:underline">Manage all</button>
-                  </div>
-                }
+                          <!-- Scenario heading -->
+                          <div class="px-4 py-2.5 border-b border-slate-100 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[14px] text-blue-500">account_tree</span>
+                            <span class="text-[11px] font-bold text-slate-700">Scenario: {{ monitor.scenarioAssigned ?? 'None' }}</span>
+                            @if (monitor.subProcesses && monitor.subProcesses.length > 0) {
+                              <span class="text-[10px] text-slate-400 ml-1">
+                                {{ monitorSubProcessTotal(monitor) }} sub-processes &middot; {{ monitorTxnTotal(monitor) }} transactions
+                              </span>
+                            }
+                          </div>
+
+                          <!-- Sub-processes & transactions -->
+                          @if (monitor.subProcesses && monitor.subProcesses.length > 0) {
+                            <div class="divide-y divide-slate-100/50">
+                              @for (sp of monitor.subProcesses; track sp.id) {
+                                <div>
+                                  <div class="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-100/50 transition-colors"
+                                       (click)="toggleSubProcessExpand(sp.id); $event.stopPropagation()">
+                                    <span class="material-symbols-outlined text-[14px] text-slate-400 transition-transform duration-200 ml-4"
+                                          [class.rotate-90]="expandedSubProcess() === sp.id">
+                                      chevron_right
+                                    </span>
+                                    <div class="size-5 rounded flex items-center justify-center shrink-0"
+                                         [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-600]="sp.status === 'passed'"
+                                         [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-600]="sp.status === 'running'"
+                                         [class.bg-red-50]="sp.status === 'failed'" [class.text-red-500]="sp.status === 'failed'"
+                                         [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-400]="sp.status === 'pending'">
+                                      <span class="material-symbols-outlined text-[12px]">
+                                        {{ sp.status === 'passed' ? 'check_circle' : (sp.status === 'running' ? 'sync' : (sp.status === 'failed' ? 'error' : 'schedule')) }}
+                                      </span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                      <p class="text-[11px] font-bold text-slate-800">{{ sp.name }}</p>
+                                    </div>
+                                    @if (sp.duration) {
+                                      <span class="text-[10px] text-slate-500 font-mono shrink-0">{{ sp.duration }}</span>
+                                    }
+                                    @if (spTxnCount(sp) > 0) {
+                                      <div class="flex items-center gap-1.5 shrink-0">
+                                        <span class="text-[10px] text-slate-400">{{ spTxnCount(sp) }} txn</span>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">{{ spPassedCount(sp) }}P</span>
+                                        @if (spFailedCount(sp) > 0) {
+                                          <span class="text-[10px] text-red-500 font-semibold">{{ spFailedCount(sp) }}F</span>
+                                        }
+                                      </div>
+                                    }
+                                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
+                                          [class.bg-emerald-50]="sp.status === 'passed'" [class.text-emerald-700]="sp.status === 'passed'"
+                                          [class.bg-blue-50]="sp.status === 'running'" [class.text-blue-700]="sp.status === 'running'"
+                                          [class.bg-red-50]="sp.status === 'failed'" [class.text-red-600]="sp.status === 'failed'"
+                                          [class.bg-slate-100]="sp.status === 'pending'" [class.text-slate-500]="sp.status === 'pending'">
+                                      {{ sp.status === 'passed' ? 'Passed' : (sp.status === 'running' ? 'Running' : (sp.status === 'failed' ? 'Failed' : 'Pending')) }}
+                                    </span>
+                                  </div>
+
+                                  <!-- Expanded: Transactions -->
+                                  @if (expandedSubProcess() === sp.id && sp.transactions) {
+                                    <div class="bg-white/50 border-t border-slate-100/50">
+                                      @for (txn of sp.transactions; track txn.id) {
+                                        <div class="pl-16 pr-4 py-1.5 flex items-center gap-3 border-b border-slate-50 last:border-b-0">
+                                          <div class="size-4 rounded flex items-center justify-center shrink-0"
+                                               [class.bg-emerald-100]="txn.status === 'passed'" [class.text-emerald-600]="txn.status === 'passed'"
+                                               [class.bg-blue-100]="txn.status === 'running'" [class.text-blue-600]="txn.status === 'running'"
+                                               [class.bg-red-100]="txn.status === 'failed'" [class.text-red-500]="txn.status === 'failed'"
+                                               [class.bg-slate-100]="txn.status === 'pending'" [class.text-slate-400]="txn.status === 'pending'">
+                                            <span class="material-symbols-outlined text-[10px]">
+                                              {{ txn.status === 'passed' ? 'check' : (txn.status === 'running' ? 'sync' : (txn.status === 'failed' ? 'close' : 'remove')) }}
+                                            </span>
+                                          </div>
+                                          <div class="flex-1 min-w-0">
+                                            <p class="text-[10px] font-semibold text-slate-700">{{ txn.name }}</p>
+                                            @if (txn.message) {
+                                              <p class="text-[9px] mt-0.5"
+                                                 [class.text-slate-500]="txn.status !== 'failed'"
+                                                 [class.text-red-500]="txn.status === 'failed'">{{ txn.message }}</p>
+                                            }
+                                          </div>
+                                          @if (txn.duration) {
+                                            <span class="text-[10px] text-slate-400 font-mono shrink-0">{{ txn.duration }}</span>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                              }
+                            </div>
+                          } @else {
+                            <div class="px-4 py-4 text-center">
+                              <p class="text-[10px] text-slate-400">No scenario data available for this watcher.</p>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @empty {
+                    <div class="px-4 py-6 text-center">
+                      <span class="material-symbols-outlined text-2xl text-slate-300 mb-1">desktop_off</span>
+                      <p class="text-xs text-slate-400">No rWatchers assigned to this process.</p>
+                    </div>
+                  }
+                </div>
+
+                <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span>{{ watchersForMonitor(monitor).length }} watchers assigned</span>
+                  <button (click)="navigate('/rwatchers')" class="font-semibold text-primary hover:underline">Manage all</button>
+                </div>
               </div>
             }
           </div>

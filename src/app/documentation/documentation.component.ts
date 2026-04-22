@@ -44,6 +44,7 @@ export class DocumentationComponent {
     { id: 'tables', label: 'Tables & Lists', icon: 'table_rows' },
     { id: 'chat', label: 'Chat Agent', icon: 'smart_toy' },
     { id: 'spacing', label: 'Spacing & Layout', icon: 'grid_on' },
+    { id: 'migration', label: 'Old vs New Design', icon: 'compare' },
   ];
 
   scrollTo(id: string) {
