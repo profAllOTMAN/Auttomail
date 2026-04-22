@@ -1892,9 +1892,90 @@
                     <span class="material-symbols-outlined text-green-600">check_circle</span>
                     <div class="flex-1">
                       <p class="text-sm font-semibold text-green-800">BotManager ready</p>
-                      <p class="text-xs text-green-700 mt-0.5">{{ wizardRLoaderCount() }} rLoader desktops started on <strong>{{ wizardBotManagerHostname() }}</strong>. You're clear to run the test.</p>
+                      <p class="text-xs text-green-700 mt-0.5">{{ wizardRLoaderCount() }} rLoader desktops connected on <strong>{{ wizardBotManagerHostname() }}</strong>. You're clear to run the test.</p>
                     </div>
-                    <button (click)="wizardBotManagerReady.set(false)" class="text-xs text-green-700 hover:text-green-900 underline">Change</button>
+                    <button (click)="wizardBotManagerReady.set(false); wizardCancelRLoaderStart()" class="text-xs text-green-700 hover:text-green-900 underline">Change</button>
+                  </div>
+                } @else if (wizardRLoaderState() === 'starting' || wizardRLoaderState() === 'ready') {
+                  <!-- Progress / Ready view -->
+                  <div class="border rounded-lg overflow-hidden mb-4"
+                    [ngClass]="wizardRLoaderState() === 'ready' ? 'border-green-200' : 'border-primary/30'">
+                    <div class="px-5 py-4 flex items-center gap-3"
+                      [ngClass]="wizardRLoaderState() === 'ready' ? 'bg-green-50 border-b border-green-200' : 'bg-primary/5 border-b border-primary/20'">
+                      <div class="size-10 rounded-full flex items-center justify-center shrink-0"
+                        [ngClass]="wizardRLoaderState() === 'ready' ? 'bg-green-500 text-white' : 'bg-primary/20 text-primary'">
+                        @if (wizardRLoaderState() === 'ready') {
+                          <span class="material-symbols-outlined">check</span>
+                        } @else {
+                          <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                        }
+                      </div>
+                      <div class="flex-1">
+                        @if (wizardRLoaderState() === 'ready') {
+                          <p class="text-sm font-semibold text-green-800">All rLoaders connected and available</p>
+                          <p class="text-xs text-green-700">{{ wizardRLoaderConnected() }} of {{ wizardRLoaderCount() }} rLoader desktops ready on <strong>{{ wizardBotManagerHostname() }}</strong>.</p>
+                        } @else {
+                          <p class="text-sm font-semibold text-primary">Starting rLoader desktops…</p>
+                          <p class="text-xs text-slate-600">{{ wizardRLoaderConnected() }} of {{ wizardRLoaderCount() }} connected · waiting for remaining rLoaders to become available.</p>
+                        }
+                      </div>
+                      <span class="text-2xl font-bold tabular-nums"
+                        [ngClass]="wizardRLoaderState() === 'ready' ? 'text-green-700' : 'text-primary'">
+                        {{ wizardRLoaderConnected() }}/{{ wizardRLoaderCount() }}
+                      </span>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="h-1.5 bg-slate-100">
+                      <div class="h-full transition-all duration-500"
+                        [ngClass]="wizardRLoaderState() === 'ready' ? 'bg-green-500' : 'bg-primary'"
+                        [style.width.%]="wizardRLoaderCount() > 0 ? (wizardRLoaderConnected() / wizardRLoaderCount()) * 100 : 0"></div>
+                    </div>
+
+                    <!-- Per-rLoader status list -->
+                    <div class="p-4 grid grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-auto">
+                      @for (r of wizardRLoaderList(); track r.index) {
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-md border text-xs"
+                          [ngClass]="r.connected ? 'border-green-200 bg-green-50 text-green-800' : 'border-slate-200 bg-slate-50 text-slate-500'">
+                          <span class="material-symbols-outlined text-base"
+                            [ngClass]="r.connected ? 'text-green-600' : 'text-slate-400 animate-pulse'">
+                            {{ r.connected ? 'check_circle' : 'pending' }}
+                          </span>
+                          <span class="font-medium truncate">{{ r.name }}</span>
+                          <span class="ml-auto text-[10px] uppercase tracking-wider"
+                            [ngClass]="r.connected ? 'text-green-600' : 'text-slate-400'">
+                            {{ r.connected ? 'ready' : 'waiting' }}
+                          </span>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Action footer -->
+                    <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                      @if (wizardRLoaderState() === 'ready') {
+                        <p class="text-xs text-green-700 flex items-center gap-1.5">
+                          <span class="material-symbols-outlined text-sm">task_alt</span>
+                          All rLoaders are available. You can launch the test.
+                        </p>
+                        <div class="flex items-center gap-2">
+                          <button (click)="wizardCancelRLoaderStart()" class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-900">
+                            Restart
+                          </button>
+                          <button (click)="wizardConfirmRLoaderReady()"
+                            class="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">rocket_launch</span> Launch rLoader
+                          </button>
+                        </div>
+                      } @else {
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5">
+                          <span class="material-symbols-outlined text-sm animate-spin">refresh</span>
+                          Waiting for rLoaders to report ready…
+                        </p>
+                        <button (click)="wizardCancelRLoaderStart()" class="px-3 py-2 text-xs font-medium text-slate-500 hover:text-rose-600 transition-colors">
+                          Cancel
+                        </button>
+                      }
+                    </div>
                   </div>
                 } @else {
                   <div class="flex items-start gap-3 p-4 rounded-lg border-2 border-amber-200 bg-amber-50 mb-6">
@@ -1956,13 +2037,9 @@
                       </div>
                       <div class="flex justify-end pt-2">
                         <button (click)="wizardStartRLoaderDesktops()"
-                          [disabled]="wizardRLoaderStarting() || !wizardRLoaderPassword()"
+                          [disabled]="!wizardRLoaderPassword()"
                           class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
-                          @if (wizardRLoaderStarting()) {
-                            <span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Starting...
-                          } @else {
-                            <span class="material-symbols-outlined text-lg">play_arrow</span> Start rLoader Desktops
-                          }
+                          <span class="material-symbols-outlined text-lg">play_arrow</span> Start rLoader Desktops
                         </button>
                       </div>
                     </div>

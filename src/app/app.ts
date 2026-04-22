@@ -873,6 +873,12 @@ export class App implements OnInit {
     this.wizardStopOnError.set(false);
     this.wizardTestProcesses.set([]);
     this.wizardBotManagerReady.set(false);
+    if (this.wizardRLoaderTimer) {
+      clearInterval(this.wizardRLoaderTimer);
+      this.wizardRLoaderTimer = null;
+    }
+    this.wizardRLoaderState.set('idle');
+    this.wizardRLoaderConnected.set(0);
     this.wizardTestWebhook.set('');
     this.wizardTestEmailInput.set('');
     this.wizardTestEmailList.set([]);
@@ -933,6 +939,9 @@ export class App implements OnInit {
   wizardRLoaderPassword = signal<string>('');
   wizardRLoaderDomain = signal<string>('ec2amaz-ts88pb7');
   wizardRLoaderStarting = signal<boolean>(false);
+  wizardRLoaderState = signal<'idle' | 'starting' | 'ready'>('idle');
+  wizardRLoaderConnected = signal<number>(0);
+  private wizardRLoaderTimer: ReturnType<typeof setInterval> | null = null;
 
   // Test notifications
   wizardTestWebhook = signal<string>('');
@@ -983,11 +992,48 @@ export class App implements OnInit {
   }
 
   wizardStartRLoaderDesktops() {
-    this.wizardRLoaderStarting.set(true);
-    setTimeout(() => {
-      this.wizardRLoaderStarting.set(false);
-      this.wizardBotManagerReady.set(true);
-    }, 1500);
+    if (this.wizardRLoaderState() === 'starting') return;
+    this.wizardRLoaderState.set('starting');
+    this.wizardRLoaderConnected.set(0);
+    const total = Math.max(1, this.wizardRLoaderCount());
+    // Simulate each rLoader taking ~delay seconds, clamped for demo responsiveness
+    const stepDelay = Math.min(Math.max(this.wizardRLoaderDelay() * 100, 400), 1500);
+    this.wizardRLoaderTimer = setInterval(() => {
+      const current = this.wizardRLoaderConnected();
+      if (current + 1 >= total) {
+        this.wizardRLoaderConnected.set(total);
+        if (this.wizardRLoaderTimer) {
+          clearInterval(this.wizardRLoaderTimer);
+          this.wizardRLoaderTimer = null;
+        }
+        this.wizardRLoaderState.set('ready');
+      } else {
+        this.wizardRLoaderConnected.set(current + 1);
+      }
+    }, stepDelay);
+  }
+
+  wizardCancelRLoaderStart() {
+    if (this.wizardRLoaderTimer) {
+      clearInterval(this.wizardRLoaderTimer);
+      this.wizardRLoaderTimer = null;
+    }
+    this.wizardRLoaderState.set('idle');
+    this.wizardRLoaderConnected.set(0);
+  }
+
+  wizardConfirmRLoaderReady() {
+    this.wizardBotManagerReady.set(true);
+  }
+
+  wizardRLoaderList() {
+    const total = this.wizardRLoaderCount();
+    const connected = this.wizardRLoaderConnected();
+    return Array.from({length: total}, (_, i) => ({
+      index: i + 1,
+      name: `${this.wizardRLoaderUsernamePrefix()}-${i + 1}`,
+      connected: i < connected
+    }));
   }
 
   // Event popup — matching Automai "Set threshold and event" modal
