@@ -1016,14 +1016,17 @@
           <div class="space-y-2">
             <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Onboarding Checklist</p>
 
-            <!-- Run a Process -->
+            <!-- Getting Started -->
             <div (click)="selectedHelpCard.set('process')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
               [ngClass]="selectedHelpCard() === 'process' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
               <div class="flex items-center gap-3">
                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[20px] text-blue-600">play_circle</span>
+                  <span class="material-symbols-outlined text-[20px] text-blue-600">rocket_launch</span>
                 </div>
-                <span class="text-sm font-semibold text-slate-900">Run a Process</span>
+                <div>
+                  <span class="text-sm font-semibold text-slate-900 block">Getting Started</span>
+                  <span class="text-[10px] text-slate-400">{{ gsCompletedSteps().length }}/{{ gettingStartedSteps.length }} complete</span>
+                </div>
               </div>
             </div>
 
@@ -1098,77 +1101,192 @@
           <!-- Right detail panel -->
           <div class="border border-slate-200 rounded-xl bg-white p-6 min-h-[400px]">
             @if (selectedHelpCard() === 'process') {
-              <div class="flex items-center gap-3 mb-5">
+              <!-- Getting Started integrated flow -->
+              <div class="flex items-center gap-3 mb-2">
                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[20px] text-blue-600">play_circle</span>
+                  <span class="material-symbols-outlined text-[20px] text-blue-600">rocket_launch</span>
                 </div>
                 <div>
-                  <h3 class="text-base font-bold text-slate-900">Run a Process</h3>
-                  <p class="text-[11px] text-slate-400">Follow these steps to record, configure, and run your first process.</p>
+                  <h3 class="text-base font-bold text-slate-900">Getting Started</h3>
+                  <p class="text-[11px] text-slate-400">Follow each step to record, configure, and launch your first automated process.</p>
                 </div>
               </div>
 
-              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Checklist</p>
-              <ol class="space-y-2.5 mb-5">
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('record')">
-                  @if (helpRunProcessSteps().includes('record')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Record scenario</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Record scenario</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('send')">
-                  @if (helpRunProcessSteps().includes('send')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Send scenario</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Send scenario</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('addwatcher')">
-                  @if (helpRunProcessSteps().includes('addwatcher')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Add watcher (check watcher availability)</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Add watcher (check watcher availability)</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('addprocess')">
-                  @if (helpRunProcessSteps().includes('addprocess')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Add process and assign default schedule</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Add process and assign default schedule</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('run')">
-                  @if (helpRunProcessSteps().includes('run')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">Go to process monitor page and run the process</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">Go to process monitor page and run the process</span>
-                  }
-                </li>
-                <li class="flex items-center gap-2.5 cursor-pointer" (click)="toggleHelpRunProcessStep('queue')">
-                  @if (helpRunProcessSteps().includes('queue')) {
-                    <div class="size-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px]">check</span></div>
-                    <span class="text-xs text-slate-400 line-through">See it running in the queue</span>
-                  } @else {
-                    <div class="size-5 rounded border-2 border-slate-300 shrink-0"></div>
-                    <span class="text-xs text-slate-600">See it running in the queue</span>
-                  }
-                </li>
-              </ol>
+              <!-- Progress bar -->
+              <div class="mb-5">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Progress</span>
+                  <span class="text-[10px] font-bold text-primary">{{ gsCompletedSteps().length }} / {{ gettingStartedSteps.length }}</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-primary rounded-full transition-all duration-500" [style.width.%]="gsProgressPercent()"></div>
+                </div>
+              </div>
 
-              <button (click)="navigate('/process-monitors')" class="w-full py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">play_arrow</span> Go to Process Monitors
-              </button>
+              <!-- Step list -->
+              <div class="space-y-1.5">
+                @for (step of gettingStartedSteps; track step.id; let i = $index) {
+                  <div class="border rounded-lg transition-all overflow-hidden"
+                    [ngClass]="gsActiveStep() === step.id ? 'border-primary/30 bg-primary/[0.03] shadow-sm' : (gsIsComplete(step.id) ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white')">
+
+                    <!-- Step header row -->
+                    <div class="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer" (click)="gsActiveStep.set(step.id)">
+                      <!-- Step number / check -->
+                      @if (gsIsComplete(step.id)) {
+                        <div class="size-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                          <span class="material-symbols-outlined text-[13px]">check</span>
+                        </div>
+                      } @else {
+                        <div class="size-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-bold"
+                          [ngClass]="gsActiveStep() === step.id ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-400'">
+                          {{ i + 1 }}
+                        </div>
+                      }
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5">
+                          <span class="text-xs font-semibold" [ngClass]="gsIsComplete(step.id) ? 'text-emerald-700' : 'text-slate-800'">{{ step.label }}</span>
+                          @if (step.optional) {
+                            <span class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
+                          }
+                        </div>
+                      </div>
+                      <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform"
+                        [ngClass]="gsActiveStep() === step.id ? 'rotate-180' : ''">expand_more</span>
+                    </div>
+
+                    <!-- Expanded content -->
+                    @if (gsActiveStep() === step.id) {
+                      <div class="px-3.5 pb-3.5 pt-0">
+                        <div class="ml-8.5 border-t border-slate-200/60 pt-3">
+
+                          @if (step.id === 'record-send') {
+                            <!-- Step 1: Record & Send Scenario (merged steps 2+3) -->
+                            <p class="text-xs text-slate-500 mb-3">ScenarioBuilder is code-free — recording is as easy as using your application normally. We use a Salesforce login as an example, but you can apply these steps to any application.</p>
+                            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-2">Record</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>Open <strong>ScenarioBuilder</strong> from the desktop shortcut</li>
+                              <li>Enter a scenario name (e.g. <em>Salesforce login</em>) and leave Type as <strong>Process Scenario</strong></li>
+                              <li>Click <strong>Open web app</strong>, select your browser, and enter your application URL</li>
+                              <li>Perform the login steps — the <strong>Recording ON</strong> bar confirms capture is active</li>
+                              <li>Click <strong>Stop</strong> when finished, then click <strong>Play</strong> to validate</li>
+                            </ol>
+                            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-2">Send to Director</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>In the toolbar, click <strong>Send Scenario</strong> (File group)</li>
+                              <li>Enter Director credentials if prompted (default: admin / automai)</li>
+                              <li>Leave the Script Version defaults — click <strong>Send Script</strong></li>
+                              <li>Confirm "Sent Successfully", then verify in Director under <strong>Projects</strong></li>
+                            </ol>
+                            <div class="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-md p-2.5 mb-3">
+                              <span class="material-symbols-outlined text-[14px] text-amber-500 mt-0.5">tips_and_updates</span>
+                              <p class="text-[11px] text-amber-700">Practice the login manually first before recording — ScenarioBuilder captures every action.</p>
+                            </div>
+                          }
+
+                          @if (step.id === 'botmanager') {
+                            <!-- Step 2: Verify BotManager -->
+                            <p class="text-xs text-slate-500 mb-3">BotManager was installed automatically. Confirm it is connected before continuing.</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>In Director, click <strong>rWatchers</strong> in the top navigation</li>
+                              <li>Click the <strong>BotManagers</strong> sub-tab</li>
+                              <li>Verify <strong>BotManager-1</strong> shows a green checkmark (connected)</li>
+                              <li>Go to <strong>Projects</strong> to confirm your scenario arrived</li>
+                            </ol>
+                            <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-md p-2.5 mb-3">
+                              <span class="material-symbols-outlined text-[14px] text-blue-500 mt-0.5">info</span>
+                              <p class="text-[11px] text-blue-700">If BotManager shows disconnected, restart the BotManager Windows service and refresh the page.</p>
+                            </div>
+                          }
+
+                          @if (step.id === 'rwatcher') {
+                            <!-- Step 3: Add an rWatcher -->
+                            <p class="text-xs text-slate-500 mb-3">An rWatcher is the bot that executes your scenario on schedule. Create one and start it.</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>Click <strong>rWatchers</strong> → <strong>Add new rWatcher</strong></li>
+                              <li>Select <strong>BotManager-1</strong>, enter a username &amp; password</li>
+                              <li>The rWatcher appears as <em>Registered</em></li>
+                              <li>Select it and click <strong>Start rWatchers</strong></li>
+                              <li>Wait ~2 min, then refresh — the icon turns green when ready</li>
+                            </ol>
+                          }
+
+                          @if (step.id === 'schedule') {
+                            <!-- Step 4: Create a Schedule -->
+                            <p class="text-xs text-slate-500 mb-3">A schedule defines how often your Process Monitor runs. You can use a default or create a custom one.</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>Click <strong>Schedules</strong> → <strong>Schedules</strong> sub-tab → <strong>+ Schedule</strong></li>
+                              <li>Enter a name (e.g. <em>5 mins</em>), set interval to <strong>5 Minutes</strong></li>
+                              <li>Set <strong>Active Days</strong> to Mon–Fri, define start/end times</li>
+                              <li>The schedule appears with a blue active toggle</li>
+                            </ol>
+                            <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-md p-2.5 mb-3">
+                              <span class="material-symbols-outlined text-[14px] text-blue-500 mt-0.5">info</span>
+                              <p class="text-[11px] text-blue-700">You can skip this step and use a built-in default schedule when creating the Process Monitor.</p>
+                            </div>
+                          }
+
+                          @if (step.id === 'monitor') {
+                            <!-- Step 5: Create Process Monitor -->
+                            <p class="text-xs text-slate-500 mb-3">The Process Monitor ties everything together — your scenario, rWatcher, and schedule.</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>Click <strong>Process Monitors</strong> → <strong>+ Add process monitor</strong></li>
+                              <li>Enter a name, select your <strong>Project</strong> and <strong>Process/Scenario</strong></li>
+                              <li>Assign your <strong>rWatcher</strong> and <strong>Schedule</strong></li>
+                              <li>Click <strong>Publish</strong> → confirm <strong>YES</strong> to start monitoring</li>
+                            </ol>
+                          }
+
+                          @if (step.id === 'results') {
+                            <!-- Step 6: See it Run -->
+                            <p class="text-xs text-slate-500 mb-3">Your Process Monitor is now live. Within minutes the bot will automatically execute the scenario.</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>Go to <strong>Schedules → Queue</strong> to see your monitor running</li>
+                              <li>Click <strong>rWatchers</strong> → select your watcher → <strong>View Screen</strong> to watch live</li>
+                              <li>After ~5 min, go to <strong>Process Monitors</strong> and check the <strong>Results</strong> tab</li>
+                              <li>Click a result row to see sub-processes, screenshots, and transaction details</li>
+                            </ol>
+                            <div class="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-md p-2.5 mb-3">
+                              <span class="material-symbols-outlined text-[14px] text-emerald-500 mt-0.5">check_circle</span>
+                              <p class="text-[11px] text-emerald-700">The Dashboard provides a high-level overview: total checks, pass/fail rates, and recent activity across all monitors.</p>
+                            </div>
+                          }
+
+                          @if (step.id === 'reports') {
+                            <!-- Step 7: Export Reports (Optional) -->
+                            <p class="text-xs text-slate-500 mb-3">Once your monitor has been running, export detailed data from the Reports tab. Three report types are available.</p>
+                            <ol class="space-y-1.5 mb-3 text-xs text-slate-600 list-decimal list-inside">
+                              <li>Click <strong>Reports</strong> → choose <strong>Summary</strong>, <strong>Raw data</strong>, or <strong>Transaction data</strong></li>
+                              <li>Select your process monitor, name the report, set the time interval</li>
+                              <li>Click <strong>Create</strong> — the report appears in the list</li>
+                              <li>Click the <strong>Play</strong> button to generate immediately, or let it run on schedule</li>
+                            </ol>
+                          }
+
+                          <!-- Action buttons -->
+                          <div class="flex items-center gap-2 mt-1">
+                            @if (step.id === 'rwatcher' || step.id === 'schedule' || step.id === 'monitor' || step.id === 'results' || step.id === 'reports') {
+                              <button (click)="gsStepAction(step.id)" class="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors">
+                                <span class="material-symbols-outlined text-[13px]">{{ step.icon }}</span>
+                                @if (step.id === 'rwatcher') { Open Add Watcher }
+                                @if (step.id === 'schedule') { Open Add Schedule }
+                                @if (step.id === 'monitor') { Create Process Monitor }
+                                @if (step.id === 'results') { Go to Process Monitors }
+                                @if (step.id === 'reports') { Go to Reports }
+                              </button>
+                            }
+                            <button (click)="gsToggleComplete(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors"
+                              [ngClass]="gsIsComplete(step.id) ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                              <span class="material-symbols-outlined text-[13px]">{{ gsIsComplete(step.id) ? 'undo' : 'check' }}</span>
+                              {{ gsIsComplete(step.id) ? 'Undo' : 'Mark Complete' }}
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
 
             } @else if (selectedHelpCard() === 'rwatchers') {
               <div class="flex items-center gap-3 mb-5">

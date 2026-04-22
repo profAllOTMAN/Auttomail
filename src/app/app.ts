@@ -242,6 +242,54 @@ export class App implements OnInit {
     this.helpNotificationSteps.update(s => s.includes(step) ? s.filter(x => x !== step) : [...s, step]);
   }
 
+  // ── Getting Started integrated flow ──
+  gettingStartedSteps: {id: string; label: string; icon: string; description: string; optional?: boolean}[] = [
+    {id: 'record-send', label: 'Record & Send Scenario', icon: 'videocam', description: 'Record your scenario in ScenarioBuilder and send it to Director.'},
+    {id: 'botmanager', label: 'Verify BotManager', icon: 'dns', description: 'Confirm BotManager is connected and ready.'},
+    {id: 'rwatcher', label: 'Add an rWatcher', icon: 'desktop_windows', description: 'Create and start a bot that will execute your scenario.'},
+    {id: 'schedule', label: 'Create a Schedule', icon: 'schedule', description: 'Define how often your Process Monitor runs.'},
+    {id: 'monitor', label: 'Create Process Monitor', icon: 'monitoring', description: 'Tie your scenario, rWatcher, and schedule together.'},
+    {id: 'results', label: 'See it Run', icon: 'play_circle', description: 'Watch your bot execute the scenario automatically.'},
+    {id: 'reports', label: 'Export Reports', icon: 'download', description: 'Download and share your automation results.', optional: true}
+  ];
+  gsActiveStep = signal<string>('record-send');
+  gsCompletedSteps = signal<string[]>([]);
+
+  gsToggleComplete(stepId: string) {
+    this.gsCompletedSteps.update(s =>
+      s.includes(stepId) ? s.filter(x => x !== stepId) : [...s, stepId]
+    );
+  }
+
+  gsIsComplete(stepId: string) {
+    return this.gsCompletedSteps().includes(stepId);
+  }
+
+  gsProgressPercent() {
+    const total = this.gettingStartedSteps.length;
+    return Math.round((this.gsCompletedSteps().length / total) * 100);
+  }
+
+  gsStepAction(stepId: string) {
+    switch (stepId) {
+      case 'rwatcher':
+        this.openDrawer('watcher', 'standalone');
+        break;
+      case 'schedule':
+        this.openDrawer('schedule', 'standalone');
+        break;
+      case 'monitor':
+        this.openDrawer('monitor', 'standalone');
+        break;
+      case 'results':
+        this.navigate('/process-monitors');
+        break;
+      case 'reports':
+        this.navigate('/reports');
+        break;
+    }
+  }
+
   // Dashboard notifications & updates
   dashboardNotifications = signal<Notification[]>([
     { id: '1', type: 'failure', title: 'Process Failed', message: 'Legacy Data Sync failed — 140 records mismatched during integrity check.', timestamp: '1 hour ago', processName: 'Legacy Data Sync' },
