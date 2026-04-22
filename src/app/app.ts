@@ -823,6 +823,13 @@ export class App implements OnInit {
   wizardCanProceed() {
     const step = this.wizardStep();
     if (step === 0) return this.wizardType() !== null;
+    if (this.wizardType() === 'testing') {
+      if (step === 1) return this.wizardProcessName().trim().length > 0 && this.wizardProject().trim().length > 0;
+      if (step === 2) return this.wizardTotalRLoaders() > 0 && this.wizardRampUpEvery() > 0;
+      if (step === 3) return this.wizardTestProcesses().length > 0;
+      if (step === 4) return this.wizardBotManagerReady();
+      return true;
+    }
     if (step === 1) return this.wizardProcessName().trim().length > 0;
     if (step === 2) return this.wizardProject().trim().length > 0 && this.wizardScenario().trim().length > 0;
     if (step === 3) return this.wizardSelectedWatcherIds().length > 0;
@@ -854,9 +861,29 @@ export class App implements OnInit {
     this.wizardEvents.set({email: false, slack: false, onFailure: true, onSuccess: false});
     this.wizardConfiguredEvents.set([]);
     this.wizardEventPopupOpen.set(false);
+    // Reset testing-specific state
+    this.wizardTestDescription.set('');
+    this.wizardDistributionType.set('All Available BotManagers');
+    this.wizardTotalRLoaders.set(5);
+    this.wizardRampUpStart.set(1);
+    this.wizardRampUpEvery.set(15);
+    this.wizardDurationType.set('fixed');
+    this.wizardDurationFixedMinutes.set(15);
+    this.wizardDurationIterations.set(1);
+    this.wizardStopOnError.set(false);
+    this.wizardTestProcesses.set([]);
+    this.wizardBotManagerReady.set(false);
+    this.wizardTestWebhook.set('');
+    this.wizardTestEmailInput.set('');
+    this.wizardTestEmailList.set([]);
+    this.wizardTestNotifEvents.set({started: false, finished: true, ramping: false, failures: false, allUsers: false});
   }
 
   wizardSubmit() {
+    if (this.wizardType() === 'testing') {
+      this.wizardStep.set(6);
+      return;
+    }
     const newId = (this.monitors().length + 1).toString();
     this.monitors.update(m => [...m, {
       id: newId,
@@ -874,7 +901,94 @@ export class App implements OnInit {
     this.gsMarkComplete('monitor');
   }
 
-  wizardStepLabels = ['Purpose', 'Name', 'Project & Scenario', 'Watchers', 'Schedule', 'Events', 'Done'];
+  wizardMonitorStepLabels = ['Purpose', 'Name', 'Project & Scenario', 'Watchers', 'Schedule', 'Events', 'Done'];
+  wizardTestingStepLabels = ['Purpose', 'Test Plan', 'Distribution', 'Processes', 'BotManager', 'Notifications', 'Done'];
+
+  wizardStepLabels() {
+    return this.wizardType() === 'testing' ? this.wizardTestingStepLabels : this.wizardMonitorStepLabels;
+  }
+
+  // ── Testing-specific wizard state ──
+  wizardTestDescription = signal<string>('');
+  wizardDistributionType = signal<string>('All Available BotManagers');
+  wizardTotalRLoaders = signal<number>(5);
+  wizardRampUpStart = signal<number>(1);
+  wizardRampUpEvery = signal<number>(15);
+  wizardDurationType = signal<'fixed' | 'iterations'>('fixed');
+  wizardDurationFixedMinutes = signal<number>(15);
+  wizardDurationIterations = signal<number>(1);
+  wizardStopOnError = signal<boolean>(false);
+  wizardTestProcesses = signal<{name: string; distributeBy: string; rLoaders: number; pacing: number; halt: boolean}[]>([]);
+  wizardTestProcessOptions = signal<string[]>([
+    'complexScen', 'loginScenario', 'checkoutFlow', 'searchAndFilter', 'dataEntry'
+  ]);
+
+  // BotManager rLoader prerequisite
+  wizardBotManagerReady = signal<boolean>(false);
+  wizardBotManagerHostname = signal<string>('ec2amaz-ts88pb7');
+  wizardRLoaderCount = signal<number>(5);
+  wizardRLoaderDelay = signal<number>(15);
+  wizardRLoaderMode = signal<string>('Incremental');
+  wizardRLoaderUsernamePrefix = signal<string>('rLoader');
+  wizardRLoaderPassword = signal<string>('');
+  wizardRLoaderDomain = signal<string>('ec2amaz-ts88pb7');
+  wizardRLoaderStarting = signal<boolean>(false);
+
+  // Test notifications
+  wizardTestWebhook = signal<string>('');
+  wizardTestEmailInput = signal<string>('');
+  wizardTestEmailList = signal<string[]>([]);
+  wizardTestNotifEvents = signal<{started: boolean; finished: boolean; ramping: boolean; failures: boolean; allUsers: boolean}>({
+    started: false, finished: true, ramping: false, failures: false, allUsers: false
+  });
+  wizardWebhookOptions = signal<string[]>(['automai test', 'slack prod', 'pagerduty on-call']);
+
+  wizardAddTestProcess(name: string) {
+    if (!name.trim()) return;
+    this.wizardTestProcesses.update(list => [...list, {
+      name: name.trim(),
+      distributeBy: this.wizardDistributionType(),
+      rLoaders: this.wizardTotalRLoaders(),
+      pacing: 5,
+      halt: false
+    }]);
+  }
+
+  wizardRemoveTestProcess(index: number) {
+    this.wizardTestProcesses.update(list => list.filter((_, i) => i !== index));
+  }
+
+  wizardToggleTestProcessHalt(index: number) {
+    this.wizardTestProcesses.update(list => list.map((p, i) => i === index ? {...p, halt: !p.halt} : p));
+  }
+
+  wizardUpdateTestProcessField(index: number, field: 'rLoaders' | 'pacing', value: number) {
+    this.wizardTestProcesses.update(list => list.map((p, i) => i === index ? {...p, [field]: value} : p));
+  }
+
+  wizardAddTestEmail() {
+    const email = this.wizardTestEmailInput().trim();
+    if (!email) return;
+    const parts = email.split(',').map(e => e.trim()).filter(e => e.length > 0);
+    this.wizardTestEmailList.update(list => [...list, ...parts.filter(p => !list.includes(p))]);
+    this.wizardTestEmailInput.set('');
+  }
+
+  wizardRemoveTestEmail(email: string) {
+    this.wizardTestEmailList.update(list => list.filter(e => e !== email));
+  }
+
+  wizardToggleTestNotifEvent(key: 'started' | 'finished' | 'ramping' | 'failures' | 'allUsers') {
+    this.wizardTestNotifEvents.update(ev => ({...ev, [key]: !ev[key]}));
+  }
+
+  wizardStartRLoaderDesktops() {
+    this.wizardRLoaderStarting.set(true);
+    setTimeout(() => {
+      this.wizardRLoaderStarting.set(false);
+      this.wizardBotManagerReady.set(true);
+    }, 1500);
+  }
 
   // Event popup — matching Automai "Set threshold and event" modal
   wizardEventPopupOpen = signal<boolean>(false);
