@@ -1263,7 +1263,7 @@
                           }
 
                           <!-- Action buttons -->
-                          <div class="flex items-center gap-2 mt-1">
+                          <div class="flex items-center gap-2 mt-1 flex-wrap">
                             @if (step.id === 'rwatcher' || step.id === 'schedule' || step.id === 'monitor' || step.id === 'results' || step.id === 'reports') {
                               <button (click)="gsStepAction(step.id)" class="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors">
                                 <span class="material-symbols-outlined text-[13px]">{{ step.icon }}</span>
@@ -1274,6 +1274,9 @@
                                 @if (step.id === 'reports') { Go to Reports }
                               </button>
                             }
+                            <button (click)="gsOpenPreview(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100">
+                              <span class="material-symbols-outlined text-[13px]">menu_book</span> View Full Guide
+                            </button>
                             <button (click)="gsToggleComplete(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors"
                               [ngClass]="gsIsComplete(step.id) ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
                               <span class="material-symbols-outlined text-[13px]">{{ gsIsComplete(step.id) ? 'undo' : 'check' }}</span>
@@ -2068,6 +2071,388 @@
         <button (click)="executeDelete()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">
           Delete Monitor
         </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Getting Started — Full Guide Preview Popup -->
+@if (gsPreviewStep() !== null) {
+  <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" (click)="gsClosePreview()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          @if (gsPreviewStepData(); as stepData) {
+            <div class="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-[20px]">{{ stepData.icon }}</span>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900">{{ stepData.label }}</h3>
+              <p class="text-[11px] text-slate-400">Getting Started Guide</p>
+            </div>
+          }
+        </div>
+        <button (click)="gsClosePreview()" class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Scrollable body -->
+      <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+        @if (gsPreviewStepData(); as stepData) {
+          <!-- Video Section -->
+          @if (stepData.videoUrl) {
+            <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-video relative">
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <div class="size-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3">
+                  <span class="material-symbols-outlined text-white text-3xl">play_circle</span>
+                </div>
+                <p class="text-sm font-semibold text-white/90">Video Tutorial</p>
+                <p class="text-xs text-white/50 mt-1">{{ stepData.label }}</p>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Full Documentation Content per step -->
+        @if (gsPreviewStep() === 'record-send') {
+          <div class="space-y-4">
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <span class="size-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">1</span>
+                Record the Scenario
+              </h4>
+              <p class="text-sm text-slate-600 mb-3 leading-relaxed">ScenarioBuilder is code-free — recording is as easy as using your application normally. The engine analyzes the desktop and acts on specific images and controls. It does not matter whether your application runs in a browser, on the desktop, or via Citrix.</p>
+
+              <div class="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <span class="material-symbols-outlined text-amber-500 text-[16px] mt-0.5">tips_and_updates</span>
+                <p class="text-xs text-amber-700 leading-relaxed"><strong>Do this manually first</strong> — before recording, go through the process yourself so you know every step. ScenarioBuilder captures every action.</p>
+              </div>
+
+              <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Steps</p>
+                <div class="space-y-3">
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    <p class="text-xs text-slate-600"><strong>Open ScenarioBuilder</strong> from the desktop shortcut. A loading screen appears — wait a few seconds for it to finish.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                    <p class="text-xs text-slate-600">The New Scenario form opens. Enter a <strong>Name</strong> (e.g. "Salesforce login") and leave Type as <strong>Process Scenario</strong>.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    <p class="text-xs text-slate-600">Click <strong>Open web app</strong>. Select your browser and enter the application URL. Click <strong>OK</strong>.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                    <p class="text-xs text-slate-600">Your browser opens and the <strong>Recording ON</strong> bar appears. Perform the login: enter username, password, click Log In, wait for the home page.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">5</span>
+                    <p class="text-xs text-slate-600">Click <strong>Stop</strong> in the Recording toolbar. Your steps are listed as individual actions.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">6</span>
+                    <p class="text-xs text-slate-600">Click <strong>Play</strong> to validate. The scenario replays — watch for a green <strong>Pass</strong> result.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <span class="size-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                Send to Director
+              </h4>
+              <p class="text-sm text-slate-600 mb-3 leading-relaxed">Once the scenario is validated, send it to Director so it can be assigned to a Process Monitor.</p>
+              <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Steps</p>
+                <div class="space-y-3">
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    <p class="text-xs text-slate-600">In the toolbar, click <strong>Send Scenario</strong> (File group on the left).</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                    <p class="text-xs text-slate-600">If prompted, enter Director credentials: <strong>admin</strong> / <strong>automai</strong> (default). Click Login.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    <p class="text-xs text-slate-600">The Script Version dialog appears. Leave the defaults (Minor, version 0.001). Click <strong>Send Script</strong>.</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                    <p class="text-xs text-slate-600">Confirm <strong>"Sent Successfully"</strong>. Open Director and verify under <strong>Projects</strong>.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (gsPreviewStep() === 'botmanager') {
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">BotManager was installed and connected automatically during the Automai installation. You just need to confirm it is showing as connected before continuing.</p>
+
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Steps</p>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p class="text-xs text-slate-600">In Director, click <strong>rWatchers</strong> in the top navigation.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p class="text-xs text-slate-600">Click the <strong>BotManagers</strong> sub-tab.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p class="text-xs text-slate-600">You should see <strong>BotManager - 1</strong> with a green checkmark confirming it is connected and ready.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <p class="text-xs text-slate-600">Click <strong>Projects</strong> to confirm your scenario script arrived. The Project should show with an open toggle.</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 mb-2">Troubleshooting</h4>
+              <div class="space-y-2">
+                <div class="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <span class="material-symbols-outlined text-amber-500 text-[16px] mt-0.5">warning</span>
+                  <p class="text-xs text-amber-700 leading-relaxed"><strong>BotManager disconnected?</strong> Open Windows Services (services.msc), find the Automai BotManager service, and restart it. Then refresh the Director page.</p>
+                </div>
+                <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <span class="material-symbols-outlined text-blue-500 text-[16px] mt-0.5">info</span>
+                  <p class="text-xs text-blue-700 leading-relaxed"><strong>Firewall issue?</strong> Ensure port <strong>8888</strong> is open on the server. BotManager communicates with Director over this port.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (gsPreviewStep() === 'rwatcher') {
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">An rWatcher is the bot that will run your scenario on schedule. You create one, assign it credentials, and start it — then it is ready to execute process monitors automatically.</p>
+
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Steps</p>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p class="text-xs text-slate-600">Click <strong>rWatchers</strong> in the top navigation. The list is empty — click <strong>Add new rWatcher</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p class="text-xs text-slate-600">Fill in the form: select <strong>BotManager-1</strong>, enter a username (e.g. rWatcher01) and password (min 6 characters).</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p class="text-xs text-slate-600">The rWatcher appears with a <strong>Registered</strong> status — it is registered but not yet active.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <p class="text-xs text-slate-600">Select the rWatcher using the checkbox, then click <strong>Start rWatchers</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">5</span>
+                  <p class="text-xs text-slate-600">Wait up to <strong>2 minutes</strong>, then click refresh. The computer icon turns <strong class="text-emerald-600">green</strong> when the rWatcher is ready.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <span class="material-symbols-outlined text-amber-500 text-[16px] mt-0.5">warning</span>
+              <p class="text-xs text-amber-700 leading-relaxed"><strong>Icon stays grey?</strong> Verify the BotManager is connected (previous step). Also check that the Windows user account credentials you entered are correct and the user has RDP access.</p>
+            </div>
+          </div>
+        }
+
+        @if (gsPreviewStep() === 'schedule') {
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">A schedule defines how often your Process Monitor runs. You have two options:</p>
+
+            <div class="grid grid-cols-2 gap-3 mb-2">
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <p class="text-xs font-bold text-slate-800 mb-1">Option 1 — Default</p>
+                <p class="text-[11px] text-slate-500 leading-relaxed">Skip this step. When creating the Process Monitor, choose from built-in defaults (every 15 min, hourly, daily, etc.).</p>
+              </div>
+              <div class="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                <p class="text-xs font-bold text-primary mb-1">Option 2 — Custom</p>
+                <p class="text-[11px] text-slate-500 leading-relaxed">Create a custom schedule with your exact interval, active days, and time window.</p>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Create a Custom Schedule</p>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p class="text-xs text-slate-600">Click <strong>Schedules</strong> in the top nav, then the <strong>Schedules</strong> sub-tab, then <strong>+ Schedule</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p class="text-xs text-slate-600">Enter <strong>Schedule Name</strong> (e.g. "5 mins"). Set type to Interval, value to <strong>5 Minutes</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p class="text-xs text-slate-600">Set <strong>Active Days</strong> to Mon–Fri. Define <strong>Start/End times</strong> (e.g. 08:00–18:00).</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <p class="text-xs text-slate-600">The schedule appears with a blue active toggle. The "Next run" will populate once assigned to a Process Monitor.</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 mb-2">Optional — Maintenance Calendar</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">Under Schedules → Calendars, you can create exclusion calendars to pause monitoring during maintenance windows (e.g. weekends, holidays). Assign a calendar to a Process Monitor to prevent it from running during those times.</p>
+            </div>
+          </div>
+        }
+
+        @if (gsPreviewStep() === 'monitor') {
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">The Process Monitor ties everything together — your scenario, rWatcher, and schedule. This is the final configuration step before monitoring goes live.</p>
+
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Steps</p>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p class="text-xs text-slate-600">Click <strong>Process Monitors</strong> in the top nav, then <strong>+ Add process monitor</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <div class="text-xs text-slate-600">
+                    <p class="mb-1">Fill in the form:</p>
+                    <ul class="space-y-1 ml-4 text-[11px]">
+                      <li class="flex items-start gap-1.5"><span class="text-slate-400 mt-0.5">&#8226;</span> <strong>Section 1</strong> — Name, Project (select your project), Process/Scenario</li>
+                      <li class="flex items-start gap-1.5"><span class="text-slate-400 mt-0.5">&#8226;</span> <strong>Section 2</strong> — Execution Schedule (pick your schedule or default), Maintenance Calendar</li>
+                      <li class="flex items-start gap-1.5"><span class="text-slate-400 mt-0.5">&#8226;</span> <strong>Section 3</strong> — Distribution type + assign your rWatcher</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p class="text-xs text-slate-600">Click <strong>Publish</strong> in the top right corner. When prompted, click <strong>YES</strong> to start monitoring immediately.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <p class="text-xs text-slate-600">Your monitor appears in the list with a blue active toggle showing project, schedule, and rWatcher assigned.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+              <span class="material-symbols-outlined text-emerald-500 text-[16px] mt-0.5">check_circle</span>
+              <p class="text-xs text-emerald-700 leading-relaxed"><strong>Congratulations!</strong> Your process monitor is now live. The bot will start executing automatically based on the schedule you set.</p>
+            </div>
+          </div>
+        }
+
+        @if (gsPreviewStep() === 'results') {
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">Your Process Monitor is now live. Within 5 minutes the bot will automatically open a browser, navigate to your application, and execute the recorded steps — exactly as you did.</p>
+
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">What to Check</p>
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800 mb-2">Confirm the run started</h4>
+                  <p class="text-xs text-slate-600">Go to <strong>Schedules → Queue</strong>. You will see your monitor listed with a running status and start time.</p>
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800 mb-2">Watch the bot in action</h4>
+                  <p class="text-xs text-slate-600">Go to <strong>rWatchers</strong>, select your watcher, and click <strong>View Screen</strong>. You can watch the bot operate in real-time.</p>
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800 mb-2">Confirm runs completed</h4>
+                  <p class="text-xs text-slate-600">After ~5 minutes, go to <strong>Process Monitors</strong> and click the <strong>Results</strong> tab. Each run shows sub-processes, screenshots, and transactions.</p>
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800 mb-2">Check the Dashboard</h4>
+                  <p class="text-xs text-slate-600">The Dashboard gives a high-level overview: total checks, pass/fail rates, and recent activity across all your monitors.</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 mb-2">Troubleshooting — Log Files</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">If a run fails, check the log files at <code class="text-[11px] bg-slate-100 px-1 py-0.5 rounded">C:\Automai\logs</code>. The log file names include timestamps and watcher identifiers to help you pinpoint the issue.</p>
+            </div>
+          </div>
+        }
+
+        @if (gsPreviewStep() === 'reports') {
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600 leading-relaxed">Once your Process Monitor has been running for a while, you can export detailed monitoring data from the Reports tab. Three report types are available:</p>
+
+            <div class="grid grid-cols-3 gap-3 mb-2">
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                <span class="material-symbols-outlined text-primary text-2xl mb-1">summarize</span>
+                <p class="text-xs font-bold text-slate-800">Summary</p>
+                <p class="text-[10px] text-slate-400">High-level pass/fail overview with trends</p>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                <span class="material-symbols-outlined text-primary text-2xl mb-1">database</span>
+                <p class="text-xs font-bold text-slate-800">Raw Data</p>
+                <p class="text-[10px] text-slate-400">Full execution data for analysis</p>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+                <span class="material-symbols-outlined text-primary text-2xl mb-1">receipt_long</span>
+                <p class="text-xs font-bold text-slate-800">Transaction</p>
+                <p class="text-[10px] text-slate-400">Step-by-step transaction details</p>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Create a Report</p>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p class="text-xs text-slate-600">Click <strong>Reports</strong> in the top navigation. Choose <strong>+ Summary</strong>, <strong>+ Raw data</strong>, or <strong>+ Transaction data</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p class="text-xs text-slate-600">Select your <strong>Process Monitor</strong>, give the report a name, set the <strong>time interval</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p class="text-xs text-slate-600">Click <strong>Create</strong>. The report appears in the Manage reports list.</p>
+                </div>
+                <div class="flex gap-3">
+                  <span class="size-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <p class="text-xs text-slate-600">To generate immediately, click the <strong>Play</strong> button next to the report. Check <strong>Schedules → Queue</strong> to confirm.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between shrink-0 bg-slate-50">
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+          <span class="material-symbols-outlined text-[14px]">menu_book</span>
+          From the Automai Watcher Getting Started guide
+        </div>
+        <div class="flex items-center gap-2">
+          @if (gsPreviewStep() !== null && !gsIsComplete(gsPreviewStep()!)) {
+            <button (click)="gsMarkComplete(gsPreviewStep()!); gsClosePreview()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-[14px]">check</span> Mark as Done
+            </button>
+          }
+          <button (click)="gsClosePreview()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -243,17 +243,27 @@ export class App implements OnInit {
   }
 
   // ── Getting Started integrated flow ──
-  gettingStartedSteps: {id: string; label: string; icon: string; description: string; optional?: boolean}[] = [
-    {id: 'record-send', label: 'Record & Send Scenario', icon: 'videocam', description: 'Record your scenario in ScenarioBuilder and send it to Director.'},
-    {id: 'botmanager', label: 'Verify BotManager', icon: 'dns', description: 'Confirm BotManager is connected and ready.'},
-    {id: 'rwatcher', label: 'Add an rWatcher', icon: 'desktop_windows', description: 'Create and start a bot that will execute your scenario.'},
-    {id: 'schedule', label: 'Create a Schedule', icon: 'schedule', description: 'Define how often your Process Monitor runs.'},
-    {id: 'monitor', label: 'Create Process Monitor', icon: 'monitoring', description: 'Tie your scenario, rWatcher, and schedule together.'},
-    {id: 'results', label: 'See it Run', icon: 'play_circle', description: 'Watch your bot execute the scenario automatically.'},
+  gettingStartedSteps: {id: string; label: string; icon: string; description: string; optional?: boolean; videoUrl?: string}[] = [
+    {id: 'record-send', label: 'Record & Send Scenario', icon: 'videocam', description: 'Record your scenario in ScenarioBuilder and send it to Director.', videoUrl: 'https://www.youtube.com/embed/placeholder-record'},
+    {id: 'botmanager', label: 'Verify BotManager', icon: 'dns', description: 'Confirm BotManager is connected and ready.', videoUrl: 'https://www.youtube.com/embed/placeholder-botmanager'},
+    {id: 'rwatcher', label: 'Add an rWatcher', icon: 'desktop_windows', description: 'Create and start a bot that will execute your scenario.', videoUrl: 'https://www.youtube.com/embed/placeholder-rwatcher'},
+    {id: 'schedule', label: 'Create a Schedule', icon: 'schedule', description: 'Define how often your Process Monitor runs.', videoUrl: 'https://www.youtube.com/embed/placeholder-schedule'},
+    {id: 'monitor', label: 'Create Process Monitor', icon: 'monitoring', description: 'Tie your scenario, rWatcher, and schedule together.', videoUrl: 'https://www.youtube.com/embed/placeholder-monitor'},
+    {id: 'results', label: 'See it Run', icon: 'play_circle', description: 'Watch your bot execute the scenario automatically.', videoUrl: 'https://www.youtube.com/embed/placeholder-results'},
     {id: 'reports', label: 'Export Reports', icon: 'download', description: 'Download and share your automation results.', optional: true}
   ];
   gsActiveStep = signal<string>('record-send');
   gsCompletedSteps = signal<string[]>([]);
+  gsPreviewStep = signal<string | null>(null);
+
+  gsMarkComplete(stepId: string) {
+    this.gsCompletedSteps.update(s => s.includes(stepId) ? s : [...s, stepId]);
+    // Auto-advance to next incomplete step
+    const nextStep = this.gettingStartedSteps.find(st => !this.gsCompletedSteps().includes(st.id) && st.id !== stepId);
+    if (nextStep) {
+      this.gsActiveStep.set(nextStep.id);
+    }
+  }
 
   gsToggleComplete(stepId: string) {
     this.gsCompletedSteps.update(s =>
@@ -268,6 +278,19 @@ export class App implements OnInit {
   gsProgressPercent() {
     const total = this.gettingStartedSteps.length;
     return Math.round((this.gsCompletedSteps().length / total) * 100);
+  }
+
+  gsOpenPreview(stepId: string) {
+    this.gsPreviewStep.set(stepId);
+  }
+
+  gsClosePreview() {
+    this.gsPreviewStep.set(null);
+  }
+
+  gsPreviewStepData() {
+    const id = this.gsPreviewStep();
+    return id ? this.gettingStartedSteps.find(s => s.id === id) ?? null : null;
   }
 
   gsStepAction(stepId: string) {
@@ -493,6 +516,12 @@ export class App implements OnInit {
   }
 
   handleNextStep(currentStep: 'watcher' | 'schedule' | 'monitor') {
+    // Auto-complete corresponding Getting Started step
+    const gsMap: Record<string, string> = {watcher: 'rwatcher', schedule: 'schedule', monitor: 'monitor'};
+    if (gsMap[currentStep]) {
+      this.gsMarkComplete(gsMap[currentStep]);
+    }
+
     if (this.drawerMode() === 'standalone') {
       if (currentStep === 'monitor') {
         const editId = this.editingMonitorId();
@@ -734,6 +763,7 @@ export class App implements OnInit {
       }
       return m;
     }));
+    this.gsMarkComplete('results');
   }
 
   // ── Smart Add Process Wizard ──
@@ -841,6 +871,7 @@ export class App implements OnInit {
       assignedRWatcherIds: this.wizardSelectedWatcherIds()
     }]);
     this.wizardStep.set(6); // confirmation step
+    this.gsMarkComplete('monitor');
   }
 
   wizardStepLabels = ['Purpose', 'Name', 'Project & Scenario', 'Watchers', 'Schedule', 'Events', 'Done'];
@@ -1057,6 +1088,7 @@ export class App implements OnInit {
             }]);
             this.chatCreatedProcessId.set(newId);
             this.chatPhase.set('done');
+            this.gsMarkComplete('monitor');
             this.chatMessages.update(m => [...m, {
               role: 'agent',
               text: `✅ Process monitor "${d.name}" has been created successfully!\n\nHere's what was set up:\n• Project: ${d.project}\n• Scenario: ${d.scenario}\n• Watchers: ${d.watchers.join(', ')} (${watcherIds.length} assigned)\n• Schedule: ${d.schedule}\n• Status: Pending — waiting for first scheduled run\n\nWhat would you like to do next?`,
