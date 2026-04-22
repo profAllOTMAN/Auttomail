@@ -11,5 +11,6 @@ export const routes: Routes = [
   { path: 'help/new', data: { tab: 'help-new' }, children: [] },
   { path: 'help/new3', data: { tab: 'help-new3' }, children: [] },
   { path: 'help', data: { tab: 'help' }, children: [] },
+  { path: 'documentation', data: { tab: 'documentation' }, children: [] },
   { path: '**', redirectTo: 'dashboard' }
 ];

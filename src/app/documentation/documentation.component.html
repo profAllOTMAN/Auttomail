@@ -1,0 +1,813 @@
+<div class="flex h-screen bg-background-light">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto">
+    <div class="px-5 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="size-9 rounded-lg bg-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-white text-lg">design_services</span>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">Automai Watcher</h1>
+          <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Design System v1.0</p>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 py-3 px-3 space-y-0.5">
+      @for (s of sections; track s.id) {
+        <button (click)="scrollTo(s.id)"
+          class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left"
+          [ngClass]="activeSection() === s.id ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'">
+          <span class="material-symbols-outlined text-lg" [ngClass]="activeSection() === s.id ? 'text-primary' : 'text-slate-400'">{{ s.icon }}</span>
+          {{ s.label }}
+        </button>
+      }
+    </nav>
+    <div class="px-5 py-4 border-t border-slate-100">
+      <a routerLink="/dashboard" class="text-xs text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 no-underline">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Back to App
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 overflow-y-auto">
+    <div class="max-w-4xl mx-auto px-8 py-10 space-y-16">
+
+      <!-- ══════════════════════════════════════════ OVERVIEW ══════════════════════════════════════════ -->
+      <section id="doc-overview" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-2">Overview</h2>
+        <p class="text-sm text-slate-600 leading-relaxed mb-6">
+          The Automai Watcher design system defines the visual language, component patterns, and interaction guidelines used across the application.
+          This reference is intended for the development team to ensure consistency when building new features.
+        </p>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+              <span class="material-symbols-outlined text-primary">code</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Framework</h3>
+            <p class="text-xs text-slate-500">Angular 21, standalone components, signals-based state, OnPush change detection</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div class="size-10 rounded-lg bg-cyan-50 flex items-center justify-center mb-3">
+              <span class="material-symbols-outlined text-cyan-600">style</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Styling</h3>
+            <p class="text-xs text-slate-500">Tailwind CSS v4 with custom theme tokens. Inter font family. Utility-first approach.</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div class="size-10 rounded-lg bg-violet-50 flex items-center justify-center mb-3">
+              <span class="material-symbols-outlined text-violet-600">token</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Icons</h3>
+            <p class="text-xs text-slate-500">Material Symbols Outlined. Weight 400, no fill. Loaded via Google Fonts CDN.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ COLORS ══════════════════════════════════════════ -->
+      <section id="doc-colors" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Colors</h2>
+        <p class="text-sm text-slate-500 mb-6">Theme tokens defined in <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">src/styles.css</code> via Tailwind <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">@theme</code>.</p>
+
+        <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Brand</h3>
+        <div class="flex gap-4 mb-8">
+          <div class="text-center">
+            <div class="swatch bg-primary"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">Primary</p>
+            <p class="text-[10px] text-slate-400 font-mono">#335A85</p>
+          </div>
+          <div class="text-center">
+            <div class="swatch bg-background-light border-slate-200"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">BG Light</p>
+            <p class="text-[10px] text-slate-400 font-mono">#f6f7f8</p>
+          </div>
+          <div class="text-center">
+            <div class="swatch bg-background-dark"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">BG Dark</p>
+            <p class="text-[10px] text-slate-400 font-mono">#101922</p>
+          </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Semantic</h3>
+        <div class="flex gap-4 mb-8">
+          <div class="text-center">
+            <div class="swatch bg-emerald-500"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">Success</p>
+            <p class="text-[10px] text-slate-400 font-mono">emerald-500</p>
+          </div>
+          <div class="text-center">
+            <div class="swatch bg-red-500"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">Error</p>
+            <p class="text-[10px] text-slate-400 font-mono">red-500</p>
+          </div>
+          <div class="text-center">
+            <div class="swatch bg-amber-500"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">Warning</p>
+            <p class="text-[10px] text-slate-400 font-mono">amber-500</p>
+          </div>
+          <div class="text-center">
+            <div class="swatch bg-blue-500"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">Info</p>
+            <p class="text-[10px] text-slate-400 font-mono">blue-500</p>
+          </div>
+          <div class="text-center">
+            <div class="swatch bg-violet-500"></div>
+            <p class="text-[10px] font-bold text-slate-700 mt-2">Accent</p>
+            <p class="text-[10px] text-slate-400 font-mono">violet-500</p>
+          </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Neutrals (Slate)</h3>
+        <div class="flex gap-2">
+          @for (n of [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]; track n) {
+            <div class="text-center flex-1">
+              <div class="h-10 rounded-lg" [ngClass]="'bg-slate-' + n"></div>
+              <p class="text-[9px] text-slate-400 mt-1 font-mono">{{ n }}</p>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ TYPOGRAPHY ══════════════════════════════════════════ -->
+      <section id="doc-typography" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Typography</h2>
+        <p class="text-sm text-slate-500 mb-6">Font: <strong>Inter</strong> (Google Fonts). Weights: 300, 400, 500, 600, 700.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="divide-y divide-slate-100">
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-2xl font-bold text-slate-900">Page Title</span>
+              <code class="text-xs text-slate-400 font-mono">text-2xl font-bold</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-xl font-bold text-slate-900">Section Heading</span>
+              <code class="text-xs text-slate-400 font-mono">text-xl font-bold</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-lg font-bold text-slate-900">Card Title</span>
+              <code class="text-xs text-slate-400 font-mono">text-lg font-bold</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-sm font-semibold text-slate-900">Label / Field Title</span>
+              <code class="text-xs text-slate-400 font-mono">text-sm font-semibold</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-sm text-slate-700">Body Text</span>
+              <code class="text-xs text-slate-400 font-mono">text-sm text-slate-700</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-xs text-slate-500">Helper / Description</span>
+              <code class="text-xs text-slate-400 font-mono">text-xs text-slate-500</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">CATEGORY LABEL</span>
+              <code class="text-xs text-slate-400 font-mono">text-[10px] font-medium uppercase tracking-wider</code>
+            </div>
+            <div class="px-6 py-4 flex items-baseline justify-between">
+              <span class="text-[11px] font-bold tracking-widest text-primary uppercase">SECTION HEADER</span>
+              <code class="text-xs text-slate-400 font-mono">text-[11px] font-bold tracking-widest text-primary uppercase</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ BUTTONS ══════════════════════════════════════════ -->
+      <section id="doc-buttons" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Buttons</h2>
+        <p class="text-sm text-slate-500 mb-6">All interactive button variants used in the application.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-8">
+          <!-- Primary -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Primary</h3>
+            <div class="flex items-center gap-3 flex-wrap">
+              <button class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">add</span> New Monitor
+              </button>
+              <button class="px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">check</span> Create Process
+              </button>
+              <button class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 flex items-center gap-2 opacity-40 cursor-not-allowed" disabled>
+                Disabled
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">rounded-full for nav actions, rounded-lg for form submits</p>
+          </div>
+
+          <!-- Secondary -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Secondary / Ghost</h3>
+            <div class="flex items-center gap-3 flex-wrap">
+              <button class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+                Cancel
+              </button>
+              <button class="px-5 py-2.5 bg-white border border-slate-300 text-sm font-medium text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                Secondary
+              </button>
+              <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <span class="material-symbols-outlined text-lg">arrow_back</span> Back
+              </button>
+            </div>
+          </div>
+
+          <!-- Danger -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Danger</h3>
+            <div class="flex items-center gap-3">
+              <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">
+                Delete Monitor
+              </button>
+              <button class="size-8 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Icon buttons -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Icon Buttons</h3>
+            <div class="flex items-center gap-3">
+              <button class="size-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
+                <span class="material-symbols-outlined text-lg">send</span>
+              </button>
+              <button class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+              <button class="size-8 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chip / Tag buttons -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Chip / Suggestion Buttons</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button class="px-3 py-1.5 text-xs rounded-full border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all">
+                Default
+              </button>
+              <button class="px-3 py-1.5 text-xs rounded-full border border-primary bg-primary/10 text-primary font-medium transition-all">
+                Selected
+              </button>
+              <button class="px-3 py-1.5 text-xs font-medium rounded-full border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+                Quick Reply
+              </button>
+            </div>
+          </div>
+
+          <!-- Dashed action -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Dashed Action</h3>
+            <button class="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-500 hover:border-primary hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-lg">add</span> Create New Item
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ INPUTS ══════════════════════════════════════════ -->
+      <section id="doc-inputs" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Inputs & Forms</h2>
+        <p class="text-sm text-slate-500 mb-6">Form field patterns used across drawers and wizards.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-6">
+          <!-- Text input -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Text Input</h3>
+            <div class="max-w-md space-y-1.5">
+              <div class="flex items-center gap-1.5">
+                <label class="text-sm font-semibold text-slate-800">Field Label <span class="text-red-500">*</span></label>
+                <span class="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded uppercase tracking-wide">Required</span>
+              </div>
+              <input type="text" placeholder="Placeholder text..."
+                class="block px-3 py-3 w-full text-sm font-medium text-slate-900 bg-white rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400 transition-colors" />
+              <p class="text-xs text-slate-500">Helper text explaining the field.</p>
+            </div>
+          </div>
+
+          <!-- Standard input -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Standard Input</h3>
+            <div class="max-w-md space-y-1.5">
+              <label class="text-sm font-medium text-slate-700">Label <span class="text-slate-400 font-normal">(optional)</span></label>
+              <input type="text" placeholder="Enter value..."
+                class="w-full px-4 py-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+            </div>
+          </div>
+
+          <!-- Select -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Select / Dropdown</h3>
+            <div class="max-w-md space-y-1.5">
+              <label class="text-sm font-medium text-slate-700">BotManager</label>
+              <div class="relative">
+                <select class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                  <option>BotManager-1 (Online)</option>
+                  <option>BotManager-2 (Offline)</option>
+                </select>
+                <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
+                  <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search input -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Search Input</h3>
+            <div class="max-w-md relative">
+              <span class="material-symbols-outlined text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 text-lg">search</span>
+              <input type="text" placeholder="Search processes..."
+                class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+            </div>
+          </div>
+
+          <!-- Chat input -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Chat Input</h3>
+            <div class="max-w-md flex items-center gap-2">
+              <input type="text" placeholder="Type your response..."
+                class="flex-1 px-4 py-2.5 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+              <button class="size-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
+                <span class="material-symbols-outlined text-lg">send</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Checkbox -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Checkboxes</h3>
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <div class="size-5 rounded border-2 border-primary bg-primary text-white flex items-center justify-center">
+                  <span class="material-symbols-outlined text-xs">check</span>
+                </div>
+                <span class="text-sm text-slate-700">Checked state</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <div class="size-5 rounded border-2 border-slate-300 flex items-center justify-center"></div>
+                <span class="text-sm text-slate-700">Unchecked state</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ CARDS ══════════════════════════════════════════ -->
+      <section id="doc-cards" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Cards</h2>
+        <p class="text-sm text-slate-500 mb-6">Container patterns for grouping content.</p>
+
+        <div class="space-y-6">
+          <!-- Standard card -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Standard Card</h3>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm max-w-md">
+              <h3 class="text-sm font-bold text-slate-900 mb-1">Card Title</h3>
+              <p class="text-xs text-slate-500">Card description with supporting text.</p>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">bg-white border border-slate-200 rounded-xl p-5 shadow-sm</p>
+          </div>
+
+          <!-- Selectable card -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Selectable Card</h3>
+            <div class="grid grid-cols-2 gap-4 max-w-lg">
+              <div class="p-5 rounded-xl border-2 border-primary bg-primary/5 shadow-md shadow-primary/10 relative">
+                <div class="size-10 rounded-xl bg-primary text-white flex items-center justify-center mb-3">
+                  <span class="material-symbols-outlined">monitoring</span>
+                </div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">Selected</h3>
+                <p class="text-xs text-slate-500">Active selection state.</p>
+                <div class="absolute top-3 right-3 size-6 rounded-full bg-primary text-white flex items-center justify-center">
+                  <span class="material-symbols-outlined text-sm">check</span>
+                </div>
+              </div>
+              <div class="p-5 rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
+                <div class="size-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center mb-3">
+                  <span class="material-symbols-outlined">science</span>
+                </div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">Default</h3>
+                <p class="text-xs text-slate-500">Unselected state.</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">border-2 border-primary bg-primary/5 (selected) | border-slate-200 (default)</p>
+          </div>
+
+          <!-- Section with icon header -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Icon Header Pattern</h3>
+            <div class="bg-white border border-slate-200 rounded-xl p-6 max-w-md shadow-sm">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary">rocket_launch</span>
+                </div>
+                <h2 class="text-lg font-bold text-slate-900">Section Title</h2>
+              </div>
+              <p class="text-sm text-slate-500 ml-[52px]">Description text aligned with the title.</p>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">size-10 rounded-lg bg-[color]/10 + ml-[52px] on description</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ BADGES ══════════════════════════════════════════ -->
+      <section id="doc-badges" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Badges & Status</h2>
+        <p class="text-sm text-slate-500 mb-6">Status indicators and badge patterns.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-6">
+          <!-- Status badges -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Status Badges</h3>
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">online</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">busy</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">offline</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700">running</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-700">pending</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700">failed</span>
+            </div>
+          </div>
+
+          <!-- Dot indicators -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Dot Indicators</h3>
+            <div class="flex items-center gap-6">
+              <div class="flex items-center gap-1.5">
+                <span class="size-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-semibold text-slate-800">Online</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="size-2 rounded-full bg-red-500"></span>
+                <span class="text-xs font-semibold text-slate-800">Offline</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="size-2 rounded-full bg-amber-500"></span>
+                <span class="text-xs font-semibold text-slate-800">Busy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline badges -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Timeline Badges</h3>
+            <div class="flex items-center gap-3">
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">Update</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">Warning</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-red-100 text-red-700">Alert</span>
+            </div>
+          </div>
+
+          <!-- Severity badges -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Severity</h3>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">Critical</span>
+              <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200">High</span>
+              <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">Medium</span>
+              <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">Low</span>
+            </div>
+          </div>
+
+          <!-- Disabled / Coming Soon -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Coming Soon</h3>
+            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Coming Soon</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ MODALS ══════════════════════════════════════════ -->
+      <section id="doc-modals" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Modals & Drawers</h2>
+        <p class="text-sm text-slate-500 mb-6">Overlay patterns for focused interactions.</p>
+
+        <div class="space-y-6">
+          <!-- Modal preview -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Confirmation Modal</h3>
+            <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+              <div class="p-6">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="size-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">warning</span>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-slate-900">Delete Item</h3>
+                    <p class="text-sm text-slate-500 mt-1">Are you sure? This action cannot be undone.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">Cancel</button>
+                <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">Delete</button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">Backdrop: fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100]</p>
+          </div>
+
+          <!-- Form modal preview -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Form Modal (Event Setup)</h3>
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200">
+              <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Set threshold and event</h3>
+                <button class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div class="p-6 text-sm text-slate-500">Form content goes here...</div>
+              <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button class="px-5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">Cancel</button>
+                <button class="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Drawer anatomy -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Drawer Anatomy</h3>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden max-w-md">
+              <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Onboarding stepper (optional)
+              </div>
+              <header class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <h2 class="text-lg font-bold text-slate-900">Drawer Title</h2>
+                <span class="material-symbols-outlined text-slate-400">close</span>
+              </header>
+              <div class="px-6 py-5">
+                <span class="text-[11px] font-bold tracking-widest text-primary uppercase">Section Header</span>
+                <p class="text-slate-500 text-xs mt-0.5">Section description.</p>
+              </div>
+              <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-end gap-3">
+                <button class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100">Cancel</button>
+                <button class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold shadow-sm shadow-primary/20">Submit</button>
+              </footer>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">w-full max-w-[560px] fixed right-0 h-full. Sections divided with divide-y divide-slate-100.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ ICONS ══════════════════════════════════════════ -->
+      <section id="doc-icons" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Icons</h2>
+        <p class="text-sm text-slate-500 mb-6">Material Symbols Outlined. Used consistently with <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">material-symbols-outlined</code> class.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <div class="grid grid-cols-6 sm:grid-cols-8 gap-4">
+            @for (icon of ['monitoring', 'desktop_windows', 'dns', 'schedule', 'notifications', 'settings', 'add', 'edit', 'delete', 'close', 'check', 'check_circle', 'error', 'warning', 'info', 'visibility', 'search', 'arrow_back', 'arrow_forward', 'chevron_right', 'play_circle', 'send', 'smart_toy', 'rocket_launch', 'folder_open', 'description', 'analytics', 'grid_view', 'calendar_today', 'speed', 'timer', 'bolt']; track icon) {
+              <div class="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                <span class="material-symbols-outlined text-slate-600 text-2xl">{{ icon }}</span>
+                <span class="text-[9px] text-slate-400 text-center leading-tight">{{ icon }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ NAVIGATION ══════════════════════════════════════════ -->
+      <section id="doc-nav" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Navigation</h2>
+        <p class="text-sm text-slate-500 mb-6">Tab-based navigation using pill-style buttons.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <div class="flex items-center gap-2 flex-wrap">
+            <a class="py-2 px-3 text-sm font-medium bg-primary text-white rounded-full cursor-pointer no-underline">Active Tab</a>
+            <a class="py-2 px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded-full cursor-pointer no-underline transition-colors">Default Tab</a>
+            <div class="w-px h-5 bg-slate-200 mx-2"></div>
+            <a class="py-2 px-3 text-sm font-medium border border-primary text-primary bg-primary/5 rounded-full cursor-pointer no-underline">Help (bordered)</a>
+          </div>
+          <p class="text-xs text-slate-400 mt-3 font-mono">Active: bg-primary text-white rounded-full | Default: text-slate-600 hover:bg-slate-100</p>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ KPI CARDS ══════════════════════════════════════════ -->
+      <section id="doc-kpi" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">KPI Cards</h2>
+        <p class="text-sm text-slate-500 mb-6">Dashboard metric cards showing key performance indicators.</p>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
+            <div class="size-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">monitoring</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">12</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Processes</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-semibold text-emerald-600">8 Active</span>
+                <span class="text-[10px] text-slate-400">/</span>
+                <span class="text-[10px] font-semibold text-slate-500">4 Inactive</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-3">
+            <div class="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">desktop_windows</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">5</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Watchers</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-semibold text-emerald-600">3 Online</span>
+                <span class="text-[10px] text-slate-400">/</span>
+                <span class="text-[10px] font-semibold text-slate-500">2 Offline</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mt-2 font-mono">Icon: size-10 rounded-full bg-[color]-50 text-[color]-600. Value: text-2xl font-bold.</p>
+      </section>
+
+      <!-- ══════════════════════════════════════════ TABLES ══════════════════════════════════════════ -->
+      <section id="doc-tables" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Tables & Lists</h2>
+        <p class="text-sm text-slate-500 mb-6">List item patterns for process monitors and watchers.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <!-- Selectable list item -->
+          <div class="px-4 py-3 flex items-center gap-3 bg-primary/5 border-l-[3px] border-primary cursor-pointer">
+            <div class="size-2 rounded-full bg-emerald-500 shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <span class="text-sm font-semibold text-slate-900">Selected Item</span>
+              <p class="text-[10px] text-slate-400 truncate">Scenario: Example Flow</p>
+            </div>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">running</span>
+          </div>
+          <div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer border-l-[3px] border-transparent">
+            <div class="size-2 rounded-full bg-amber-400 shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <span class="text-sm font-semibold text-slate-900">Default Item</span>
+              <p class="text-[10px] text-slate-400 truncate">Scenario: Another Flow</p>
+            </div>
+            <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">pending</span>
+          </div>
+          <div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer border-l-[3px] border-transparent opacity-50">
+            <div class="size-2 rounded-full bg-slate-300 shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <span class="text-sm font-semibold text-slate-900">Disabled Item</span>
+              <p class="text-[10px] text-slate-400 truncate">Manually disabled</p>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full">disabled</span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mt-2 font-mono">Selected: bg-primary/5 border-l-[3px] border-primary | Hover: hover:bg-slate-50</p>
+      </section>
+
+      <!-- ══════════════════════════════════════════ CHAT AGENT ══════════════════════════════════════════ -->
+      <section id="doc-chat" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Chat Agent</h2>
+        <p class="text-sm text-slate-500 mb-6">Conversational UI patterns for the AI setup assistant.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <div class="p-4 space-y-4">
+            <!-- Agent message -->
+            <div class="flex gap-3">
+              <div class="size-8 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-violet-600 text-lg">smart_toy</span>
+              </div>
+              <div class="max-w-[80%] space-y-2">
+                <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-slate-100 text-slate-800 text-sm leading-relaxed">
+                  Agent message bubble. Left-aligned with avatar.
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-3 py-1.5 text-xs font-medium rounded-full border border-primary/30 text-primary bg-primary/5">Quick Reply</span>
+                  <span class="px-3 py-1.5 text-xs font-medium rounded-full border border-primary/30 text-primary bg-primary/5">Option 2</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- User message -->
+            <div class="flex gap-3 flex-row-reverse">
+              <div class="max-w-[80%]">
+                <div class="px-4 py-3 rounded-2xl rounded-tr-md bg-primary text-white text-sm leading-relaxed">
+                  User message. Right-aligned, no avatar.
+                </div>
+              </div>
+            </div>
+
+            <!-- Typing indicator -->
+            <div class="flex gap-3">
+              <div class="size-8 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-violet-600 text-lg">smart_toy</span>
+              </div>
+              <div class="bg-slate-100 rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1">
+                <div class="size-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0ms"></div>
+                <div class="size-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 150ms"></div>
+                <div class="size-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 300ms"></div>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-3">
+              <div class="size-8 shrink-0"></div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 bg-white hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all shadow-sm">
+                  <span class="material-symbols-outlined text-base">edit</span> Edit Process
+                </button>
+                <button class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 bg-white hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all shadow-sm">
+                  <span class="material-symbols-outlined text-base">schedule</span> Add Schedule
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════ SPACING ══════════════════════════════════════════ -->
+      <section id="doc-spacing" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Spacing & Layout</h2>
+        <p class="text-sm text-slate-500 mb-6">Consistent spacing and layout conventions.</p>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-6">
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Spacing Scale</h3>
+            <div class="space-y-2">
+              @for (sp of [
+                {val: '0.5', px: '2px', usage: 'Micro gaps between inline elements'},
+                {val: '1', px: '4px', usage: 'Tight spacing, badge padding'},
+                {val: '1.5', px: '6px', usage: 'Small gaps, field label margin'},
+                {val: '2', px: '8px', usage: 'Standard gap between small elements'},
+                {val: '3', px: '12px', usage: 'Card padding, section gaps'},
+                {val: '4', px: '16px', usage: 'Standard padding, card body'},
+                {val: '5', px: '20px', usage: 'Drawer section padding'},
+                {val: '6', px: '24px', usage: 'Page section horizontal padding'},
+                {val: '8', px: '32px', usage: 'Wizard step padding'}
+              ]; track sp.val) {
+                <div class="flex items-center gap-4">
+                  <code class="text-xs font-mono text-primary w-8 text-right">{{ sp.val }}</code>
+                  <div class="bg-primary/20 rounded" [style.width.px]="sp.px === '2px' ? 8 : +sp.px.replace('px','') * 2" style="height: 12px"></div>
+                  <span class="text-xs text-slate-400 font-mono w-10">{{ sp.px }}</span>
+                  <span class="text-xs text-slate-600">{{ sp.usage }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Border Radius</h3>
+            <div class="flex items-end gap-4">
+              <div class="text-center">
+                <div class="size-12 bg-primary/20 rounded border border-primary/30"></div>
+                <p class="text-[10px] text-slate-400 mt-1 font-mono">rounded</p>
+                <p class="text-[10px] text-slate-500">Badges</p>
+              </div>
+              <div class="text-center">
+                <div class="size-12 bg-primary/20 rounded-lg border border-primary/30"></div>
+                <p class="text-[10px] text-slate-400 mt-1 font-mono">rounded-lg</p>
+                <p class="text-[10px] text-slate-500">Cards, Inputs</p>
+              </div>
+              <div class="text-center">
+                <div class="size-12 bg-primary/20 rounded-xl border border-primary/30"></div>
+                <p class="text-[10px] text-slate-400 mt-1 font-mono">rounded-xl</p>
+                <p class="text-[10px] text-slate-500">Panels, Modals</p>
+              </div>
+              <div class="text-center">
+                <div class="size-12 bg-primary/20 rounded-2xl border border-primary/30"></div>
+                <p class="text-[10px] text-slate-400 mt-1 font-mono">rounded-2xl</p>
+                <p class="text-[10px] text-slate-500">Chat bubbles</p>
+              </div>
+              <div class="text-center">
+                <div class="size-12 bg-primary/20 rounded-full border border-primary/30"></div>
+                <p class="text-[10px] text-slate-400 mt-1 font-mono">rounded-full</p>
+                <p class="text-[10px] text-slate-500">Buttons, Avatars</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Shadows</h3>
+            <div class="flex items-center gap-6">
+              <div class="text-center">
+                <div class="size-16 bg-white rounded-xl shadow-sm border border-slate-100"></div>
+                <p class="text-[10px] text-slate-400 mt-2 font-mono">shadow-sm</p>
+              </div>
+              <div class="text-center">
+                <div class="size-16 bg-white rounded-xl shadow-xl border border-slate-100"></div>
+                <p class="text-[10px] text-slate-400 mt-2 font-mono">shadow-xl</p>
+              </div>
+              <div class="text-center">
+                <div class="size-16 bg-white rounded-xl shadow-2xl border border-slate-100"></div>
+                <p class="text-[10px] text-slate-400 mt-2 font-mono">shadow-2xl</p>
+              </div>
+              <div class="text-center">
+                <div class="size-16 bg-primary rounded-xl shadow-sm shadow-primary/20"></div>
+                <p class="text-[10px] text-slate-400 mt-2 font-mono">shadow-primary/20</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <div class="border-t border-slate-200 pt-8 pb-4 text-center">
+        <p class="text-xs text-slate-400">Automai Watcher Design System v1.0 — Generated for development team handoff</p>
+        <p class="text-xs text-slate-400 mt-1">Last updated: April 2026</p>
+      </div>
+    </div>
+  </main>
+</div>

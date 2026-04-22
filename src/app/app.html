@@ -114,6 +114,11 @@
          routerLink="/help">
         Help
       </a>
+      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full border flex items-center gap-2 cursor-pointer no-underline"
+         [ngClass]="activeTab() === 'documentation' ? 'border-primary text-primary bg-primary/5' : 'border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+         routerLink="/documentation">
+        <span class="material-symbols-outlined text-[16px]">menu_book</span> Design System
+      </a>
     </div>
   </nav>
 
@@ -1883,6 +1888,8 @@
           </button>
         </div>
       </div>
+    } @else if (activeTab() === 'documentation') {
+      <app-documentation class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation>
     }
   </main>
 

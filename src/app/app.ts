@@ -5,6 +5,7 @@ import {filter} from 'rxjs/operators';
 import {AddWatcherDrawerComponent} from './drawers/add-watcher.component';
 import {AddScheduleDrawerComponent} from './drawers/add-schedule.component';
 import {CreateProcessMonitorDrawerComponent} from './drawers/create-process-monitor.component';
+import {DocumentationComponent} from './documentation/documentation.component';
 
 export interface SubProcess {
   id: string;
@@ -85,7 +86,8 @@ export interface LatestUpdate {
     RouterLink,
     AddWatcherDrawerComponent,
     AddScheduleDrawerComponent,
-    CreateProcessMonitorDrawerComponent
+    CreateProcessMonitorDrawerComponent,
+    DocumentationComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -119,7 +121,8 @@ export class App implements OnInit {
         'schedules': 'schedules',
         'projects': 'projects',
         'reports': 'reports',
-        'help': 'help'
+        'help': 'help',
+        'documentation': 'documentation'
       };
       this.activeTab.set(tabMap[path] || 'dashboard');
     });
