@@ -1074,7 +1074,7 @@ export class App implements OnInit {
 
   wizardCanProceed() {
     const step = this.wizardStep();
-    if (step === 0) return this.wizardType() !== null;
+    if (step === 0) return this.wizardType() !== null && this.wizardBmConfigured();
     if (this.wizardType() === 'testing') {
       if (step === 1) return this.wizardProcessName().trim().length > 0 && this.wizardProject().trim().length > 0;
       if (step === 2) return this.wizardTotalRLoaders() > 0 && this.wizardRampUpEvery() > 0;
@@ -1135,6 +1135,11 @@ export class App implements OnInit {
     this.wizardTestEmailInput.set('');
     this.wizardTestEmailList.set([]);
     this.wizardTestNotifEvents.set({started: false, finished: true, ramping: false, failures: false, allUsers: false});
+    // Reset BotManager setup (but keep defaults for name/hostname/etc)
+    this.wizardBmLauncherUsername.set('');
+    this.wizardBmLauncherPassword.set('');
+    this.wizardBmAdvancedOpen.set(false);
+    this.wizardBmShowPassword.set(false);
   }
 
   wizardSubmit() {
@@ -1180,6 +1185,35 @@ export class App implements OnInit {
   wizardTestProcessOptions = signal<string[]>([
     'complexScen', 'loginScenario', 'checkoutFlow', 'searchAndFilter', 'dataEntry'
   ]);
+
+  // ── Step 0: BotManager Setup (credentials) ──
+  wizardBmName = signal<string>('BotManager - 1');
+  wizardBmHostname = signal<string>('ec2amaz-ts88pb7');
+  wizardBmDescription = signal<string>('BotManager ec2amaz-ts88pb7');
+  wizardBmVersion = signal<string>('26.1.0');
+  wizardBmOS = signal<string>('Windows Server 2022 Datacenter');
+  wizardBmSetRemoteLauncher = signal<boolean>(false);
+  wizardBmLauncherUsername = signal<string>('');
+  wizardBmLauncherPassword = signal<string>('');
+  wizardBmLauncherDomain = signal<string>('');
+  wizardBmScriptingUserName = signal<string>('ScriptingBot');
+  wizardBmScriptingUserPassword = signal<string>('');
+  wizardBmDomain = signal<string>('');
+  wizardBmRdpResolution = signal<string>('1280x1024');
+  wizardBmRdpColorDepth = signal<string>('32-bit');
+  wizardBmRdpIp = signal<string>('ec2amaz-ts88pb7');
+  wizardBmRdpTimeout = signal<number>(30);
+  wizardBmUseLoader = signal<boolean>(true);
+  wizardBmUseWatcher = signal<boolean>(true);
+  wizardBmUseWorker = signal<boolean>(true);
+  wizardBmUseTester = signal<boolean>(true);
+  wizardBmAdvancedOpen = signal<boolean>(false);
+  wizardBmShowPassword = signal<boolean>(false);
+
+  wizardBmConfigured() {
+    return this.wizardBmLauncherUsername().trim().length > 0 &&
+           this.wizardBmLauncherPassword().trim().length > 0;
+  }
 
   // BotManager rLoader prerequisite
   wizardBotManagerReady = signal<boolean>(false);
