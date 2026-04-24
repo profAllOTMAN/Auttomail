@@ -77,6 +77,25 @@ export interface LatestUpdate {
   icon: string;
 }
 
+export interface TestRun {
+  id: string;
+  name: string;
+  project: string;
+  status: 'running' | 'queued' | 'completed' | 'failed' | 'disabled';
+  rLoadersActive: number;
+  rLoadersTotal: number;
+  vUsers: number;
+  duration: string;
+  elapsed: string;
+  progress: number; // 0..100
+  responseTime: number; // ms
+  successRate: number; // 0..100
+  iterations: number;
+  errors: number;
+  startedAt: string;
+  processes: string[];
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
@@ -99,12 +118,29 @@ export class App implements OnInit {
   completedSteps = signal<string[]>(['notifications', 'watcher', 'schedule', 'monitor']);
   activeTab = signal<string>('dashboard');
 
+  // Watcher vs Loader environment toggle
+  appMode = signal<'watcher' | 'loader'>('watcher');
+
+  setAppMode(mode: 'watcher' | 'loader') {
+    if (this.appMode() === mode) return;
+    this.appMode.set(mode);
+    if (mode === 'loader') {
+      this.navigate('/test-runs');
+    } else {
+      this.navigate('/dashboard');
+    }
+  }
+
   ngOnInit() {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
       // Check for multi-segment paths first
+      if (url.startsWith('/help/new4')) {
+        this.activeTab.set('help-new4');
+        return;
+      }
       if (url.startsWith('/help/new3')) {
         this.activeTab.set('help-new3');
         return;
@@ -121,10 +157,20 @@ export class App implements OnInit {
         'schedules': 'schedules',
         'projects': 'projects',
         'reports': 'reports',
+        'test-plans': 'test-plans',
+        'test-runs': 'test-runs',
+        'botmanagers': 'botmanagers',
         'help': 'help',
         'documentation': 'documentation'
       };
-      this.activeTab.set(tabMap[path] || 'dashboard');
+      const nextTab = tabMap[path] || 'dashboard';
+      this.activeTab.set(nextTab);
+      // Auto-sync mode with tab (in case of deep links / browser nav)
+      if (['test-plans', 'test-runs', 'botmanagers'].includes(nextTab)) {
+        this.appMode.set('loader');
+      } else if (['dashboard', 'process-monitor', 'rwatchers', 'schedules'].includes(nextTab)) {
+        this.appMode.set('watcher');
+      }
     });
   }
 
@@ -177,6 +223,212 @@ export class App implements OnInit {
   }
 
   monitors = signal<ProcessMonitor[]>(this.getDemoMonitors());
+
+  // --- Test Runs (Loader mode) ---
+  testRuns = signal<TestRun[]>(this.getDemoTestRuns());
+  testRunsSearch = signal<string>('');
+  testRunsStatusFilter = signal<'all' | 'running' | 'queued' | 'completed' | 'failed' | 'disabled'>('all');
+
+  filteredTestRuns() {
+    const search = this.testRunsSearch().toLowerCase();
+    const statusFilter = this.testRunsStatusFilter();
+    return this.testRuns().filter(t => {
+      if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+      if (!search) return true;
+      return t.name.toLowerCase().includes(search) || t.project.toLowerCase().includes(search);
+    });
+  }
+
+  testRunsCountByStatus(status: TestRun['status']) {
+    return this.testRuns().filter(t => t.status === status).length;
+  }
+
+  totalActiveRLoaders() {
+    return this.testRuns()
+      .filter(t => t.status === 'running')
+      .reduce((sum, t) => sum + t.rLoadersActive, 0);
+  }
+
+  avgResponseTime() {
+    const active = this.testRuns().filter(t => t.status === 'running' || t.status === 'completed');
+    if (!active.length) return 0;
+    return Math.round(active.reduce((sum, t) => sum + t.responseTime, 0) / active.length);
+  }
+
+  totalVUsersRunning() {
+    return this.testRuns()
+      .filter(t => t.status === 'running')
+      .reduce((sum, t) => sum + t.vUsers, 0);
+  }
+
+  avgSuccessRate() {
+    const arr = this.testRuns().filter(t => t.status === 'completed' || t.status === 'running');
+    if (!arr.length) return 0;
+    return Math.round(arr.reduce((sum, t) => sum + t.successRate, 0) / arr.length);
+  }
+
+  totalErrorsToday() {
+    return this.testRuns().reduce((sum, t) => sum + t.errors, 0);
+  }
+
+  runTestRun(id: string) {
+    this.testRuns.update(runs => runs.map(r =>
+      r.id === id ? { ...r, status: 'running' as const, progress: 1, elapsed: '00:00:05' } : r
+    ));
+  }
+
+  stopTestRun(id: string) {
+    this.testRuns.update(runs => runs.map(r =>
+      r.id === id ? { ...r, status: 'completed' as const, progress: 100 } : r
+    ));
+  }
+
+  toggleTestRunDisabled(id: string) {
+    this.testRuns.update(runs => runs.map(r => {
+      if (r.id !== id) return r;
+      if (r.status === 'disabled') return { ...r, status: 'queued' as const };
+      return { ...r, status: 'disabled' as const };
+    }));
+  }
+
+  retryTestRun(id: string) {
+    this.testRuns.update(runs => runs.map(r =>
+      r.id === id ? { ...r, status: 'queued' as const, progress: 0, elapsed: '00:00:00', errors: 0 } : r
+    ));
+  }
+
+  testRunStatusColor(status: TestRun['status']): string {
+    switch (status) {
+      case 'running': return 'bg-blue-100 text-blue-700';
+      case 'queued': return 'bg-amber-100 text-amber-700';
+      case 'completed': return 'bg-green-100 text-green-700';
+      case 'failed': return 'bg-red-100 text-red-700';
+      case 'disabled': return 'bg-slate-200 text-slate-600';
+    }
+  }
+
+  testRunStatusIcon(status: TestRun['status']): string {
+    switch (status) {
+      case 'running': return 'play_circle';
+      case 'queued': return 'schedule';
+      case 'completed': return 'check_circle';
+      case 'failed': return 'error';
+      case 'disabled': return 'pause_circle';
+    }
+  }
+
+  getDemoTestRuns(): TestRun[] {
+    return [
+      {
+        id: 'tr-1',
+        name: 'Peak Hour Login Load',
+        project: 'Customer Portal',
+        status: 'running',
+        rLoadersActive: 8,
+        rLoadersTotal: 10,
+        vUsers: 240,
+        duration: '30m',
+        elapsed: '00:12:48',
+        progress: 42,
+        responseTime: 285,
+        successRate: 98,
+        iterations: 1420,
+        errors: 12,
+        startedAt: '12 min ago',
+        processes: ['Login Flow', 'Dashboard Load']
+      },
+      {
+        id: 'tr-2',
+        name: 'Checkout Stress Test',
+        project: 'E-Commerce',
+        status: 'running',
+        rLoadersActive: 5,
+        rLoadersTotal: 5,
+        vUsers: 150,
+        duration: '45m',
+        elapsed: '00:28:03',
+        progress: 62,
+        responseTime: 412,
+        successRate: 94,
+        iterations: 2180,
+        errors: 48,
+        startedAt: '28 min ago',
+        processes: ['Add to Cart', 'Checkout', 'Payment']
+      },
+      {
+        id: 'tr-3',
+        name: 'Nightly Regression',
+        project: 'Core Banking',
+        status: 'queued',
+        rLoadersActive: 0,
+        rLoadersTotal: 4,
+        vUsers: 100,
+        duration: '60m',
+        elapsed: '00:00:00',
+        progress: 0,
+        responseTime: 0,
+        successRate: 0,
+        iterations: 0,
+        errors: 0,
+        startedAt: 'Scheduled for 02:00',
+        processes: ['Account Open', 'Transfer', 'Statement']
+      },
+      {
+        id: 'tr-4',
+        name: 'API Smoke Test',
+        project: 'Integrations',
+        status: 'completed',
+        rLoadersActive: 0,
+        rLoadersTotal: 2,
+        vUsers: 50,
+        duration: '10m',
+        elapsed: '00:10:00',
+        progress: 100,
+        responseTime: 148,
+        successRate: 100,
+        iterations: 500,
+        errors: 0,
+        startedAt: '2h ago',
+        processes: ['Health Check', 'Auth API']
+      },
+      {
+        id: 'tr-5',
+        name: 'Report Generation Load',
+        project: 'Analytics',
+        status: 'failed',
+        rLoadersActive: 0,
+        rLoadersTotal: 6,
+        vUsers: 120,
+        duration: '20m',
+        elapsed: '00:07:21',
+        progress: 36,
+        responseTime: 892,
+        successRate: 42,
+        iterations: 320,
+        errors: 186,
+        startedAt: '4h ago',
+        processes: ['Generate PDF', 'Export CSV']
+      },
+      {
+        id: 'tr-6',
+        name: 'Search Endurance 8h',
+        project: 'Marketplace',
+        status: 'disabled',
+        rLoadersActive: 0,
+        rLoadersTotal: 3,
+        vUsers: 80,
+        duration: '8h',
+        elapsed: '00:00:00',
+        progress: 0,
+        responseTime: 0,
+        successRate: 0,
+        iterations: 0,
+        errors: 0,
+        startedAt: 'Last run 3d ago',
+        processes: ['Search Query', 'Filter Results']
+      }
+    ];
+  }
 
   dashboardProcessSearch = signal<string>('');
 
