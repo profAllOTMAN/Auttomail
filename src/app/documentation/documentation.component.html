@@ -31,7 +31,58 @@
 
   <!-- Main content -->
   <main class="flex-1 overflow-y-auto">
-    <div class="max-w-4xl mx-auto px-8 py-10 space-y-16">
+    <!-- Export toolbar -->
+    <div class="doc-export-toolbar sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 px-8 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2 text-[11px] text-slate-500">
+        <span class="material-symbols-outlined text-[16px] text-slate-400">description</span>
+        <span>Design System Documentation</span>
+      </div>
+      <div class="relative">
+        <button (click)="toggleExportMenu()" type="button"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">download</span>
+          Export
+          <span class="material-symbols-outlined text-[16px] transition-transform"
+            [ngClass]="exportMenuOpen() ? 'rotate-180' : ''">expand_more</span>
+        </button>
+        @if (exportMenuOpen()) {
+          <div class="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+            <button (click)="exportMarkdown()" type="button"
+              class="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-start gap-3 border-b border-slate-100">
+              <div class="size-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[16px]">notes</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-900">Markdown (Notion)</p>
+                <p class="text-[10px] text-slate-500">Import into Notion, Obsidian, or any MD editor.</p>
+              </div>
+            </button>
+            <button (click)="exportPdf()" type="button"
+              class="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-start gap-3 border-b border-slate-100">
+              <div class="size-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-900">PDF</p>
+                <p class="text-[10px] text-slate-500">Print dialog — choose "Save as PDF".</p>
+              </div>
+            </button>
+            <button (click)="exportDocx()" type="button"
+              class="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-start gap-3">
+              <div class="size-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[16px]">article</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-900">Word (.doc)</p>
+                <p class="text-[10px] text-slate-500">Open in Word/Google Docs — edit &amp; drop screenshots.</p>
+              </div>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div #docContent class="max-w-4xl mx-auto px-8 py-10 space-y-16">
 
       <!-- ══════════════════════════════════════════ OVERVIEW ══════════════════════════════════════════ -->
       <section id="doc-overview" class="doc-section">
