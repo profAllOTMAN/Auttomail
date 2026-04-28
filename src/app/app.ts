@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, signal, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Router, RouterOutlet, NavigationEnd, RouterLink} from '@angular/router';
+import {Router, NavigationEnd, RouterLink} from '@angular/router';
 import {filter} from 'rxjs/operators';
 import {AddWatcherDrawerComponent} from './drawers/add-watcher.component';
 import {AddScheduleDrawerComponent} from './drawers/add-schedule.component';
@@ -101,7 +101,6 @@ export interface TestRun {
   selector: 'app-root',
   imports: [
     CommonModule,
-    RouterOutlet,
     RouterLink,
     AddWatcherDrawerComponent,
     AddScheduleDrawerComponent,
