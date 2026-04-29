@@ -766,7 +766,7 @@
             <h2 class="text-xl font-bold text-slate-900">rWatchers</h2>
             <p class="text-sm text-slate-500 mt-1">Manage the machines that execute your automated processes.</p>
           </div>
-          <button (click)="openRWatcherWizard()" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+          <button (click)="openDrawer('watcher', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> Add rWatcher
           </button>
         </div>
@@ -779,7 +779,7 @@
             </div>
             <div>
               <p class="text-2xl font-bold text-slate-900">{{ onlineRWatcherCount() }}</p>
-              <p class="text-xs font-medium text-slate-500">Available</p>
+              <p class="text-xs font-medium text-slate-500">Online</p>
             </div>
           </div>
           <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-4">
@@ -802,54 +802,12 @@
           </div>
         </div>
 
-        <!-- Filters row: search + status pills -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <div class="relative flex-1 min-w-[220px] max-w-md">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-            <input type="text" [value]="rwatcherSearch()" (input)="rwatcherSearch.set($any($event.target).value)"
-              placeholder="Search by alias, IP, BotManager, or group..."
-              class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+        <!-- Search Bar -->
+        <div class="relative w-full sm:max-w-md">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
           </div>
-          <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
-            @for (opt of [
-              {value: 'all', label: 'All'},
-              {value: 'online', label: 'Available'},
-              {value: 'busy', label: 'Busy'},
-              {value: 'offline', label: 'Offline'}
-            ]; track opt.value) {
-              <button (click)="rwatcherStatusFilter.set($any(opt.value))"
-                class="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-                [ngClass]="rwatcherStatusFilter() === opt.value ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50'">
-                {{ opt.label }}
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Bulk action bar -->
-        <div class="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center gap-3 flex-wrap">
-          <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-            <input type="checkbox" [checked]="isAllRWatchersSelected()" (change)="toggleAllRWatchersSelected()"
-              class="rounded border-slate-300 text-primary focus:ring-primary/20" />
-            Select all
-          </label>
-          <span class="text-[11px] text-slate-400">{{ selectedRWatcherIds().length }} selected</span>
-          <div class="flex-1"></div>
-          <button (click)="bulkRunRWatchers()" [disabled]="!selectedRWatcherIds().length"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed">
-            <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all
-          </button>
-          <button (click)="bulkActivateRWatchers()" [disabled]="!selectedRWatcherIds().length"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed">
-            <span class="material-symbols-outlined text-[16px]">power</span> Activate
-          </button>
-          <button (click)="bulkDeactivateRWatchers()" [disabled]="!selectedRWatcherIds().length"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed">
-            <span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate
-          </button>
-          @if (selectedRWatcherIds().length) {
-            <button (click)="clearRWatcherSelection()" class="text-[11px] text-slate-500 hover:text-slate-700 underline">Clear</button>
-          }
+          <input type="text" [value]="rwatcherSearch()" (input)="rwatcherSearch.set($any($event.target).value)" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search by alias, IP, or BotManager..." />
         </div>
 
         <!-- rWatcher Cards List -->
@@ -862,13 +820,9 @@
                  style="border-left-width: 3px;">
 
               <!-- Main Row -->
-              <div class="p-4 flex flex-col xl:flex-row xl:items-center gap-4">
-                <!-- Selection -->
-                <input type="checkbox" [checked]="selectedRWatcherIds().includes(watcher.id)" (change)="toggleRWatcherSelected(watcher.id)"
-                  class="rounded border-slate-300 text-primary focus:ring-primary/20 mt-1 xl:mt-0 shrink-0" />
-
+              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                 <!-- Identity & Status -->
-                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[260px]">
+                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
                   <div class="size-10 flex items-center justify-center rounded-md shrink-0"
                        [class.bg-emerald-50]="watcher.status === 'online'" [class.text-emerald-600]="watcher.status === 'online'"
                        [class.bg-blue-50]="watcher.status === 'busy'" [class.text-blue-600]="watcher.status === 'busy'"
@@ -877,37 +831,28 @@
                   </div>
                   <div class="flex flex-col min-w-0">
                     <h3 class="font-bold text-slate-900 text-sm">{{ watcher.alias }}</h3>
-                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <div class="flex items-center gap-2 mt-0.5">
                       <span class="flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
                             [class.text-emerald-700]="watcher.status === 'online'" [class.bg-emerald-100]="watcher.status === 'online'"
                             [class.text-blue-700]="watcher.status === 'busy'" [class.bg-blue-100]="watcher.status === 'busy'"
                             [class.text-slate-600]="watcher.status === 'offline'" [class.bg-slate-100]="watcher.status === 'offline'">
                         @if (watcher.status === 'online') {
-                          <span class="size-1.5 rounded-full bg-emerald-500"></span> Available
+                          <span class="size-1.5 rounded-full bg-emerald-500"></span> Online
                         } @else if (watcher.status === 'busy') {
                           <span class="material-symbols-outlined text-[12px] animate-spin">sync</span> Busy
                         } @else {
                           <span class="size-1.5 rounded-full bg-slate-400"></span> Offline
                         }
                       </span>
-                      @if (watcher.isActive) {
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded text-emerald-700 bg-emerald-50 border border-emerald-200">
-                          <span class="size-1 rounded-full bg-emerald-500"></span> Active
-                        </span>
-                      } @else {
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-500 bg-slate-50 border border-slate-200">
-                          <span class="size-1 rounded-full bg-slate-300"></span> Inactive
-                        </span>
-                      }
                     </div>
-                    <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[260px]">{{ watcher.description }}</p>
+                    <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[250px]">{{ watcher.description }}</p>
                   </div>
                 </div>
 
                 <!-- Quick Stats -->
-                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
+                <div class="flex flex-wrap items-center gap-4 sm:gap-8 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
                   <div class="flex flex-col w-[45%] sm:w-auto">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">IP</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">IP Address</span>
                     <span class="text-xs font-semibold text-slate-700 font-mono">{{ watcher.ipAddress }}</span>
                   </div>
                   <div class="flex flex-col w-[45%] sm:w-auto">
@@ -915,122 +860,129 @@
                     <span class="text-xs font-semibold text-slate-700">{{ watcher.botManager }}</span>
                   </div>
                   <div class="flex flex-col w-[45%] sm:w-auto">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Processes</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ watcher.assignedMonitors }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Last Ping</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ watcher.lastPing }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto min-w-[150px]">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Groups</span>
-                    @if (watcher.groups?.length) {
-                      <div class="flex flex-wrap gap-1">
-                        @for (g of watcher.groups; track g) {
-                          <span class="inline-flex px-1.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-medium rounded-full">{{ g }}</span>
-                        }
-                      </div>
-                    } @else {
-                      <span class="text-[11px] text-slate-400">—</span>
-                    }
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Monitors</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ watcher.assignedMonitors }}</span>
                   </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center justify-between sm:justify-end gap-1 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-3 xl:border-l border-slate-100 shrink-0">
-                  @if (watcher.status === 'busy') {
-                    <button (click)="stopRWatcher(watcher.id)" title="Stop"
-                      class="size-8 rounded-md flex items-center justify-center text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200">
-                      <span class="material-symbols-outlined text-[18px]">stop</span>
+                <div class="flex items-center justify-between sm:justify-end gap-3 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                  <button (click)="toggleRWatcherExpand(watcher.id)" class="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-primary px-3 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">{{ expandedRWatcher() === watcher.id ? 'expand_less' : 'expand_more' }}</span>
+                    {{ expandedRWatcher() === watcher.id ? 'Less' : 'Details' }}
+                  </button>
+                  <div class="relative group">
+                    <button class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                      <span class="material-symbols-outlined text-[20px]">more_vert</span>
                     </button>
-                  } @else {
-                    <button (click)="runRWatcher(watcher.id)" [disabled]="watcher.status === 'offline' && !watcher.isActive" title="Run"
-                      class="size-8 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 disabled:opacity-40 disabled:cursor-not-allowed">
-                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                    </button>
-                  }
-                  <button (click)="toggleRWatcherActive(watcher.id)" [title]="watcher.isActive ? 'Deactivate' : 'Activate'"
-                    class="size-8 rounded-md flex items-center justify-center hover:bg-slate-100 border border-transparent hover:border-slate-200"
-                    [ngClass]="watcher.isActive ? 'text-emerald-600' : 'text-slate-400'">
-                    <span class="material-symbols-outlined text-[18px]">{{ watcher.isActive ? 'power' : 'power_off' }}</span>
-                  </button>
-                  <button (click)="openRWatcherWizard(watcher.id)" title="Edit"
-                    class="size-8 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 border border-transparent hover:border-slate-200">
-                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                  </button>
-                  <button (click)="toggleRWatcherExpand(watcher.id)" title="Details"
-                    class="size-8 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 border border-transparent hover:border-slate-200">
-                    <span class="material-symbols-outlined text-[18px]">{{ expandedRWatcher() === watcher.id ? 'expand_less' : 'expand_more' }}</span>
-                  </button>
-                  <button (click)="confirmDeleteRWatcher(watcher.id)" title="Remove"
-                    class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 border border-transparent hover:border-rose-200">
-                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
+                    <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                      <div class="py-1">
+                        <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">edit</span> Edit Configuration
+                        </button>
+                        <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">restart_alt</span> Restart Connection
+                        </button>
+                        <button (click)="confirmDeleteRWatcher(watcher.id)" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">delete</span> Remove rWatcher
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Expanded Detail Panel: live screen left + stats right -->
+              <!-- Expanded Detail Panel -->
               @if (expandedRWatcher() === watcher.id) {
-                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4">
-                  <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
-                    <!-- Live Screen View (horizontal main focus) -->
-                    <div>
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live Screen View</span>
-                        <span class="text-[10px] text-slate-400">{{ watcher.resolution }} · {{ watcher.colorDepth }}</span>
-                      </div>
-                      <div class="bg-slate-900 rounded-lg overflow-hidden aspect-video flex items-center justify-center relative">
-                        @if (watcher.status === 'offline') {
-                          <div class="text-center">
-                            <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">desktop_access_disabled</span>
-                            <p class="text-xs text-slate-500">Watcher is offline</p>
-                          </div>
-                        } @else {
-                          <div class="text-center">
-                            <span class="material-symbols-outlined text-5xl text-slate-500 mb-2">screen_share</span>
-                            <p class="text-xs text-slate-400">Live screen feed</p>
-                          </div>
-                          <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                            <span class="size-1.5 rounded-full bg-white animate-pulse"></span> LIVE
-                          </div>
-                        }
-                      </div>
+                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4 space-y-4">
+                  <!-- Live Screen View -->
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Screen View</span>
+                    <div class="bg-slate-900 rounded-lg overflow-hidden aspect-video max-w-2xl flex items-center justify-center relative">
+                      @if (watcher.status === 'offline') {
+                        <div class="text-center">
+                          <span class="material-symbols-outlined text-3xl text-slate-600 mb-2">desktop_access_disabled</span>
+                          <p class="text-xs text-slate-500">Watcher is offline</p>
+                        </div>
+                      } @else {
+                        <div class="text-center">
+                          <span class="material-symbols-outlined text-4xl text-slate-500 mb-2">screen_share</span>
+                          <p class="text-xs text-slate-400">Live screen feed</p>
+                          <p class="text-[10px] text-slate-600 mt-1">{{ watcher.resolution }} &middot; {{ watcher.colorDepth }}</p>
+                        </div>
+                        <!-- Live indicator -->
+                        <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                          <span class="size-1.5 rounded-full bg-white animate-pulse"></span> LIVE
+                        </div>
+                      }
                     </div>
+                  </div>
 
-                    <!-- Stats column (side) -->
-                    <div class="space-y-3">
-                      <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-white rounded-lg border border-slate-200 p-3">
-                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Checks</span>
-                          <span class="text-base font-bold text-slate-900">{{ watcher.totalChecks ?? 0 }}</span>
-                        </div>
-                        <div class="bg-white rounded-lg border border-slate-200 p-3">
-                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Response</span>
-                          <span class="text-base font-bold text-slate-900">{{ watcher.avgResponseTime ?? '--' }}</span>
-                        </div>
-                        <div class="bg-white rounded-lg border border-slate-200 p-3">
-                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success</span>
-                          <span class="text-base font-bold text-emerald-600">{{ watcher.successCount ?? 0 }}</span>
-                        </div>
-                        <div class="bg-white rounded-lg border border-slate-200 p-3">
-                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Failures</span>
-                          <span class="text-base font-bold text-rose-600">{{ watcher.failureCount ?? 0 }}</span>
-                        </div>
-                      </div>
-                      <div class="bg-white rounded-lg border border-slate-200 p-3 space-y-2 text-xs">
-                        <div class="flex justify-between"><span class="text-slate-500">Username</span><span class="font-mono text-slate-800">{{ watcher.username }}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Domain</span><span class="text-slate-800">{{ watcher.domain }}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Last Ping</span><span class="text-slate-800">{{ watcher.lastPing }}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Uptime</span>
-                          <span class="font-medium" [class.text-emerald-600]="watcher.status !== 'offline'" [class.text-slate-500]="watcher.status === 'offline'">{{ watcher.uptime }}</span>
-                        </div>
-                        <div class="flex justify-between"><span class="text-slate-500">Processes</span><span class="text-slate-800">{{ watcher.assignedMonitors }} active</span></div>
-                      </div>
-                      @if (watcher.groups?.length) {
-                        <div class="bg-white rounded-lg border border-slate-200 p-3">
-                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Groups</span>
-                          <div class="flex flex-wrap gap-1">
-                            @for (g of watcher.groups; track g) {
-                              <span class="inline-flex px-1.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-medium rounded-full">{{ g }}</span>
-                            }
-                          </div>
-                        </div>
+                  <!-- Stats Grid -->
+                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Resolution</span>
+                      <span class="text-sm text-slate-800 font-medium">{{ watcher.resolution }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color Depth</span>
+                      <span class="text-sm text-slate-800 font-medium">{{ watcher.colorDepth }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</span>
+                      <span class="text-sm text-slate-800 font-medium font-mono">{{ watcher.username }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Domain</span>
+                      <span class="text-sm text-slate-800 font-medium">{{ watcher.domain }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
+                      <span class="text-sm font-medium" [class.text-emerald-600]="watcher.status !== 'offline'" [class.text-slate-500]="watcher.status === 'offline'">{{ watcher.uptime }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monitors</span>
+                      <span class="text-sm text-slate-800 font-medium">{{ watcher.assignedMonitors }} active</span>
+                    </div>
+                  </div>
+
+                  <!-- Performance Stats -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Checks</span>
+                      <span class="text-lg font-bold text-slate-900">{{ watcher.totalChecks ?? 0 }}</span>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success</span>
+                      <span class="text-lg font-bold text-emerald-600">{{ watcher.successCount ?? 0 }}</span>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Failures</span>
+                      <span class="text-lg font-bold text-red-500">{{ watcher.failureCount ?? 0 }}</span>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 p-3">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Response</span>
+                      <span class="text-lg font-bold text-slate-900">{{ watcher.avgResponseTime ?? '--' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Trend Chart -->
+                  <div class="bg-white rounded-lg border border-slate-200 p-3">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Success Rate Trend (Last 7 Days)</span>
+                    <div class="flex items-end gap-1 h-10">
+                      @if (watcher.trendData) {
+                        @for (val of watcher.trendData; track $index) {
+                          <div class="flex-1 rounded-t-sm transition-all"
+                               [style.height.%]="val"
+                               [class.bg-emerald-400]="val >= 90"
+                               [class.bg-amber-400]="val >= 50 && val < 90"
+                               [class.bg-red-400]="val > 0 && val < 50"
+                               [class.bg-slate-200]="val === 0"></div>
+                        }
                       }
                     </div>
                   </div>
@@ -1044,7 +996,7 @@
               </div>
               <h3 class="text-lg font-bold text-slate-900 mb-2">No rWatchers found</h3>
               <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Register your first rWatcher to start executing automated processes on remote machines.</p>
-              <button (click)="openRWatcherWizard()" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
+              <button (click)="openDrawer('watcher', 'standalone')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
                 <span class="material-symbols-outlined text-[18px]">add</span> Add Your First rWatcher
               </button>
             </div>
@@ -1528,165 +1480,17 @@
         </div>
       </div>
     } @else if (activeTab() === 'schedules') {
-      <!-- Schedules Page -->
-      <div class="mt-6 space-y-6">
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900">Schedules</h2>
-            <p class="text-sm text-slate-500 mt-1">Trigger processes on a recurring cadence and order their execution.</p>
+      <!-- Schedules placeholder -->
+      <div class="mt-6 max-w-5xl mx-auto w-full">
+        <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
+          <div class="bg-violet-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-3xl text-violet-500">calendar_month</span>
           </div>
-          <button (click)="openDrawer('schedule', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Schedules</h3>
+          <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Create and manage schedules that control when your process monitors run.</p>
+          <button (click)="openDrawer('schedule', 'standalone')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> Create Schedule
           </button>
-        </div>
-
-        <!-- Filters row -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <div class="relative flex-1 min-w-[220px] max-w-md">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-            <input type="text" [value]="scheduleSearch()" (input)="scheduleSearch.set($any($event.target).value)"
-              placeholder="Search schedules..."
-              class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-          </div>
-          <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
-            @for (opt of [
-              {value: 'all', label: 'All'},
-              {value: 'active', label: 'Active'},
-              {value: 'deactivated', label: 'Deactivated'}
-            ]; track opt.value) {
-              <button (click)="scheduleStatusFilter.set($any(opt.value))"
-                class="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-                [ngClass]="scheduleStatusFilter() === opt.value ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50'">
-                {{ opt.label }}
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Schedule cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          @for (s of filteredSchedules(); track s.id) {
-            <div class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-              [ngClass]="s.status === 'deactivated' ? 'opacity-70' : ''">
-              <div class="p-4">
-                <!-- Header -->
-                <div class="flex items-start justify-between gap-2 mb-3">
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                      <div class="size-9 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-violet-600 text-[18px]">calendar_month</span>
-                      </div>
-                      <div class="min-w-0">
-                        <h3 class="text-sm font-bold text-slate-900 truncate">{{ s.name }}</h3>
-                        <p class="text-[11px] text-slate-500 truncate">{{ s.cronLabel }}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide shrink-0"
-                    [ngClass]="s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'">
-                    @if (s.status === 'active') {
-                      <span class="size-1.5 rounded-full bg-emerald-500"></span> Active
-                    } @else {
-                      <span class="size-1.5 rounded-full bg-slate-400"></span> Deactivated
-                    }
-                  </span>
-                </div>
-
-                <!-- Metadata grid -->
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                  <div class="bg-slate-50 rounded-lg p-2">
-                    <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Time zone</div>
-                    <div class="text-xs font-semibold text-slate-800 mt-0.5 truncate">{{ s.timezone }}</div>
-                  </div>
-                  <div class="bg-slate-50 rounded-lg p-2">
-                    <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Processes</div>
-                    <div class="text-xs font-semibold text-slate-800 mt-0.5">{{ s.processIds.length }} linked</div>
-                  </div>
-                  <div class="bg-slate-50 rounded-lg p-2">
-                    <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Last run</div>
-                    <div class="text-xs font-semibold text-slate-800 mt-0.5">{{ s.lastRun }}</div>
-                  </div>
-                  <div class="bg-slate-50 rounded-lg p-2">
-                    <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Next run</div>
-                    <div class="text-xs font-semibold text-slate-800 mt-0.5">{{ s.nextRun }}</div>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center gap-1 pt-3 border-t border-slate-100">
-                  <button (click)="runScheduleAll(s.id)" [disabled]="!s.processIds.length || s.status === 'deactivated'"
-                    class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed">
-                    <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all
-                  </button>
-                  <button (click)="toggleScheduleStatus(s.id)"
-                    [title]="s.status === 'active' ? 'Deactivate' : 'Activate'"
-                    class="size-8 rounded-md flex items-center justify-center hover:bg-slate-100 border border-transparent hover:border-slate-200"
-                    [ngClass]="s.status === 'active' ? 'text-emerald-600' : 'text-slate-400'">
-                    <span class="material-symbols-outlined text-[18px]">{{ s.status === 'active' ? 'power' : 'power_off' }}</span>
-                  </button>
-                  <button (click)="toggleScheduleExpand(s.id)" title="Reorder"
-                    class="size-8 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 border border-transparent hover:border-slate-200">
-                    <span class="material-symbols-outlined text-[18px]">{{ expandedSchedule() === s.id ? 'expand_less' : 'reorder' }}</span>
-                  </button>
-                  <button (click)="deleteSchedule(s.id)" title="Delete"
-                    class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 border border-transparent hover:border-rose-200">
-                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Expanded: process priority list -->
-              @if (expandedSchedule() === s.id) {
-                <div class="border-t border-slate-100 bg-slate-50/50 p-3">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Execution order ({{ s.processIds.length }})</span>
-                    <span class="text-[10px] text-slate-400">Runs from top to bottom</span>
-                  </div>
-                  @if (scheduleProcesses(s).length) {
-                    <div class="space-y-1.5">
-                      @for (m of scheduleProcesses(s); track m.id; let i = $index; let isFirst = $first; let isLast = $last) {
-                        <div class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 flex items-center gap-2">
-                          <div class="size-6 rounded-md bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0">{{ i + 1 }}</div>
-                          <div class="flex-1 min-w-0">
-                            <p class="text-xs font-semibold text-slate-800 truncate">{{ m.name }}</p>
-                            @if (m.scenarioAssigned) {
-                              <p class="text-[10px] text-slate-400 truncate">{{ m.scenarioAssigned }}</p>
-                            }
-                          </div>
-                          <button (click)="moveScheduleProcess(s.id, m.id, -1)" [disabled]="isFirst" title="Move up"
-                            class="size-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">
-                            <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
-                          </button>
-                          <button (click)="moveScheduleProcess(s.id, m.id, 1)" [disabled]="isLast" title="Move down"
-                            class="size-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">
-                            <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
-                          </button>
-                          <button (click)="removeProcessFromSchedule(s.id, m.id)" title="Remove"
-                            class="size-7 rounded-md flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600">
-                            <span class="material-symbols-outlined text-[16px]">close</span>
-                          </button>
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <p class="text-[11px] text-slate-400 text-center py-3">No processes linked yet.</p>
-                  }
-                </div>
-              }
-            </div>
-          } @empty {
-            <div class="md:col-span-2 xl:col-span-3 bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center">
-              <div class="bg-violet-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-3xl text-violet-500">calendar_month</span>
-              </div>
-              <h3 class="text-lg font-bold text-slate-900 mb-2">No schedules yet</h3>
-              <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Create a schedule to automatically run a group of processes on a recurring cadence.</p>
-              <button (click)="openDrawer('schedule', 'standalone')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
-                <span class="material-symbols-outlined text-[18px]">add</span> Create Your First Schedule
-              </button>
-            </div>
-          }
         </div>
       </div>
     } @else if (activeTab() === 'projects') {
@@ -3694,216 +3498,6 @@
         <button (click)="wizardSaveEvent()" class="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20">
           Save
         </button>
-      </div>
-    </div>
-  </div>
-}
-
-<!-- Add rWatcher Wizard (modal, step-by-step — same pattern as event setup) -->
-@if (rwatcherWizardOpen()) {
-  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      <!-- Header -->
-      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-3">
-          <div class="size-9 rounded-lg bg-emerald-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-emerald-600">desktop_windows</span>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">{{ rwatcherWizardEditingId() ? 'Edit rWatcher' : 'Add rWatcher' }}</h3>
-            <p class="text-[11px] text-slate-500">Step {{ rwatcherWizardStep() + 1 }} of {{ rwatcherWizardSteps.length }} · {{ rwatcherWizardSteps[rwatcherWizardStep()] }}</p>
-          </div>
-        </div>
-        <button (click)="closeRWatcherWizard()" class="size-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <!-- Progress -->
-      <div class="px-6 pt-4 pb-2 shrink-0">
-        <div class="flex items-center gap-1">
-          @for (label of rwatcherWizardSteps; track label; let i = $index) {
-            <div class="flex items-center gap-1 flex-1">
-              <div class="size-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all"
-                [ngClass]="i < rwatcherWizardStep() ? 'bg-emerald-500 text-white' : i === rwatcherWizardStep() ? 'bg-primary text-white ring-2 ring-primary/20' : 'bg-slate-100 text-slate-400'">
-                @if (i < rwatcherWizardStep()) {
-                  <span class="material-symbols-outlined text-xs">check</span>
-                } @else { {{ i + 1 }} }
-              </div>
-              @if (i < rwatcherWizardSteps.length - 1) {
-                <div class="h-0.5 flex-1 rounded-full" [ngClass]="i < rwatcherWizardStep() ? 'bg-emerald-500' : 'bg-slate-200'"></div>
-              }
-            </div>
-          }
-        </div>
-      </div>
-
-      <!-- Body (scrollable) -->
-      <div class="px-6 py-5 overflow-y-auto flex-1">
-        @if (rwatcherWizardStep() === 0) {
-          <!-- Identity -->
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-primary mb-1.5">Alias <span class="text-rose-500">*</span></label>
-              <input type="text" [value]="rwAlias()" (input)="rwAlias.set($any($event.target).value)"
-                placeholder="rWatcher004"
-                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-primary mb-1.5">Description</label>
-              <textarea [value]="rwDescription()" (input)="rwDescription.set($any($event.target).value)"
-                rows="3" placeholder="What this watcher is used for..."
-                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"></textarea>
-            </div>
-          </div>
-        } @else if (rwatcherWizardStep() === 1) {
-          <!-- Connection -->
-          <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-primary mb-1.5">BotManager <span class="text-rose-500">*</span></label>
-                <select [value]="rwBotManager()" (change)="rwBotManager.set($any($event.target).value)"
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                  @for (bm of rwBotManagerOptions; track bm) { <option [value]="bm">{{ bm }}</option> }
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-primary mb-1.5">IP Address <span class="text-rose-500">*</span></label>
-                <input type="text" [value]="rwIpAddress()" (input)="rwIpAddress.set($any($event.target).value)"
-                  placeholder="192.168.1.108"
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono" />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-primary mb-1.5">Username</label>
-                <input type="text" [value]="rwUsername()" (input)="rwUsername.set($any($event.target).value)"
-                  placeholder="CORP\auto_user4"
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-primary mb-1.5">Domain</label>
-                <input type="text" [value]="rwDomain()" (input)="rwDomain.set($any($event.target).value)"
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-              </div>
-            </div>
-          </div>
-        } @else if (rwatcherWizardStep() === 2) {
-          <!-- Display -->
-          <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-primary mb-1.5">Resolution</label>
-                <select [value]="rwResolution()" (change)="rwResolution.set($any($event.target).value)"
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                  @for (r of rwResolutionOptions; track r) { <option [value]="r">{{ r }}</option> }
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-primary mb-1.5">Color depth</label>
-                <select [value]="rwColorDepth()" (change)="rwColorDepth.set($any($event.target).value)"
-                  class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-                  @for (c of rwColorDepthOptions; track c) { <option [value]="c">{{ c }}</option> }
-                </select>
-              </div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11px] text-slate-500 flex items-start gap-2">
-              <span class="material-symbols-outlined text-[16px] text-slate-400">info</span>
-              <span>The watcher will use these display settings when capturing the live screen feed and rendering scenarios.</span>
-            </div>
-          </div>
-        } @else if (rwatcherWizardStep() === 3) {
-          <!-- Groups & Monitors -->
-          <div class="space-y-5">
-            <div>
-              <label class="block text-sm font-medium text-primary mb-1.5">Watcher groups</label>
-              <div class="flex items-center gap-2">
-                <input type="text" [value]="rwGroupInput()" (input)="rwGroupInput.set($any($event.target).value)"
-                  (keydown.enter)="addRWatcherGroup()" placeholder="Add a group (e.g., Production)"
-                  class="flex-1 px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-                <button (click)="addRWatcherGroup()" class="px-4 py-2.5 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/90">Add</button>
-              </div>
-              @if (rwSuggestedGroups.length) {
-                <div class="mt-2 flex items-center gap-1.5 flex-wrap">
-                  <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold mr-1">Suggested:</span>
-                  @for (g of rwSuggestedGroups; track g) {
-                    <button (click)="rwGroupInput.set(g); addRWatcherGroup()"
-                      class="px-2.5 py-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-full hover:bg-slate-50 hover:border-slate-300">
-                      + {{ g }}
-                    </button>
-                  }
-                </div>
-              }
-              @if (rwGroups().length) {
-                <div class="mt-3 flex flex-wrap gap-1.5">
-                  @for (g of rwGroups(); track g) {
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-medium rounded-full">
-                      {{ g }}
-                      <button (click)="removeRWatcherGroup(g)" class="hover:text-emerald-900">
-                        <span class="material-symbols-outlined text-[12px]">close</span>
-                      </button>
-                    </span>
-                  }
-                </div>
-              }
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-primary mb-1.5">Assign processes <span class="text-slate-400 font-normal">(optional)</span></label>
-              <div class="border border-slate-200 rounded-lg max-h-48 overflow-y-auto divide-y divide-slate-100">
-                @for (m of monitors(); track m.id) {
-                  <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 cursor-pointer text-xs">
-                    <input type="checkbox" [checked]="rwAssignedMonitorIds().includes(m.id)" (change)="toggleRWatcherMonitor(m.id)"
-                      class="rounded border-slate-300 text-primary focus:ring-primary/20" />
-                    <span class="font-medium text-slate-800 flex-1">{{ m.name }}</span>
-                    <span class="text-[10px] text-slate-400">{{ m.scenarioAssigned }}</span>
-                  </label>
-                } @empty {
-                  <p class="px-3 py-4 text-xs text-slate-400 text-center">No processes available yet.</p>
-                }
-              </div>
-            </div>
-          </div>
-        } @else if (rwatcherWizardStep() === 4) {
-          <!-- Review -->
-          <div class="space-y-3">
-            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-xs">
-              <div class="flex justify-between"><span class="text-slate-500">Alias</span><span class="font-semibold text-slate-800">{{ rwAlias() || '—' }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">BotManager</span><span class="font-semibold text-slate-800">{{ rwBotManager() }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">IP Address</span><span class="font-semibold text-slate-800 font-mono">{{ rwIpAddress() || '—' }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">Username</span><span class="font-semibold text-slate-800 font-mono">{{ rwUsername() || '—' }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">Domain</span><span class="font-semibold text-slate-800">{{ rwDomain() || '—' }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">Display</span><span class="font-semibold text-slate-800">{{ rwResolution() }} · {{ rwColorDepth() }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">Groups</span><span class="font-semibold text-slate-800">{{ rwGroups().length ? rwGroups().join(', ') : '—' }}</span></div>
-              <div class="flex justify-between"><span class="text-slate-500">Assigned monitors</span><span class="font-semibold text-slate-800">{{ rwAssignedMonitorIds().length }}</span></div>
-            </div>
-            <p class="text-[11px] text-slate-500">The watcher will be created in <strong>Offline</strong> state. You can activate it from the rWatchers list.</p>
-          </div>
-        }
-      </div>
-
-      <!-- Footer -->
-      <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between shrink-0">
-        <div>
-          @if (rwatcherWizardStep() > 0) {
-            <button (click)="rwatcherWizardBack()" class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900">
-              <span class="material-symbols-outlined text-lg">arrow_back</span> Back
-            </button>
-          }
-        </div>
-        <div class="flex items-center gap-2">
-          <button (click)="closeRWatcherWizard()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Cancel</button>
-          @if (rwatcherWizardStep() < rwatcherWizardSteps.length - 1) {
-            <button (click)="rwatcherWizardNext()" [disabled]="!rwatcherWizardCanProceed()"
-              class="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
-              Continue <span class="material-symbols-outlined text-lg">arrow_forward</span>
-            </button>
-          } @else {
-            <button (click)="saveRWatcherFromWizard()" class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-lg">check</span>
-              {{ rwatcherWizardEditingId() ? 'Save Changes' : 'Create rWatcher' }}
-            </button>
-          }
-        </div>
       </div>
     </div>
   </div>

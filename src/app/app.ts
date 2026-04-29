@@ -57,20 +57,6 @@ export interface RWatcher {
   avgResponseTime?: string;
   trendData?: number[];
   screenUrl?: string;
-  isActive?: boolean;
-  groups?: string[];
-}
-
-export interface Schedule {
-  id: string;
-  name: string;
-  timezone: string;
-  cron: string;
-  cronLabel: string;
-  lastRun: string;
-  nextRun: string;
-  status: 'active' | 'deactivated';
-  processIds: string[];
 }
 
 export interface Notification {
@@ -616,9 +602,7 @@ export class App implements OnInit {
       failureCount: 20,
       avgResponseTime: '1.2s',
       trendData: [95, 97, 98, 96, 99, 100, 98],
-      screenUrl: '',
-      isActive: true,
-      groups: ['NYC Office', 'Production']
+      screenUrl: ''
     },
     {
       id: '2',
@@ -639,9 +623,7 @@ export class App implements OnInit {
       failureCount: 20,
       avgResponseTime: '2.1s',
       trendData: [90, 92, 88, 85, 0, 0, 0],
-      screenUrl: '',
-      isActive: false,
-      groups: ['Backup Pool']
+      screenUrl: ''
     },
     {
       id: '3',
@@ -662,9 +644,7 @@ export class App implements OnInit {
       failureCount: 45,
       avgResponseTime: '3.4s',
       trendData: [92, 94, 91, 95, 93, 96, 94],
-      screenUrl: '',
-      isActive: true,
-      groups: ['Legacy Sync', 'Production']
+      screenUrl: ''
     }
   ]);
 
@@ -692,20 +672,14 @@ export class App implements OnInit {
     this.rwatcherToDelete.set(null);
   }
 
-  rwatcherStatusFilter = signal<'all' | 'online' | 'busy' | 'offline'>('all');
-  selectedRWatcherIds = signal<string[]>([]);
-
   filteredRWatchers() {
     const search = this.rwatcherSearch().toLowerCase();
-    const statusFilter = this.rwatcherStatusFilter();
-    return this.rwatchers().filter(w => {
-      if (statusFilter !== 'all' && w.status !== statusFilter) return false;
-      if (!search) return true;
-      return w.alias.toLowerCase().includes(search) ||
-        w.ipAddress.includes(search) ||
-        w.botManager.toLowerCase().includes(search) ||
-        (w.groups ?? []).some(g => g.toLowerCase().includes(search));
-    });
+    if (!search) return this.rwatchers();
+    return this.rwatchers().filter(w =>
+      w.alias.toLowerCase().includes(search) ||
+      w.ipAddress.includes(search) ||
+      w.botManager.toLowerCase().includes(search)
+    );
   }
 
   onlineRWatcherCount() {
@@ -718,325 +692,6 @@ export class App implements OnInit {
 
   offlineRWatcherCount() {
     return this.rwatchers().filter(w => w.status === 'offline').length;
-  }
-
-  // Watcher selection / bulk actions
-  toggleRWatcherSelected(id: string) {
-    this.selectedRWatcherIds.update(ids =>
-      ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]
-    );
-  }
-
-  isAllRWatchersSelected() {
-    const visible = this.filteredRWatchers().map(w => w.id);
-    if (!visible.length) return false;
-    const selected = this.selectedRWatcherIds();
-    return visible.every(id => selected.includes(id));
-  }
-
-  toggleAllRWatchersSelected() {
-    const visible = this.filteredRWatchers().map(w => w.id);
-    if (this.isAllRWatchersSelected()) {
-      this.selectedRWatcherIds.update(ids => ids.filter(id => !visible.includes(id)));
-    } else {
-      this.selectedRWatcherIds.update(ids => Array.from(new Set([...ids, ...visible])));
-    }
-  }
-
-  // Per-watcher actions
-  toggleRWatcherActive(id: string) {
-    this.rwatchers.update(list => list.map(w => {
-      if (w.id !== id) return w;
-      const nextActive = !w.isActive;
-      return { ...w, isActive: nextActive, status: nextActive ? (w.status === 'offline' ? 'online' : w.status) : 'offline' };
-    }));
-  }
-
-  runRWatcher(id: string) {
-    this.rwatchers.update(list => list.map(w =>
-      w.id === id ? { ...w, status: 'busy', isActive: true, lastPing: 'Just now' } : w
-    ));
-  }
-
-  stopRWatcher(id: string) {
-    this.rwatchers.update(list => list.map(w =>
-      w.id === id && w.status === 'busy' ? { ...w, status: 'online' } : w
-    ));
-  }
-
-  // Bulk actions
-  bulkActivateRWatchers() {
-    const ids = this.selectedRWatcherIds();
-    if (!ids.length) return;
-    this.rwatchers.update(list => list.map(w =>
-      ids.includes(w.id) ? { ...w, isActive: true, status: w.status === 'offline' ? 'online' : w.status } : w
-    ));
-  }
-
-  bulkDeactivateRWatchers() {
-    const ids = this.selectedRWatcherIds();
-    if (!ids.length) return;
-    this.rwatchers.update(list => list.map(w =>
-      ids.includes(w.id) ? { ...w, isActive: false, status: 'offline' } : w
-    ));
-  }
-
-  bulkRunRWatchers() {
-    const ids = this.selectedRWatcherIds();
-    if (!ids.length) return;
-    this.rwatchers.update(list => list.map(w =>
-      ids.includes(w.id) && w.status !== 'offline' ? { ...w, status: 'busy', lastPing: 'Just now' } : w
-    ));
-  }
-
-  clearRWatcherSelection() {
-    this.selectedRWatcherIds.set([]);
-  }
-
-  rwatcherStatusBadge(status: RWatcher['status']) {
-    return status === 'online' ? 'Available' : status === 'busy' ? 'Busy' : 'Offline';
-  }
-
-  // ── Add rWatcher wizard ──
-  rwatcherWizardOpen = signal<boolean>(false);
-  rwatcherWizardStep = signal<number>(0);
-  rwatcherWizardSteps = ['Identity', 'Connection', 'Display', 'Groups & Monitors', 'Review'];
-  rwatcherWizardEditingId = signal<string | null>(null);
-
-  rwAlias = signal<string>('');
-  rwDescription = signal<string>('');
-  rwBotManager = signal<string>('BotManager-1');
-  rwIpAddress = signal<string>('');
-  rwUsername = signal<string>('');
-  rwDomain = signal<string>('CORP');
-  rwResolution = signal<string>('1920x1080');
-  rwColorDepth = signal<string>('32-bit');
-  rwGroupInput = signal<string>('');
-  rwGroups = signal<string[]>([]);
-  rwAssignedMonitorIds = signal<string[]>([]);
-
-  rwBotManagerOptions = ['BotManager-1', 'BotManager-2', 'BotManager-3'];
-  rwResolutionOptions = ['1280x1024', '1366x768', '1920x1080', '2560x1440'];
-  rwColorDepthOptions = ['16-bit', '24-bit', '32-bit'];
-  rwSuggestedGroups = ['Production', 'Backup Pool', 'NYC Office', 'EU Office', 'Legacy Sync'];
-
-  openRWatcherWizard(editingId?: string) {
-    this.rwatcherWizardOpen.set(true);
-    this.rwatcherWizardStep.set(0);
-    if (editingId) {
-      const existing = this.rwatchers().find(w => w.id === editingId);
-      if (existing) {
-        this.rwatcherWizardEditingId.set(editingId);
-        this.rwAlias.set(existing.alias);
-        this.rwDescription.set(existing.description);
-        this.rwBotManager.set(existing.botManager);
-        this.rwIpAddress.set(existing.ipAddress);
-        this.rwUsername.set(existing.username);
-        this.rwDomain.set(existing.domain);
-        this.rwResolution.set(existing.resolution);
-        this.rwColorDepth.set(existing.colorDepth);
-        this.rwGroups.set(existing.groups ?? []);
-        return;
-      }
-    }
-    this.rwatcherWizardEditingId.set(null);
-    this.rwAlias.set('');
-    this.rwDescription.set('');
-    this.rwBotManager.set('BotManager-1');
-    this.rwIpAddress.set('');
-    this.rwUsername.set('');
-    this.rwDomain.set('CORP');
-    this.rwResolution.set('1920x1080');
-    this.rwColorDepth.set('32-bit');
-    this.rwGroups.set([]);
-    this.rwAssignedMonitorIds.set([]);
-    this.rwGroupInput.set('');
-  }
-
-  closeRWatcherWizard() {
-    this.rwatcherWizardOpen.set(false);
-  }
-
-  rwatcherWizardCanProceed() {
-    const step = this.rwatcherWizardStep();
-    if (step === 0) return this.rwAlias().trim().length > 0;
-    if (step === 1) return this.rwIpAddress().trim().length > 0 && this.rwBotManager().trim().length > 0;
-    return true;
-  }
-
-  rwatcherWizardNext() {
-    if (this.rwatcherWizardCanProceed() && this.rwatcherWizardStep() < this.rwatcherWizardSteps.length - 1) {
-      this.rwatcherWizardStep.update(s => s + 1);
-    }
-  }
-
-  rwatcherWizardBack() {
-    if (this.rwatcherWizardStep() > 0) {
-      this.rwatcherWizardStep.update(s => s - 1);
-    }
-  }
-
-  addRWatcherGroup() {
-    const v = this.rwGroupInput().trim();
-    if (!v) return;
-    if (!this.rwGroups().includes(v)) {
-      this.rwGroups.update(g => [...g, v]);
-    }
-    this.rwGroupInput.set('');
-  }
-
-  removeRWatcherGroup(g: string) {
-    this.rwGroups.update(list => list.filter(x => x !== g));
-  }
-
-  toggleRWatcherMonitor(id: string) {
-    this.rwAssignedMonitorIds.update(ids =>
-      ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]
-    );
-  }
-
-  saveRWatcherFromWizard() {
-    const editingId = this.rwatcherWizardEditingId();
-    const data = {
-      alias: this.rwAlias(),
-      description: this.rwDescription(),
-      botManager: this.rwBotManager(),
-      ipAddress: this.rwIpAddress(),
-      username: this.rwUsername(),
-      domain: this.rwDomain(),
-      resolution: this.rwResolution(),
-      colorDepth: this.rwColorDepth(),
-      groups: this.rwGroups(),
-      assignedMonitors: this.rwAssignedMonitorIds().length || 0
-    };
-    if (editingId) {
-      this.rwatchers.update(list => list.map(w => w.id === editingId ? { ...w, ...data } : w));
-    } else {
-      const newId = (Math.max(0, ...this.rwatchers().map(w => +w.id)) + 1).toString();
-      this.rwatchers.update(list => [...list, {
-        id: newId,
-        alias: data.alias,
-        description: data.description,
-        status: 'offline',
-        ipAddress: data.ipAddress,
-        lastPing: 'Never',
-        botManager: data.botManager,
-        resolution: data.resolution,
-        colorDepth: data.colorDepth,
-        username: data.username,
-        domain: data.domain,
-        assignedMonitors: data.assignedMonitors,
-        uptime: '--',
-        totalChecks: 0,
-        successCount: 0,
-        failureCount: 0,
-        avgResponseTime: '--',
-        trendData: [0, 0, 0, 0, 0, 0, 0],
-        screenUrl: '',
-        isActive: false,
-        groups: data.groups
-      }]);
-    }
-    this.closeRWatcherWizard();
-  }
-
-  // ── Schedules ──
-  schedules = signal<Schedule[]>([
-    {
-      id: 's-1',
-      name: 'Hourly Health Checks',
-      timezone: 'America/New_York',
-      cron: '0 * * * *',
-      cronLabel: 'Every hour',
-      lastRun: '12 min ago',
-      nextRun: 'in 48 min',
-      status: 'active',
-      processIds: ['1', '2']
-    },
-    {
-      id: 's-2',
-      name: 'Nightly Regression',
-      timezone: 'UTC',
-      cron: '0 2 * * *',
-      cronLabel: 'Daily at 02:00',
-      lastRun: '8h ago',
-      nextRun: 'in 16h',
-      status: 'active',
-      processIds: ['3']
-    },
-    {
-      id: 's-3',
-      name: 'Weekly Audit',
-      timezone: 'Europe/Paris',
-      cron: '0 9 * * 1',
-      cronLabel: 'Mondays at 09:00',
-      lastRun: '6d ago',
-      nextRun: 'Mon 09:00',
-      status: 'deactivated',
-      processIds: []
-    }
-  ]);
-  scheduleSearch = signal<string>('');
-  scheduleStatusFilter = signal<'all' | 'active' | 'deactivated'>('all');
-  expandedSchedule = signal<string | null>(null);
-
-  filteredSchedules() {
-    const search = this.scheduleSearch().toLowerCase();
-    const statusFilter = this.scheduleStatusFilter();
-    return this.schedules().filter(s => {
-      if (statusFilter !== 'all' && s.status !== statusFilter) return false;
-      if (!search) return true;
-      return s.name.toLowerCase().includes(search) || s.timezone.toLowerCase().includes(search);
-    });
-  }
-
-  toggleScheduleExpand(id: string) {
-    this.expandedSchedule.update(c => c === id ? null : id);
-  }
-
-  toggleScheduleStatus(id: string) {
-    this.schedules.update(list => list.map(s =>
-      s.id === id ? { ...s, status: s.status === 'active' ? 'deactivated' : 'active' } : s
-    ));
-  }
-
-  deleteSchedule(id: string) {
-    this.schedules.update(list => list.filter(s => s.id !== id));
-  }
-
-  runScheduleAll(id: string) {
-    const sched = this.schedules().find(s => s.id === id);
-    if (!sched) return;
-    this.monitors.update(list => list.map(m =>
-      sched.processIds.includes(m.id) ? { ...m, status: 'running', message: 'Triggered by ' + sched.name } : m
-    ));
-    this.schedules.update(list => list.map(s =>
-      s.id === id ? { ...s, lastRun: 'Just now' } : s
-    ));
-  }
-
-  scheduleProcesses(s: Schedule): ProcessMonitor[] {
-    return s.processIds
-      .map(id => this.monitors().find(m => m.id === id))
-      .filter((m): m is ProcessMonitor => !!m);
-  }
-
-  moveScheduleProcess(scheduleId: string, processId: string, direction: -1 | 1) {
-    this.schedules.update(list => list.map(s => {
-      if (s.id !== scheduleId) return s;
-      const ids = [...s.processIds];
-      const idx = ids.indexOf(processId);
-      const target = idx + direction;
-      if (idx < 0 || target < 0 || target >= ids.length) return s;
-      [ids[idx], ids[target]] = [ids[target], ids[idx]];
-      return { ...s, processIds: ids };
-    }));
-  }
-
-  removeProcessFromSchedule(scheduleId: string, processId: string) {
-    this.schedules.update(list => list.map(s =>
-      s.id === scheduleId ? { ...s, processIds: s.processIds.filter(id => id !== processId) } : s
-    ));
   }
 
   toggleRunState(id: string) {
