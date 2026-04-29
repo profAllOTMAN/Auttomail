@@ -34,7 +34,19 @@ export interface ProcessMonitor {
   scenarioAssigned?: string;
   projectLinked?: string;
   assignedRWatcherIds?: string[];
+  scheduleId?: string;
   subProcesses?: SubProcess[];
+}
+
+export interface Schedule {
+  id: string;
+  name: string;
+  timezone: string;
+  lastRun: string;
+  nextRun: string;
+  status: 'active' | 'deactivated';
+  cadence: string;
+  processOrder: string[]; // ProcessMonitor ids in execution priority (first → last)
 }
 
 export interface RWatcher {
@@ -57,6 +69,7 @@ export interface RWatcher {
   avgResponseTime?: string;
   trendData?: number[];
   screenUrl?: string;
+  groups?: string[];
 }
 
 export interface Notification {
@@ -602,7 +615,8 @@ export class App implements OnInit {
       failureCount: 20,
       avgResponseTime: '1.2s',
       trendData: [95, 97, 98, 96, 99, 100, 98],
-      screenUrl: ''
+      screenUrl: '',
+      groups: ['Production', 'NYC']
     },
     {
       id: '2',
@@ -623,7 +637,8 @@ export class App implements OnInit {
       failureCount: 20,
       avgResponseTime: '2.1s',
       trendData: [90, 92, 88, 85, 0, 0, 0],
-      screenUrl: ''
+      screenUrl: '',
+      groups: ['Backup', 'CRM']
     },
     {
       id: '3',
@@ -644,13 +659,15 @@ export class App implements OnInit {
       failureCount: 45,
       avgResponseTime: '3.4s',
       trendData: [92, 94, 91, 95, 93, 96, 94],
-      screenUrl: ''
+      screenUrl: '',
+      groups: ['Production', 'Legacy', 'Finance']
     }
   ]);
 
   rwatcherToDelete = signal<string | null>(null);
   expandedRWatcher = signal<string | null>(null);
   rwatcherSearch = signal<string>('');
+  rwatcherStatusFilter = signal<'all' | 'available' | 'busy' | 'offline'>('all');
 
   toggleRWatcherExpand(id: string) {
     this.expandedRWatcher.update(current => current === id ? null : id);
@@ -674,12 +691,173 @@ export class App implements OnInit {
 
   filteredRWatchers() {
     const search = this.rwatcherSearch().toLowerCase();
-    if (!search) return this.rwatchers();
-    return this.rwatchers().filter(w =>
-      w.alias.toLowerCase().includes(search) ||
-      w.ipAddress.includes(search) ||
-      w.botManager.toLowerCase().includes(search)
-    );
+    const statusFilter = this.rwatcherStatusFilter();
+    let list = this.rwatchers();
+    if (statusFilter !== 'all') {
+      const target = statusFilter === 'available' ? 'online' : statusFilter;
+      list = list.filter(w => w.status === target);
+    }
+    if (search) {
+      list = list.filter(w =>
+        w.alias.toLowerCase().includes(search) ||
+        w.ipAddress.includes(search) ||
+        w.botManager.toLowerCase().includes(search)
+      );
+    }
+    return list;
+  }
+
+  processCountForWatcher(watcherId: string) {
+    return this.monitors().filter(m => m.assignedRWatcherIds?.includes(watcherId)).length;
+  }
+
+  // Per-watcher actions
+  activateWatcher(id: string) {
+    this.rwatchers.update(ws => ws.map(w =>
+      w.id === id && w.status === 'offline'
+        ? { ...w, status: 'online', lastPing: 'Just now' }
+        : w
+    ));
+  }
+  deactivateWatcher(id: string) {
+    this.rwatchers.update(ws => ws.map(w =>
+      w.id === id ? { ...w, status: 'offline' } : w
+    ));
+  }
+  runWatcher(id: string) {
+    this.rwatchers.update(ws => ws.map(w =>
+      w.id === id && w.status === 'online' ? { ...w, status: 'busy' } : w
+    ));
+  }
+  stopWatcher(id: string) {
+    this.rwatchers.update(ws => ws.map(w =>
+      w.id === id && w.status === 'busy' ? { ...w, status: 'online' } : w
+    ));
+  }
+  editingWatcherId = signal<string | null>(null);
+  editWatcher(id: string) {
+    this.editingWatcherId.set(id);
+    this.openDrawer('watcher', 'standalone');
+  }
+
+  // Bulk actions
+  activateAllWatchers() {
+    this.rwatchers.update(ws => ws.map(w =>
+      w.status === 'offline' ? { ...w, status: 'online', lastPing: 'Just now' } : w
+    ));
+  }
+  deactivateAllWatchers() {
+    this.rwatchers.update(ws => ws.map(w => ({ ...w, status: 'offline' })));
+  }
+  runAllWatchers() {
+    this.rwatchers.update(ws => ws.map(w =>
+      w.status === 'online' ? { ...w, status: 'busy' } : w
+    ));
+  }
+
+  // Schedules
+  schedules = signal<Schedule[]>([
+    {
+      id: 's1',
+      name: 'Hourly Production',
+      timezone: 'America/New_York',
+      lastRun: '2026-04-29 09:00 EDT',
+      nextRun: '2026-04-29 10:00 EDT',
+      status: 'active',
+      cadence: 'Every hour',
+      processOrder: ['1', '2']
+    },
+    {
+      id: 's2',
+      name: 'Nightly Data Sync',
+      timezone: 'UTC',
+      lastRun: '2026-04-29 02:00 UTC',
+      nextRun: '2026-04-30 02:00 UTC',
+      status: 'active',
+      cadence: 'Daily at 02:00',
+      processOrder: ['3']
+    },
+    {
+      id: 's3',
+      name: 'Weekend Maintenance',
+      timezone: 'Europe/London',
+      lastRun: '2026-04-26 22:00 BST',
+      nextRun: '2026-05-03 22:00 BST',
+      status: 'deactivated',
+      cadence: 'Weekly · Saturdays 22:00',
+      processOrder: ['4']
+    }
+  ]);
+
+  scheduleToDelete = signal<string | null>(null);
+
+  monitorsForSchedule(scheduleId: string): ProcessMonitor[] {
+    const sched = this.schedules().find(s => s.id === scheduleId);
+    if (!sched) return [];
+    const order = sched.processOrder;
+    const all = this.monitors();
+    return order
+      .map(id => all.find(m => m.id === id))
+      .filter((m): m is ProcessMonitor => !!m);
+  }
+
+  toggleScheduleStatus(id: string) {
+    this.schedules.update(list => list.map(s =>
+      s.id === id ? { ...s, status: s.status === 'active' ? 'deactivated' : 'active' } : s
+    ));
+  }
+
+  confirmDeleteSchedule(id: string) {
+    this.scheduleToDelete.set(id);
+  }
+  executeDeleteSchedule() {
+    const id = this.scheduleToDelete();
+    if (id) {
+      this.schedules.update(list => list.filter(s => s.id !== id));
+      this.monitors.update(list => list.map(m =>
+        m.scheduleId === id ? { ...m, scheduleId: undefined } : m
+      ));
+    }
+    this.scheduleToDelete.set(null);
+  }
+  cancelDeleteSchedule() {
+    this.scheduleToDelete.set(null);
+  }
+
+  runScheduleProcesses(scheduleId: string) {
+    const ordered = this.monitorsForSchedule(scheduleId);
+    const ids = new Set(ordered.map(m => m.id));
+    this.monitors.update(list => list.map(m =>
+      ids.has(m.id) && m.status !== 'disabled'
+        ? { ...m, status: 'running', lastRun: 'Just now', message: 'Triggered by schedule' }
+        : m
+    ));
+  }
+
+  moveScheduleProcessUp(scheduleId: string, monitorId: string) {
+    this.schedules.update(list => list.map(s => {
+      if (s.id !== scheduleId) return s;
+      const idx = s.processOrder.indexOf(monitorId);
+      if (idx <= 0) return s;
+      const next = [...s.processOrder];
+      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+      return { ...s, processOrder: next };
+    }));
+  }
+  moveScheduleProcessDown(scheduleId: string, monitorId: string) {
+    this.schedules.update(list => list.map(s => {
+      if (s.id !== scheduleId) return s;
+      const idx = s.processOrder.indexOf(monitorId);
+      if (idx === -1 || idx >= s.processOrder.length - 1) return s;
+      const next = [...s.processOrder];
+      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+      return { ...s, processOrder: next };
+    }));
+  }
+
+  expandedSchedule = signal<string | null>(null);
+  toggleScheduleExpand(id: string) {
+    this.expandedSchedule.update(c => c === id ? null : id);
   }
 
   onlineRWatcherCount() {
@@ -843,7 +1021,7 @@ export class App implements OnInit {
     return [
       {
         id: '1', name: 'Process Notepad', status: 'running', lastRun: 'Just now', successRate: '100%', resources: '3 rWatchers',
-        message: 'Processing items...', scenarioAssigned: 'Notepad Data Entry', projectLinked: 'My First Project', assignedRWatcherIds: ['1', '2', '3'],
+        message: 'Processing items...', scenarioAssigned: 'Notepad Data Entry', projectLinked: 'My First Project', assignedRWatcherIds: ['1', '2', '3'], scheduleId: 's1',
         subProcesses: [
           { id: 'sp1', name: 'Open Application', status: 'passed', duration: '2s', transactions: [
             { id: 't1', name: 'Launch Notepad', status: 'passed', duration: '1.2s', message: 'Window detected' },
@@ -862,7 +1040,7 @@ export class App implements OnInit {
       },
       {
         id: '2', name: 'SFDC Auth Monitor', status: 'running', lastRun: '3 min ago', successRate: '98%', resources: '2 rWatchers',
-        message: 'Auth flow validated', scenarioAssigned: 'SFDC Auth Flow', projectLinked: 'CRM Integration', assignedRWatcherIds: ['1', '2'],
+        message: 'Auth flow validated', scenarioAssigned: 'SFDC Auth Flow', projectLinked: 'CRM Integration', assignedRWatcherIds: ['1', '2'], scheduleId: 's1',
         subProcesses: [
           { id: 'sp4', name: 'Login Flow', status: 'passed', duration: '4s', transactions: [
             { id: 't8', name: 'Navigate to Login', status: 'passed', duration: '1.8s' },
@@ -877,7 +1055,7 @@ export class App implements OnInit {
       },
       {
         id: '3', name: 'Legacy Data Sync', status: 'pending', lastRun: '1 hour ago', successRate: '95%', resources: '1 rWatcher',
-        message: 'Waiting for schedule', scenarioAssigned: 'Legacy Data Sync', projectLinked: 'Data Migration', assignedRWatcherIds: ['3'],
+        message: 'Waiting for schedule', scenarioAssigned: 'Legacy Data Sync', projectLinked: 'Data Migration', assignedRWatcherIds: ['3'], scheduleId: 's2',
         subProcesses: [
           { id: 'sp6', name: 'Extract Records', status: 'passed', duration: '12s', transactions: [
             { id: 't13', name: 'Query Source DB', status: 'passed', duration: '8s', message: '1,240 records' },
@@ -891,7 +1069,7 @@ export class App implements OnInit {
       },
       {
         id: '4', name: 'Invoice Processing', status: 'disabled', lastRun: '2 days ago', successRate: '100%', resources: '2 rWatchers',
-        message: 'Manually disabled', scenarioAssigned: 'Invoice OCR', projectLinked: 'Finance Automation', assignedRWatcherIds: ['1', '3']
+        message: 'Manually disabled', scenarioAssigned: 'Invoice OCR', projectLinked: 'Finance Automation', assignedRWatcherIds: ['1', '3'], scheduleId: 's3'
       }
     ];
   }

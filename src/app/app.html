@@ -802,12 +802,55 @@
           </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="relative w-full sm:max-w-md">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+        <!-- Filter & bulk-actions toolbar -->
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+            <div class="relative w-full sm:max-w-sm">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+              </div>
+              <input type="text" [value]="rwatcherSearch()" (input)="rwatcherSearch.set($any($event.target).value)" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search by alias, IP, or BotManager..." />
+            </div>
+            <div class="inline-flex rounded-full bg-slate-100 p-1 self-start">
+              <button (click)="rwatcherStatusFilter.set('all')"
+                      class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
+                      [class.bg-white]="rwatcherStatusFilter() === 'all'"
+                      [class.text-slate-900]="rwatcherStatusFilter() === 'all'"
+                      [class.shadow-sm]="rwatcherStatusFilter() === 'all'"
+                      [class.text-slate-500]="rwatcherStatusFilter() !== 'all'">All</button>
+              <button (click)="rwatcherStatusFilter.set('available')"
+                      class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
+                      [class.bg-white]="rwatcherStatusFilter() === 'available'"
+                      [class.text-emerald-700]="rwatcherStatusFilter() === 'available'"
+                      [class.shadow-sm]="rwatcherStatusFilter() === 'available'"
+                      [class.text-slate-500]="rwatcherStatusFilter() !== 'available'">Available</button>
+              <button (click)="rwatcherStatusFilter.set('busy')"
+                      class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
+                      [class.bg-white]="rwatcherStatusFilter() === 'busy'"
+                      [class.text-blue-700]="rwatcherStatusFilter() === 'busy'"
+                      [class.shadow-sm]="rwatcherStatusFilter() === 'busy'"
+                      [class.text-slate-500]="rwatcherStatusFilter() !== 'busy'">Busy</button>
+              <button (click)="rwatcherStatusFilter.set('offline')"
+                      class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
+                      [class.bg-white]="rwatcherStatusFilter() === 'offline'"
+                      [class.text-slate-700]="rwatcherStatusFilter() === 'offline'"
+                      [class.shadow-sm]="rwatcherStatusFilter() === 'offline'"
+                      [class.text-slate-500]="rwatcherStatusFilter() !== 'offline'">Offline</button>
+            </div>
           </div>
-          <input type="text" [value]="rwatcherSearch()" (input)="rwatcherSearch.set($any($event.target).value)" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search by alias, IP, or BotManager..." />
+
+          <!-- Bulk actions -->
+          <div class="flex items-center gap-2 self-start lg:self-auto">
+            <button (click)="activateAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md inline-flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[16px]">power</span> Activate all
+            </button>
+            <button (click)="deactivateAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md inline-flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate all
+            </button>
+            <button (click)="runAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary/90 rounded-md inline-flex items-center gap-1 transition-colors shadow-sm shadow-primary/20">
+              <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all
+            </button>
+          </div>
         </div>
 
         <!-- rWatcher Cards List -->
@@ -850,7 +893,7 @@
                 </div>
 
                 <!-- Quick Stats -->
-                <div class="flex flex-wrap items-center gap-4 sm:gap-8 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
+                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
                   <div class="flex flex-col w-[45%] sm:w-auto">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">IP Address</span>
                     <span class="text-xs font-semibold text-slate-700 font-mono">{{ watcher.ipAddress }}</span>
@@ -864,13 +907,60 @@
                     <span class="text-xs font-semibold text-slate-700">{{ watcher.lastPing }}</span>
                   </div>
                   <div class="flex flex-col w-[45%] sm:w-auto">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Monitors</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ watcher.assignedMonitors }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Processes</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ processCountForWatcher(watcher.id) }} assigned</span>
+                  </div>
+                  <div class="flex flex-col w-full sm:w-auto sm:max-w-[200px]">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Groups</span>
+                    @if ((watcher.groups?.length ?? 0) > 0) {
+                      <div class="flex flex-wrap gap-1 mt-0.5">
+                        @for (g of watcher.groups; track g) {
+                          <span class="text-[10px] font-medium text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">{{ g }}</span>
+                        }
+                      </div>
+                    } @else {
+                      <span class="text-[11px] text-slate-400">—</span>
+                    }
                   </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center justify-between sm:justify-end gap-3 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                  <!-- Inline action buttons -->
+                  <div class="flex items-center gap-1">
+                    @if (watcher.status === 'offline') {
+                      <button (click)="activateWatcher(watcher.id)" title="Activate"
+                              class="size-8 flex items-center justify-center rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">power</span>
+                      </button>
+                    } @else {
+                      <button (click)="deactivateWatcher(watcher.id)" title="Deactivate"
+                              class="size-8 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">power_off</span>
+                      </button>
+                    }
+                    @if (watcher.status === 'busy') {
+                      <button (click)="stopWatcher(watcher.id)" title="Stop"
+                              class="size-8 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">stop</span>
+                      </button>
+                    } @else {
+                      <button (click)="runWatcher(watcher.id)" title="Run"
+                              [disabled]="watcher.status !== 'online'"
+                              class="size-8 flex items-center justify-center rounded-md transition-colors"
+                              [class.text-primary]="watcher.status === 'online'"
+                              [class.hover:bg-primary]="watcher.status === 'online'"
+                              [class.hover:bg-opacity-10]="watcher.status === 'online'"
+                              [class.text-slate-300]="watcher.status !== 'online'"
+                              [class.cursor-not-allowed]="watcher.status !== 'online'">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                      </button>
+                    }
+                    <button (click)="editWatcher(watcher.id)" title="Edit"
+                            class="size-8 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors">
+                      <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                  </div>
                   <button (click)="toggleRWatcherExpand(watcher.id)" class="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-primary px-3 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
                     <span class="material-symbols-outlined text-[16px]">{{ expandedRWatcher() === watcher.id ? 'expand_less' : 'expand_more' }}</span>
                     {{ expandedRWatcher() === watcher.id ? 'Less' : 'Details' }}
@@ -881,7 +971,7 @@
                     </button>
                     <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                       <div class="py-1">
-                        <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <button (click)="editWatcher(watcher.id)" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
                           <span class="material-symbols-outlined text-[16px]">edit</span> Edit Configuration
                         </button>
                         <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
@@ -896,94 +986,85 @@
                 </div>
               </div>
 
-              <!-- Expanded Detail Panel -->
+              <!-- Expanded Detail Panel: live screen dominant + side stats -->
               @if (expandedRWatcher() === watcher.id) {
-                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4 space-y-4">
-                  <!-- Live Screen View -->
-                  <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Screen View</span>
-                    <div class="bg-slate-900 rounded-lg overflow-hidden aspect-video max-w-2xl flex items-center justify-center relative">
-                      @if (watcher.status === 'offline') {
-                        <div class="text-center">
-                          <span class="material-symbols-outlined text-3xl text-slate-600 mb-2">desktop_access_disabled</span>
-                          <p class="text-xs text-slate-500">Watcher is offline</p>
-                        </div>
-                      } @else {
-                        <div class="text-center">
-                          <span class="material-symbols-outlined text-4xl text-slate-500 mb-2">screen_share</span>
-                          <p class="text-xs text-slate-400">Live screen feed</p>
-                          <p class="text-[10px] text-slate-600 mt-1">{{ watcher.resolution }} &middot; {{ watcher.colorDepth }}</p>
-                        </div>
-                        <!-- Live indicator -->
-                        <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                          <span class="size-1.5 rounded-full bg-white animate-pulse"></span> LIVE
-                        </div>
-                      }
-                    </div>
-                  </div>
-
-                  <!-- Stats Grid -->
-                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Resolution</span>
-                      <span class="text-sm text-slate-800 font-medium">{{ watcher.resolution }}</span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color Depth</span>
-                      <span class="text-sm text-slate-800 font-medium">{{ watcher.colorDepth }}</span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</span>
-                      <span class="text-sm text-slate-800 font-medium font-mono">{{ watcher.username }}</span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Domain</span>
-                      <span class="text-sm text-slate-800 font-medium">{{ watcher.domain }}</span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
-                      <span class="text-sm font-medium" [class.text-emerald-600]="watcher.status !== 'offline'" [class.text-slate-500]="watcher.status === 'offline'">{{ watcher.uptime }}</span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monitors</span>
-                      <span class="text-sm text-slate-800 font-medium">{{ watcher.assignedMonitors }} active</span>
-                    </div>
-                  </div>
-
-                  <!-- Performance Stats -->
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div class="bg-white rounded-lg border border-slate-200 p-3">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Checks</span>
-                      <span class="text-lg font-bold text-slate-900">{{ watcher.totalChecks ?? 0 }}</span>
-                    </div>
-                    <div class="bg-white rounded-lg border border-slate-200 p-3">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success</span>
-                      <span class="text-lg font-bold text-emerald-600">{{ watcher.successCount ?? 0 }}</span>
-                    </div>
-                    <div class="bg-white rounded-lg border border-slate-200 p-3">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Failures</span>
-                      <span class="text-lg font-bold text-red-500">{{ watcher.failureCount ?? 0 }}</span>
-                    </div>
-                    <div class="bg-white rounded-lg border border-slate-200 p-3">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Response</span>
-                      <span class="text-lg font-bold text-slate-900">{{ watcher.avgResponseTime ?? '--' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Trend Chart -->
-                  <div class="bg-white rounded-lg border border-slate-200 p-3">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Success Rate Trend (Last 7 Days)</span>
-                    <div class="flex items-end gap-1 h-10">
-                      @if (watcher.trendData) {
-                        @for (val of watcher.trendData; track $index) {
-                          <div class="flex-1 rounded-t-sm transition-all"
-                               [style.height.%]="val"
-                               [class.bg-emerald-400]="val >= 90"
-                               [class.bg-amber-400]="val >= 50 && val < 90"
-                               [class.bg-red-400]="val > 0 && val < 50"
-                               [class.bg-slate-200]="val === 0"></div>
+                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4">
+                  <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+                    <!-- Live Screen View (primary focus, horizontal) -->
+                    <div>
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live Screen View</span>
+                        @if (watcher.status !== 'offline') {
+                          <span class="text-[10px] text-slate-500">{{ watcher.resolution }} · {{ watcher.colorDepth }}</span>
                         }
-                      }
+                      </div>
+                      <div class="bg-slate-900 rounded-lg overflow-hidden aspect-video w-full flex items-center justify-center relative">
+                        @if (watcher.status === 'offline') {
+                          <div class="text-center">
+                            <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">desktop_access_disabled</span>
+                            <p class="text-xs text-slate-500">Watcher is offline</p>
+                          </div>
+                        } @else {
+                          <div class="text-center">
+                            <span class="material-symbols-outlined text-5xl text-slate-500 mb-2">screen_share</span>
+                            <p class="text-sm text-slate-400">Live screen feed</p>
+                          </div>
+                          <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                            <span class="size-1.5 rounded-full bg-white animate-pulse"></span> LIVE
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Stats sidebar -->
+                    <div class="flex flex-col gap-3">
+                      <!-- Performance summary -->
+                      <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white rounded-lg border border-slate-200 p-3">
+                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Checks</span>
+                          <span class="text-lg font-bold text-slate-900">{{ watcher.totalChecks ?? 0 }}</span>
+                        </div>
+                        <div class="bg-white rounded-lg border border-slate-200 p-3">
+                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Success</span>
+                          <span class="text-lg font-bold text-emerald-600">{{ watcher.successCount ?? 0 }}</span>
+                        </div>
+                        <div class="bg-white rounded-lg border border-slate-200 p-3">
+                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Failures</span>
+                          <span class="text-lg font-bold text-red-500">{{ watcher.failureCount ?? 0 }}</span>
+                        </div>
+                        <div class="bg-white rounded-lg border border-slate-200 p-3">
+                          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Avg Response</span>
+                          <span class="text-lg font-bold text-slate-900">{{ watcher.avgResponseTime ?? '--' }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Machine details -->
+                      <div class="bg-white rounded-lg border border-slate-200 p-3 space-y-2">
+                        <div class="flex items-center justify-between">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Resolution</span>
+                          <span class="text-xs text-slate-800 font-medium">{{ watcher.resolution }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color Depth</span>
+                          <span class="text-xs text-slate-800 font-medium">{{ watcher.colorDepth }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username</span>
+                          <span class="text-xs text-slate-800 font-medium font-mono">{{ watcher.username }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Domain</span>
+                          <span class="text-xs text-slate-800 font-medium">{{ watcher.domain }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
+                          <span class="text-xs font-medium" [class.text-emerald-600]="watcher.status !== 'offline'" [class.text-slate-500]="watcher.status === 'offline'">{{ watcher.uptime }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Processes</span>
+                          <span class="text-xs text-slate-800 font-medium">{{ processCountForWatcher(watcher.id) }} assigned</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1480,19 +1561,171 @@
         </div>
       </div>
     } @else if (activeTab() === 'schedules') {
-      <!-- Schedules placeholder -->
-      <div class="mt-6 max-w-5xl mx-auto w-full">
-        <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
-          <div class="bg-violet-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="material-symbols-outlined text-3xl text-violet-500">calendar_month</span>
+      <!-- Schedules Page -->
+      <div class="mt-6 space-y-6">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Schedules</h2>
+            <p class="text-sm text-slate-500 mt-1">Define when process monitors run and the order they execute in.</p>
           </div>
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Schedules</h3>
-          <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Create and manage schedules that control when your process monitors run.</p>
-          <button (click)="openDrawer('schedule', 'standalone')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
+          <button (click)="openDrawer('schedule', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> Create Schedule
           </button>
         </div>
+
+        @if (schedules().length === 0) {
+          <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
+            <div class="bg-violet-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="material-symbols-outlined text-3xl text-violet-500">calendar_month</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">No schedules yet</h3>
+            <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Create a schedule to automate when your process monitors run.</p>
+            <button (click)="openDrawer('schedule', 'standalone')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
+              <span class="material-symbols-outlined text-[18px]">add</span> Create Your First Schedule
+            </button>
+          </div>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (sched of schedules(); track sched.id) {
+              <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                   [class.border-l-emerald-400]="sched.status === 'active'"
+                   [class.border-l-slate-300]="sched.status === 'deactivated'"
+                   style="border-left-width: 3px;">
+                <!-- Main row -->
+                <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                  <!-- Identity & Status -->
+                  <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
+                    <div class="size-10 flex items-center justify-center rounded-md shrink-0"
+                         [class.bg-emerald-50]="sched.status === 'active'"
+                         [class.text-emerald-600]="sched.status === 'active'"
+                         [class.bg-slate-100]="sched.status === 'deactivated'"
+                         [class.text-slate-500]="sched.status === 'deactivated'">
+                      <span class="material-symbols-outlined">schedule</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <h3 class="font-bold text-slate-900 text-sm">{{ sched.name }}</h3>
+                      <div class="flex items-center gap-2 mt-0.5">
+                        <span class="flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
+                              [class.text-emerald-700]="sched.status === 'active'" [class.bg-emerald-100]="sched.status === 'active'"
+                              [class.text-slate-600]="sched.status === 'deactivated'" [class.bg-slate-100]="sched.status === 'deactivated'">
+                          @if (sched.status === 'active') {
+                            <span class="size-1.5 rounded-full bg-emerald-500"></span> Active
+                          } @else {
+                            <span class="size-1.5 rounded-full bg-slate-400"></span> Deactivated
+                          }
+                        </span>
+                        <span class="text-[11px] text-slate-500">{{ sched.cadence }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Stats -->
+                  <div class="flex flex-wrap items-center gap-4 sm:gap-8 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
+                    <div class="flex flex-col w-[45%] sm:w-auto">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Time Zone</span>
+                      <span class="text-xs font-semibold text-slate-700">{{ sched.timezone }}</span>
+                    </div>
+                    <div class="flex flex-col w-[45%] sm:w-auto">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Last Run</span>
+                      <span class="text-xs font-semibold text-slate-700">{{ sched.lastRun }}</span>
+                    </div>
+                    <div class="flex flex-col w-[45%] sm:w-auto">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Next Run</span>
+                      <span class="text-xs font-semibold text-slate-700">{{ sched.nextRun }}</span>
+                    </div>
+                    <div class="flex flex-col w-[45%] sm:w-auto">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Processes</span>
+                      <span class="text-xs font-semibold text-slate-700">{{ monitorsForSchedule(sched.id).length }} linked</span>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                    <div class="flex items-center gap-1">
+                      <button (click)="toggleScheduleStatus(sched.id)" [title]="sched.status === 'active' ? 'Deactivate' : 'Activate'"
+                              class="size-8 flex items-center justify-center rounded-md transition-colors"
+                              [class.text-slate-500]="sched.status === 'active'"
+                              [class.hover:bg-slate-100]="sched.status === 'active'"
+                              [class.text-emerald-600]="sched.status === 'deactivated'"
+                              [class.hover:bg-emerald-50]="sched.status === 'deactivated'">
+                        <span class="material-symbols-outlined text-[18px]">{{ sched.status === 'active' ? 'power_off' : 'power' }}</span>
+                      </button>
+                      <button (click)="runScheduleProcesses(sched.id)" title="Run all linked processes"
+                              [disabled]="monitorsForSchedule(sched.id).length === 0"
+                              class="size-8 flex items-center justify-center rounded-md transition-colors text-primary hover:bg-primary/10 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                      </button>
+                      <button (click)="confirmDeleteSchedule(sched.id)" title="Delete"
+                              class="size-8 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+                    <button (click)="toggleScheduleExpand(sched.id)" class="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-primary px-3 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
+                      <span class="material-symbols-outlined text-[16px]">{{ expandedSchedule() === sched.id ? 'expand_less' : 'expand_more' }}</span>
+                      {{ expandedSchedule() === sched.id ? 'Less' : 'Priority' }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Expanded: process priority list -->
+                @if (expandedSchedule() === sched.id) {
+                  <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Execution Order (first → last)</span>
+                      <span class="text-[10px] text-slate-500">{{ monitorsForSchedule(sched.id).length }} process(es) linked</span>
+                    </div>
+                    @if (monitorsForSchedule(sched.id).length === 0) {
+                      <p class="text-xs text-slate-400 text-center py-4">No processes linked to this schedule yet.</p>
+                    } @else {
+                      <ol class="space-y-2">
+                        @for (m of monitorsForSchedule(sched.id); track m.id; let i = $index, last = $last) {
+                          <li class="flex items-center gap-3 bg-white border border-slate-200 rounded-md p-2.5">
+                            <span class="size-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold shrink-0">{{ i + 1 }}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-sm font-semibold text-slate-900 truncate">{{ m.name }}</p>
+                              <p class="text-[11px] text-slate-500 truncate">{{ m.scenarioAssigned }} · {{ m.projectLinked }}</p>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                              <button (click)="moveScheduleProcessUp(sched.id, m.id)" [disabled]="i === 0" title="Move up"
+                                      class="size-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                                <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+                              </button>
+                              <button (click)="moveScheduleProcessDown(sched.id, m.id)" [disabled]="last" title="Move down"
+                                      class="size-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                                <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+                              </button>
+                            </div>
+                          </li>
+                        }
+                      </ol>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
       </div>
+
+      <!-- Delete Schedule Confirmation -->
+      @if (scheduleToDelete()) {
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" (click)="cancelDeleteSchedule()">
+          <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6" (click)="$event.stopPropagation()">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="size-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined">delete</span>
+              </div>
+              <h3 class="text-base font-bold text-slate-900">Delete schedule?</h3>
+            </div>
+            <p class="text-sm text-slate-600 mb-5">Linked processes will be unassigned but will not be deleted.</p>
+            <div class="flex justify-end gap-2">
+              <button (click)="cancelDeleteSchedule()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-md transition-colors">Cancel</button>
+              <button (click)="executeDeleteSchedule()" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">Delete</button>
+            </div>
+          </div>
+        </div>
+      }
     } @else if (activeTab() === 'projects') {
       <!-- Projects placeholder -->
       <div class="mt-6 max-w-5xl mx-auto w-full">
