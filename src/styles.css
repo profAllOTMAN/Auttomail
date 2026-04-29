@@ -10,6 +10,17 @@
   --font-display: "Inter", sans-serif;
 }
 
+/* Loader product theme — overrides primary token site-wide when active */
+[data-app-mode="loader"] {
+  --color-primary: #047857; /* emerald-700 */
+}
+[data-app-mode="loader"] .header-gradient {
+  background: linear-gradient(90deg, #065f46 0%, #047857 60%, #059669 100%);
+}
+[data-app-mode="watcher"] .header-gradient {
+  background: var(--color-primary);
+}
+
 body {
   font-family: 'Inter', sans-serif;
 }

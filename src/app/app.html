@@ -1,11 +1,34 @@
-<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900">
+<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900" [attr.data-app-mode]="appMode()">
   <!-- Header -->
-  <header class="bg-primary px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
-    <div class="flex items-center gap-2 sm:gap-3">
-      <div class="size-8 sm:size-10 flex items-center justify-center shrink-0">
-        <span class="material-symbols-outlined text-xl sm:text-2xl text-white/80">grid_view</span>
+  <header class="header-gradient px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div class="flex items-center gap-3 sm:gap-5">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="size-8 sm:size-10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-xl sm:text-2xl text-white/80">grid_view</span>
+        </div>
+        <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white truncate">Automai {{ appMode() === 'loader' ? 'Loader' : 'Watcher' }}</h1>
       </div>
-      <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white truncate">Automai Watcher</h1>
+      <!-- Product mode switch -->
+      <div class="hidden sm:inline-flex items-center bg-white/10 border border-white/20 rounded-full p-0.5" role="tablist" aria-label="Product mode">
+        <button (click)="setAppMode('watcher')"
+                class="px-3 py-1 text-xs font-semibold rounded-full inline-flex items-center gap-1 transition-colors"
+                [class.bg-white]="appMode() === 'watcher'"
+                [class.text-slate-900]="appMode() === 'watcher'"
+                [class.text-white]="appMode() !== 'watcher'"
+                [class.hover:bg-white]="appMode() !== 'watcher'"
+                [class.hover:bg-opacity-10]="appMode() !== 'watcher'">
+          <span class="material-symbols-outlined text-[14px]">visibility</span> Watcher
+        </button>
+        <button (click)="setAppMode('loader')"
+                class="px-3 py-1 text-xs font-semibold rounded-full inline-flex items-center gap-1 transition-colors"
+                [class.bg-white]="appMode() === 'loader'"
+                [class.text-emerald-700]="appMode() === 'loader'"
+                [class.text-white]="appMode() !== 'loader'"
+                [class.hover:bg-white]="appMode() !== 'loader'"
+                [class.hover:bg-opacity-10]="appMode() !== 'loader'">
+          <span class="material-symbols-outlined text-[14px]">speed</span> Loader
+        </button>
+      </div>
     </div>
     <div class="flex items-center gap-1 sm:gap-2">
       <div class="flex items-center border-r border-white/20 pr-2 sm:pr-4 mr-1 sm:mr-2 gap-0.5 sm:gap-1">
@@ -83,21 +106,41 @@
          routerLink="/dashboard">
         Dashboard
       </a>
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'process-monitor' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/process-monitors">
-        Process Monitors
-      </a>
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'reports' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/reports">
-        Reports
-      </a>
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'rwatchers' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/rwatchers">
-        rWatchers
-      </a>
+
+      @if (appMode() === 'watcher') {
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'process-monitor' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/process-monitors">
+          Process Monitors
+        </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'reports' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/reports">
+          Reports
+        </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'rwatchers' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/rwatchers">
+          rWatchers
+        </a>
+      } @else {
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'test-plans' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/test-plans">
+          Test Plans
+        </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'test-runs' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/test-runs">
+          Test Runs
+        </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'botmanagers' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/botmanagers">
+          BotManagers
+        </a>
+      }
+
       <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
          [ngClass]="activeTab() === 'schedules' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
          routerLink="/schedules">
@@ -2912,6 +2955,479 @@
           <button (click)="chatReset()" class="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">refresh</span> Reset conversation
           </button>
+        </div>
+      </div>
+    } @else if (activeTab() === 'test-plans') {
+      <!-- Test Plans (Loader) -->
+      <div class="mt-6 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Test Plans</h2>
+            <p class="text-sm text-slate-500 mt-1">Define what scenarios run, how many rLoaders, and the ramp-up policy.</p>
+          </div>
+          <button class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+            <span class="material-symbols-outlined text-[18px]">add</span> New Test Plan
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="relative w-full sm:max-w-md">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+          </div>
+          <input type="text" [value]="testPlanSearch()" (input)="testPlanSearch.set($any($event.target).value)" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search by ID, name, or project..." />
+        </div>
+
+        <!-- Test plan cards -->
+        <div class="flex flex-col gap-3">
+          @for (plan of filteredTestPlans(); track plan.id) {
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                 [class.border-l-emerald-400]="plan.active"
+                 [class.border-l-slate-300]="!plan.active"
+                 style="border-left-width: 3px;">
+              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                <!-- Identity -->
+                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
+                  <div class="size-10 flex items-center justify-center rounded-md shrink-0"
+                       [class.bg-emerald-50]="plan.active"
+                       [class.text-emerald-600]="plan.active"
+                       [class.bg-slate-100]="!plan.active"
+                       [class.text-slate-500]="!plan.active">
+                    <span class="material-symbols-outlined">assignment</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <h3 class="font-bold text-slate-900 text-sm">{{ plan.name }}</h3>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="text-[11px] font-mono text-slate-500">{{ plan.id }}</span>
+                      <span class="flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
+                            [class.text-emerald-700]="plan.active" [class.bg-emerald-100]="plan.active"
+                            [class.text-slate-600]="!plan.active" [class.bg-slate-100]="!plan.active">
+                        @if (plan.active) {
+                          <span class="size-1.5 rounded-full bg-emerald-500"></span> Active
+                        } @else {
+                          <span class="size-1.5 rounded-full bg-slate-400"></span> Disabled
+                        }
+                      </span>
+                    </div>
+                    @if (plan.description) {
+                      <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[260px]">{{ plan.description }}</p>
+                    }
+                  </div>
+                </div>
+
+                <!-- Quick stats -->
+                <div class="flex flex-wrap items-center gap-4 sm:gap-8 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Project</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ plan.project }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Modified</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ plan.modifiedDate }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Modified by</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ plan.modifiedBy }}</span>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                  <div class="flex items-center gap-1">
+                    <button (click)="toggleTestPlanActive(plan.id)" [title]="plan.active ? 'Deactivate' : 'Activate'"
+                            class="size-8 flex items-center justify-center rounded-md transition-colors"
+                            [class.text-slate-500]="plan.active"
+                            [class.hover:bg-slate-100]="plan.active"
+                            [class.text-emerald-600]="!plan.active"
+                            [class.hover:bg-emerald-50]="!plan.active">
+                      <span class="material-symbols-outlined text-[18px]">{{ plan.active ? 'power_off' : 'power' }}</span>
+                    </button>
+                    <button (click)="runTestPlan(plan.id); navigate('/test-runs')" title="Run"
+                            [disabled]="!plan.active"
+                            class="size-8 flex items-center justify-center rounded-md transition-colors text-primary hover:bg-primary/10 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    </button>
+                    <button title="Edit" class="size-8 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors">
+                      <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                    <button (click)="deleteTestPlan(plan.id)" title="Delete"
+                            class="size-8 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 transition-colors">
+                      <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
+              <div class="bg-emerald-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+                <span class="material-symbols-outlined text-3xl">assignment</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">No test plans yet</h3>
+              <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Create your first test plan to define what scenarios to load-test, how many rLoaders to use, and the ramp-up policy.</p>
+              <button class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
+                <span class="material-symbols-outlined text-[18px]">add</span> New Test Plan
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (activeTab() === 'test-runs') {
+      <!-- Test Runs (Loader) -->
+      <div class="mt-6 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Test Runs</h2>
+            <p class="text-sm text-slate-500 mt-1">Live and historical executions of your test plans.</p>
+          </div>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <span class="material-symbols-outlined text-[14px] text-blue-500">play_circle</span> Running
+            </div>
+            <div class="text-2xl font-bold text-slate-900">{{ testRunsCountByStatus('running') }}</div>
+            <div class="text-[11px] text-slate-400 mt-1">active tests</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <span class="material-symbols-outlined text-[14px] text-amber-500">schedule</span> Queued
+            </div>
+            <div class="text-2xl font-bold text-slate-900">{{ testRunsCountByStatus('queued') }}</div>
+            <div class="text-[11px] text-slate-400 mt-1">waiting to start</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <span class="material-symbols-outlined text-[14px] text-violet-500">group</span> vUsers
+            </div>
+            <div class="text-2xl font-bold text-slate-900">{{ totalVUsersRunning() }}</div>
+            <div class="text-[11px] text-slate-400 mt-1">currently simulated</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <span class="material-symbols-outlined text-[14px] text-cyan-500">hub</span> rLoaders
+            </div>
+            <div class="text-2xl font-bold text-slate-900">{{ totalActiveRLoaders() }}</div>
+            <div class="text-[11px] text-slate-400 mt-1">active desktops</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <span class="material-symbols-outlined text-[14px] text-emerald-500">timer</span> Avg Response
+            </div>
+            <div class="text-2xl font-bold text-slate-900">{{ avgResponseTime() }}<span class="text-sm font-normal text-slate-400 ml-1">ms</span></div>
+            <div class="text-[11px] text-slate-400 mt-1">across active runs</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
+              <span class="material-symbols-outlined text-[14px] text-rose-500">error</span> Errors
+            </div>
+            <div class="text-2xl font-bold text-slate-900">{{ totalErrorsToday() }}</div>
+            <div class="text-[11px] text-slate-400 mt-1">today</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="relative flex-1 min-w-[200px] max-w-sm">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+            <input type="text" [value]="testRunsSearch()" (input)="testRunsSearch.set($any($event.target).value)"
+              placeholder="Search tests or projects..."
+              class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+          <div class="inline-flex rounded-full bg-slate-100 p-1">
+            @for (opt of [
+              {value: 'all', label: 'All'},
+              {value: 'running', label: 'Running'},
+              {value: 'queued', label: 'Queued'},
+              {value: 'completed', label: 'Completed'},
+              {value: 'failed', label: 'Failed'},
+              {value: 'disabled', label: 'Disabled'}
+            ]; track opt.value) {
+              <button (click)="testRunsStatusFilter.set($any(opt.value))"
+                class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
+                [class.bg-white]="testRunsStatusFilter() === opt.value"
+                [class.text-slate-900]="testRunsStatusFilter() === opt.value"
+                [class.shadow-sm]="testRunsStatusFilter() === opt.value"
+                [class.text-slate-500]="testRunsStatusFilter() !== opt.value">
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Test run cards grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          @for (run of filteredTestRuns(); track run.id) {
+            <div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              [ngClass]="run.status === 'disabled' ? 'opacity-60' : ''">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+                      [ngClass]="testRunStatusColor(run.status)">
+                      <span class="material-symbols-outlined text-[12px]">{{ testRunStatusIcon(run.status) }}</span>
+                      {{ run.status }}
+                    </span>
+                    <span class="text-[11px] text-slate-400">{{ run.startedAt }}</span>
+                  </div>
+                  <h3 class="text-sm font-bold text-slate-900 truncate">{{ run.name }}</h3>
+                  <p class="text-[11px] text-slate-500">{{ run.project }}</p>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  @if (run.status === 'running') {
+                    <button (click)="stopTestRun(run.id)" title="Stop"
+                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200">
+                      <span class="material-symbols-outlined text-[18px]">stop</span>
+                    </button>
+                  } @else if (run.status === 'queued') {
+                    <button (click)="runTestRun(run.id)" title="Run now"
+                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
+                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    </button>
+                  } @else if (run.status === 'failed') {
+                    <button (click)="retryTestRun(run.id)" title="Retry"
+                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200">
+                      <span class="material-symbols-outlined text-[18px]">refresh</span>
+                    </button>
+                  } @else if (run.status === 'completed') {
+                    <button (click)="retryTestRun(run.id)" title="Re-run"
+                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
+                      <span class="material-symbols-outlined text-[18px]">replay</span>
+                    </button>
+                  } @else if (run.status === 'disabled') {
+                    <button (click)="toggleTestRunDisabled(run.id)" title="Enable"
+                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200">
+                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    </button>
+                  }
+                  @if (run.status !== 'disabled') {
+                    <button (click)="toggleTestRunDisabled(run.id)" title="Disable"
+                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100">
+                      <span class="material-symbols-outlined text-[18px]">do_not_disturb_on</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <div class="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+                  <span>{{ run.elapsed }} / {{ run.duration }}</span>
+                  <span class="font-semibold">{{ run.progress }}%</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                    [ngClass]="{
+                      'bg-blue-500': run.status === 'running',
+                      'bg-emerald-500': run.status === 'completed',
+                      'bg-rose-500': run.status === 'failed',
+                      'bg-amber-400': run.status === 'queued',
+                      'bg-slate-300': run.status === 'disabled'
+                    }"
+                    [style.width.%]="run.progress"></div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-4 gap-2 mb-3">
+                <div class="bg-slate-50 rounded-lg p-2">
+                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">rLoaders</div>
+                  <div class="text-sm font-bold text-slate-900 mt-0.5">{{ run.rLoadersActive }}/{{ run.rLoadersTotal }}</div>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-2">
+                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">vUsers</div>
+                  <div class="text-sm font-bold text-slate-900 mt-0.5">{{ run.vUsers }}</div>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-2">
+                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Resp</div>
+                  <div class="text-sm font-bold text-slate-900 mt-0.5">{{ run.responseTime }}<span class="text-[9px] font-normal text-slate-400">ms</span></div>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-2">
+                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Success</div>
+                  <div class="text-sm font-bold mt-0.5"
+                    [ngClass]="run.successRate >= 95 ? 'text-emerald-600' : run.successRate >= 80 ? 'text-amber-600' : 'text-rose-600'">
+                    {{ run.successRate }}%
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100">
+                <div class="flex items-center gap-3 text-slate-500">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">repeat</span>
+                    {{ run.iterations }}
+                  </span>
+                  @if (run.errors > 0) {
+                    <span class="inline-flex items-center gap-1 text-rose-600 font-medium">
+                      <span class="material-symbols-outlined text-[13px]">error</span>
+                      {{ run.errors }}
+                    </span>
+                  }
+                </div>
+                <div class="flex items-center gap-1 text-slate-400 truncate max-w-[50%]">
+                  <span class="material-symbols-outlined text-[13px]">playlist_play</span>
+                  <span class="truncate">{{ run.processes.join(', ') }}</span>
+                </div>
+              </div>
+            </div>
+          }
+          @if (filteredTestRuns().length === 0) {
+            <div class="col-span-full bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center">
+              <span class="material-symbols-outlined text-4xl text-slate-300">search_off</span>
+              <p class="text-sm text-slate-500 mt-2">No test runs match your filters</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (activeTab() === 'botmanagers') {
+      <!-- BotManagers (Loader) -->
+      <div class="mt-6 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">BotManagers</h2>
+            <p class="text-sm text-slate-500 mt-1">Monitor, start, and manage the remote desktop agents that execute your test scenarios.</p>
+          </div>
+          <button class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+            <span class="material-symbols-outlined text-[18px]">add</span> Register BotManager
+          </button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-4">
+            <div class="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">check_circle</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">{{ totalConnectedRLoaders() }}</p>
+              <p class="text-xs font-medium text-slate-500">Connected rLoaders</p>
+            </div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-4">
+            <div class="size-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">bolt</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">{{ totalAvailableRLoaders() }}</p>
+              <p class="text-xs font-medium text-slate-500">Available rLoaders</p>
+            </div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex items-center gap-4">
+            <div class="size-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">dns</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900">{{ botManagers().length }}</p>
+              <p class="text-xs font-medium text-slate-500">BotManagers</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="relative w-full sm:max-w-sm">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+            </div>
+            <input type="text" [value]="botManagerSearch()" (input)="botManagerSearch.set($any($event.target).value)" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search by name, host, or group..." />
+          </div>
+          <div class="inline-flex rounded-full bg-slate-100 p-1 self-start">
+            @for (opt of [
+              {value: 'all', label: 'All'},
+              {value: 'connected', label: 'Connected'},
+              {value: 'available', label: 'Available'},
+              {value: 'busy', label: 'Busy'},
+              {value: 'offline', label: 'Offline'}
+            ]; track opt.value) {
+              <button (click)="botManagerStatusFilter.set($any(opt.value))"
+                class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
+                [class.bg-white]="botManagerStatusFilter() === opt.value"
+                [class.text-slate-900]="botManagerStatusFilter() === opt.value"
+                [class.shadow-sm]="botManagerStatusFilter() === opt.value"
+                [class.text-slate-500]="botManagerStatusFilter() !== opt.value">{{ opt.label }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="flex flex-col gap-3">
+          @for (bm of filteredBotManagers(); track bm.id) {
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                 [class.border-l-emerald-400]="bm.status === 'connected'"
+                 [class.border-l-blue-400]="bm.status === 'available'"
+                 [class.border-l-amber-400]="bm.status === 'busy'"
+                 [class.border-l-slate-300]="bm.status === 'offline'"
+                 style="border-left-width: 3px;">
+              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
+                  <div class="size-10 flex items-center justify-center rounded-md shrink-0"
+                       [ngClass]="botManagerStatusColor(bm.status)">
+                    <span class="material-symbols-outlined">dns</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <h3 class="font-bold text-slate-900 text-sm">{{ bm.name }}</h3>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-md inline-flex items-center gap-1"
+                            [ngClass]="botManagerStatusColor(bm.status)">
+                        <span class="size-1.5 rounded-full"
+                              [class.bg-emerald-500]="bm.status === 'connected'"
+                              [class.bg-blue-500]="bm.status === 'available'"
+                              [class.bg-amber-500]="bm.status === 'busy'"
+                              [class.bg-slate-400]="bm.status === 'offline'"></span>
+                        {{ bm.status }}
+                      </span>
+                      <span class="text-[11px] text-slate-500">{{ bm.rLoaderGroup }}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[260px]">{{ bm.lastStatusMessage }}</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Hostname</span>
+                    <span class="text-xs font-semibold text-slate-700 font-mono">{{ bm.hostname }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">RDP Access</span>
+                    <span class="text-xs font-semibold text-slate-700 font-mono">{{ bm.rdpAccess }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Connected</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ bm.connectedRLoaders }} rLoaders</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Available</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ bm.availableRLoaders }} idle</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                  <div class="flex items-center gap-1">
+                    <button (click)="startRLoaderDesktops(bm.id)" title="Start rLoader desktops"
+                            class="size-8 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors">
+                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    </button>
+                    <button title="Restart connection"
+                            class="size-8 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors">
+                      <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                    </button>
+                    <button title="Edit"
+                            class="size-8 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors">
+                      <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
+              <div class="bg-emerald-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+                <span class="material-symbols-outlined text-3xl">dns</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 mb-2">No BotManagers found</h3>
+              <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Register a BotManager to start running load tests against your scenarios.</p>
+            </div>
+          }
         </div>
       </div>
     } @else if (activeTab() === 'help-new4') {

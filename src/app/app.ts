@@ -109,6 +109,30 @@ export interface TestRun {
   processes: string[];
 }
 
+export interface TestPlan {
+  id: string;            // human ID e.g. AL-4857
+  name: string;
+  description: string;
+  project: string;
+  modifiedDate: string;
+  modifiedBy: string;
+  active: boolean;       // toggle
+}
+
+export interface BotManager {
+  id: string;
+  name: string;
+  status: 'connected' | 'available' | 'busy' | 'offline';
+  launcher: string;
+  hostname: string;
+  rdpAccess: string;
+  rLoaderGroup: string;
+  connectedRLoaders: number;
+  availableRLoaders: number;
+  index: number;
+  lastStatusMessage: string;
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
@@ -440,6 +464,91 @@ export class App implements OnInit {
         processes: ['Search Query', 'Filter Results']
       }
     ];
+  }
+
+  // --- Test Plans (Loader mode) ---
+  testPlans = signal<TestPlan[]>([
+    { id: 'AL-4857', name: 'test$', description: '', project: 'myproject', modifiedDate: '2026-04-29 01:15', modifiedBy: 'admin', active: true },
+    { id: 'AL-4917', name: 'test22', description: 'Spike test for checkout', project: 'myproject', modifiedDate: '2026-04-29 00:50', modifiedBy: 'admin', active: true },
+    { id: 'AL-5284', name: 'test', description: 'Baseline regression run', project: 'myproject', modifiedDate: '2026-04-29 00:41', modifiedBy: 'admin', active: true }
+  ]);
+  testPlanSearch = signal<string>('');
+  filteredTestPlans() {
+    const q = this.testPlanSearch().toLowerCase();
+    if (!q) return this.testPlans();
+    return this.testPlans().filter(p =>
+      p.id.toLowerCase().includes(q) ||
+      p.name.toLowerCase().includes(q) ||
+      p.project.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+  }
+  toggleTestPlanActive(id: string) {
+    this.testPlans.update(list => list.map(p => p.id === id ? { ...p, active: !p.active } : p));
+  }
+  deleteTestPlan(id: string) {
+    this.testPlans.update(list => list.filter(p => p.id !== id));
+  }
+  runTestPlan(id: string) {
+    const plan = this.testPlans().find(p => p.id === id);
+    if (!plan) return;
+    const newId = 'tr-' + Date.now();
+    this.testRuns.update(runs => [{
+      id: newId,
+      name: plan.name,
+      project: plan.project,
+      status: 'running',
+      rLoadersActive: 1,
+      rLoadersTotal: 5,
+      vUsers: 5,
+      duration: '15m',
+      elapsed: '00:00:05',
+      progress: 1,
+      responseTime: 0,
+      successRate: 100,
+      iterations: 0,
+      errors: 0,
+      startedAt: 'Just now',
+      processes: ['notepad']
+    }, ...runs]);
+  }
+
+  // --- BotManagers (Loader mode) ---
+  botManagers = signal<BotManager[]>([
+    { id: 'bm-1', name: 'BotManager-1', status: 'connected', launcher: 'rLoader Desktop Manager', hostname: 'BM-NYC-01', rdpAccess: '10.0.1.20:3389', rLoaderGroup: 'Production', connectedRLoaders: 5, availableRLoaders: 3, index: 1, lastStatusMessage: '5 rLoaders ready' },
+    { id: 'bm-2', name: 'BotManager-2', status: 'busy', launcher: 'rLoader Desktop Manager', hostname: 'BM-LON-01', rdpAccess: '10.0.2.20:3389', rLoaderGroup: 'EU', connectedRLoaders: 4, availableRLoaders: 0, index: 2, lastStatusMessage: 'Running test AL-4917' },
+    { id: 'bm-3', name: 'BotManager-3', status: 'available', launcher: 'rLoader Desktop Manager', hostname: 'BM-SF-01', rdpAccess: '10.0.3.20:3389', rLoaderGroup: 'QA', connectedRLoaders: 2, availableRLoaders: 2, index: 3, lastStatusMessage: 'Idle' },
+    { id: 'bm-4', name: 'BotManager-4', status: 'offline', launcher: 'rLoader Desktop Manager', hostname: 'BM-TYO-01', rdpAccess: '10.0.4.20:3389', rLoaderGroup: 'APAC', connectedRLoaders: 0, availableRLoaders: 0, index: 4, lastStatusMessage: 'Last seen 2h ago' }
+  ]);
+  botManagerSearch = signal<string>('');
+  botManagerStatusFilter = signal<'all' | 'connected' | 'available' | 'busy' | 'offline'>('all');
+  filteredBotManagers() {
+    const q = this.botManagerSearch().toLowerCase();
+    const sf = this.botManagerStatusFilter();
+    return this.botManagers().filter(b => {
+      if (sf !== 'all' && b.status !== sf) return false;
+      if (!q) return true;
+      return b.name.toLowerCase().includes(q) ||
+        b.hostname.toLowerCase().includes(q) ||
+        b.rLoaderGroup.toLowerCase().includes(q);
+    });
+  }
+  totalConnectedRLoaders() {
+    return this.botManagers().reduce((s, b) => s + b.connectedRLoaders, 0);
+  }
+  totalAvailableRLoaders() {
+    return this.botManagers().reduce((s, b) => s + b.availableRLoaders, 0);
+  }
+  startRLoaderDesktops(id: string) {
+    this.botManagers.update(list => list.map(b => b.id === id ? { ...b, status: 'connected', connectedRLoaders: 5, availableRLoaders: 5, lastStatusMessage: '5 rLoaders started' } : b));
+  }
+  botManagerStatusColor(s: BotManager['status']) {
+    switch (s) {
+      case 'connected': return 'bg-emerald-100 text-emerald-700';
+      case 'available': return 'bg-blue-100 text-blue-700';
+      case 'busy': return 'bg-amber-100 text-amber-700';
+      case 'offline': return 'bg-slate-200 text-slate-600';
+    }
   }
 
   dashboardProcessSearch = signal<string>('');
