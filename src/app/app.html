@@ -8,26 +8,72 @@
         </div>
         <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white truncate">Automai {{ appMode() === 'loader' ? 'Loader' : 'Watcher' }}</h1>
       </div>
-      <!-- Product mode switch -->
-      <div class="hidden sm:inline-flex items-center bg-white/10 border border-white/20 rounded-full p-0.5" role="tablist" aria-label="Product mode">
-        <button (click)="setAppMode('watcher')"
-                class="px-3 py-1 text-xs font-semibold rounded-full inline-flex items-center gap-1 transition-colors"
-                [class.bg-white]="appMode() === 'watcher'"
-                [class.text-slate-900]="appMode() === 'watcher'"
-                [class.text-white]="appMode() !== 'watcher'"
-                [class.hover:bg-white]="appMode() !== 'watcher'"
-                [class.hover:bg-opacity-10]="appMode() !== 'watcher'">
-          <span class="material-symbols-outlined text-[14px]">visibility</span> Watcher
+      <!-- Product switcher -->
+      <div class="relative hidden sm:block">
+        <button (click)="toggleProductSwitcher()" type="button"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold hover:bg-white/20 transition-colors"
+                [attr.aria-expanded]="productSwitcherOpen()"
+                aria-haspopup="menu">
+          <span class="text-[10px] font-medium uppercase tracking-wider text-white/60">Product</span>
+          <span class="size-5 flex items-center justify-center rounded-md bg-white/15">
+            <span class="material-symbols-outlined text-[14px] text-white">{{ currentProduct().icon }}</span>
+          </span>
+          <span>{{ currentProduct().label }}</span>
+          <span class="material-symbols-outlined text-[16px] text-white/70 transition-transform"
+                [class.rotate-180]="productSwitcherOpen()">expand_more</span>
         </button>
-        <button (click)="setAppMode('loader')"
-                class="px-3 py-1 text-xs font-semibold rounded-full inline-flex items-center gap-1 transition-colors"
-                [class.bg-white]="appMode() === 'loader'"
-                [class.text-emerald-700]="appMode() === 'loader'"
-                [class.text-white]="appMode() !== 'loader'"
-                [class.hover:bg-white]="appMode() !== 'loader'"
-                [class.hover:bg-opacity-10]="appMode() !== 'loader'">
-          <span class="material-symbols-outlined text-[14px]">speed</span> Loader
-        </button>
+
+        @if (productSwitcherOpen()) {
+          <!-- Backdrop to capture outside clicks -->
+          <div class="fixed inset-0 z-30" (click)="closeProductSwitcher()"></div>
+          <!-- Menu -->
+          <div role="menu"
+               class="absolute left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-40 overflow-hidden">
+            <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Switch product</span>
+              <button (click)="closeProductSwitcher()" class="size-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            </div>
+            <ul class="py-1">
+              @for (p of products; track p.id) {
+                <li>
+                  <button (click)="selectProduct(p.id)"
+                          [disabled]="!p.available"
+                          [attr.aria-current]="appMode() === p.id ? 'true' : null"
+                          class="w-full text-left px-3 py-2.5 flex items-center gap-3 transition-colors"
+                          [class.bg-primary]="appMode() === p.id"
+                          [class.bg-opacity-5]="appMode() === p.id"
+                          [class.hover:bg-slate-50]="p.available && appMode() !== p.id"
+                          [class.cursor-not-allowed]="!p.available"
+                          [class.opacity-60]="!p.available">
+                    <span class="size-9 flex items-center justify-center rounded-lg shrink-0"
+                          [class.bg-primary]="appMode() === p.id"
+                          [class.text-white]="appMode() === p.id"
+                          [class.bg-slate-100]="appMode() !== p.id"
+                          [class.text-slate-600]="appMode() !== p.id">
+                      <span class="material-symbols-outlined text-[20px]">{{ p.icon }}</span>
+                    </span>
+                    <span class="flex-1 min-w-0">
+                      <span class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-slate-900">{{ p.label }}</span>
+                        @if (!p.available) {
+                          <span class="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Soon</span>
+                        } @else if (appMode() === p.id) {
+                          <span class="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">Active</span>
+                        }
+                      </span>
+                      <span class="block text-[11px] text-slate-500 truncate">{{ p.description }}</span>
+                    </span>
+                    @if (appMode() === p.id) {
+                      <span class="material-symbols-outlined text-[18px] text-primary shrink-0">check</span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
       </div>
     </div>
     <div class="flex items-center gap-1 sm:gap-2">

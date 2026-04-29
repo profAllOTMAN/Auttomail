@@ -154,17 +154,50 @@ export class App implements OnInit {
   completedSteps = signal<string[]>(['notifications', 'watcher', 'schedule', 'monitor']);
   activeTab = signal<string>('dashboard');
 
-  // Watcher vs Loader environment toggle
+  // Product switcher
   appMode = signal<'watcher' | 'loader'>('watcher');
+  productSwitcherOpen = signal<boolean>(false);
 
-  setAppMode(mode: 'watcher' | 'loader') {
-    if (this.appMode() === mode) return;
-    this.appMode.set(mode);
-    if (mode === 'loader') {
+  readonly products: readonly {
+    id: 'watcher' | 'loader' | 'worker' | 'tester';
+    label: string;
+    icon: string;
+    description: string;
+    available: boolean;
+  }[] = [
+    { id: 'watcher', label: 'Watcher', icon: 'visibility', description: 'Process monitoring & rWatcher agents', available: true },
+    { id: 'loader',  label: 'Loader',  icon: 'speed',      description: 'Load testing with rLoader desktops', available: true },
+    { id: 'worker',  label: 'Worker',  icon: 'precision_manufacturing', description: 'Background job orchestration', available: false },
+    { id: 'tester',  label: 'Tester',  icon: 'science',    description: 'End-to-end test automation', available: false }
+  ];
+
+  currentProduct() {
+    return this.products.find(p => p.id === this.appMode()) ?? this.products[0];
+  }
+
+  toggleProductSwitcher() {
+    this.productSwitcherOpen.update(v => !v);
+  }
+  closeProductSwitcher() {
+    this.productSwitcherOpen.set(false);
+  }
+
+  selectProduct(id: 'watcher' | 'loader' | 'worker' | 'tester') {
+    const product = this.products.find(p => p.id === id);
+    if (!product || !product.available) return;
+    this.closeProductSwitcher();
+    if (id !== 'watcher' && id !== 'loader') return;
+    if (this.appMode() === id) return;
+    this.appMode.set(id);
+    if (id === 'loader') {
       this.navigate('/test-runs');
     } else {
       this.navigate('/dashboard');
     }
+  }
+
+  setAppMode(mode: 'watcher' | 'loader') {
+    this.selectProduct(mode);
   }
 
   ngOnInit() {
