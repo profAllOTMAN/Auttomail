@@ -101,13 +101,12 @@
   <!-- Navigation -->
   <nav class="bg-white border-b border-slate-200 px-4 sm:px-6 overflow-x-auto">
     <div class="flex items-center gap-1 sm:gap-2 min-w-max py-2">
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'dashboard' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/dashboard">
-        Dashboard
-      </a>
-
       @if (appMode() === 'watcher') {
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'dashboard' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/dashboard">
+          Dashboard
+        </a>
         <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
            [ngClass]="activeTab() === 'process-monitor' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
            routerLink="/process-monitors">
@@ -123,7 +122,28 @@
            routerLink="/rwatchers">
           rWatchers
         </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'schedules' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/schedules">
+          Schedules
+        </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'projects' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/projects">
+          Projects
+        </a>
+        <div class="w-px h-5 bg-slate-200 mx-2"></div>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full border flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'help' ? 'border-primary text-primary bg-primary/5' : 'border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/help">
+          Help
+        </a>
       } @else {
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'dashboard' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/dashboard">
+          Dashboard
+        </a>
         <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
            [ngClass]="activeTab() === 'test-plans' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
            routerLink="/test-plans">
@@ -139,30 +159,227 @@
            routerLink="/botmanagers">
           BotManagers
         </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'schedules' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/schedules">
+          Schedules
+        </a>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'projects' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/projects">
+          Projects
+        </a>
+        <div class="w-px h-5 bg-slate-200 mx-2"></div>
+        <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full border flex items-center gap-2 cursor-pointer no-underline"
+           [ngClass]="activeTab() === 'help' ? 'border-primary text-primary bg-primary/5' : 'border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+           routerLink="/help">
+          Help
+        </a>
       }
-
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'schedules' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/schedules">
-        Schedules
-      </a>
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'projects' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/projects">
-        Projects
-      </a>
-      <div class="w-px h-5 bg-slate-200 mx-2"></div>
-      <a class="py-2 px-3 text-sm font-medium transition-colors rounded-full border flex items-center gap-2 cursor-pointer no-underline"
-         [ngClass]="activeTab() === 'help' ? 'border-primary text-primary bg-primary/5' : 'border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-         routerLink="/help">
-        Help
-      </a>
     </div>
   </nav>
 
   <!-- Main Content -->
   <main class="flex-1 px-4 sm:px-6 pb-12 max-w-7xl mx-auto w-full">
-    @if (activeTab() === 'dashboard') {
+    @if (activeTab() === 'dashboard' && appMode() === 'loader') {
+      <!-- Loader Dashboard -->
+      <div class="mt-6 space-y-5">
+        <!-- Status pills -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">dns</span>
+            ONLINE BotManagers: <span class="font-bold">{{ totalConnectedRLoaders() > 0 ? botManagers().length : onlineBotManagerCount() }}</span>
+          </button>
+          <button (click)="loaderStartRLoaders()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">play_circle</span>
+            START rLOADERS
+          </button>
+          <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+            <span class="material-symbols-outlined text-[16px]">directions_run</span>
+            CONNECTED rLOADERS: <span class="font-bold">{{ totalConnectedRLoaders() }}</span>
+          </button>
+          <button title="Refresh" class="size-9 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">refresh</span>
+          </button>
+          <button title="Clear" class="size-9 flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">layers_clear</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="relative">
+            <label class="absolute -top-2 left-3 px-1 bg-white text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Test plan</label>
+            <input type="text" [value]="selectedDashboardPlan()" (input)="selectedDashboardPlan.set($any($event.target).value)" class="w-full pl-3 pr-9 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button (click)="selectedDashboardPlan.set('')" class="absolute right-2 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center text-slate-400 hover:text-slate-600">
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+          <div class="relative">
+            <label class="absolute -top-2 left-3 px-1 bg-white text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Test run</label>
+            <input type="text" [value]="selectedDashboardRun()" (input)="selectedDashboardRun.set($any($event.target).value)" class="w-full pl-3 pr-9 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button (click)="selectedDashboardRun.set('')" class="absolute right-2 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center text-slate-400 hover:text-slate-600">
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+          <div class="relative">
+            <label class="absolute -top-2 left-3 px-1 bg-white text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Project</label>
+            <input type="text" [value]="selectedDashboardProject()" (input)="selectedDashboardProject.set($any($event.target).value)" class="w-full pl-3 pr-9 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button (click)="selectedDashboardProject.set('')" class="absolute right-2 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center text-slate-400 hover:text-slate-600">
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+          <div class="relative">
+            <label class="absolute -top-2 left-3 px-1 bg-white text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Project test cycle</label>
+            <input type="text" [value]="selectedDashboardCycle()" (input)="selectedDashboardCycle.set($any($event.target).value)" class="w-full pl-3 pr-9 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button (click)="selectedDashboardCycle.set('')" class="absolute right-2 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center text-slate-400 hover:text-slate-600">
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Test Run Stats -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-slate-500">bar_chart</span>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Test Run Stats</h3>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="px-4 py-3 flex flex-wrap items-center gap-3">
+            <select class="text-xs text-slate-700 border border-slate-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-[220px]">
+              <option>Filter by process/transaction</option>
+              <option>notepad</option>
+              <option>login</option>
+            </select>
+            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+              <input type="checkbox" [checked]="dashboardShowMixed()" (change)="dashboardShowMixed.set($any($event.target).checked)" class="sr-only peer" />
+              <span class="relative w-9 h-5 bg-slate-200 peer-checked:bg-primary rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-4"></span>
+              Show mixed chart
+            </label>
+            <button class="text-xs font-semibold text-rose-600 border border-rose-200 hover:bg-rose-50 rounded-full px-3 py-1.5 inline-flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[14px]">restart_alt</span> Reset Charts
+            </button>
+          </div>
+
+          <!-- KPI grid -->
+          <div class="px-4 pb-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-3 text-[11px]">
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Start date:</span> <span class="text-blue-600 font-semibold ml-1">{{ dashboardKpis().startDate }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">End date:</span> <span class="text-blue-600 font-semibold ml-1">{{ dashboardKpis().endDate }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Test duration:</span> <span class="text-blue-600 font-semibold ml-1">{{ dashboardKpis().duration }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Success:</span> <span class="text-emerald-600 font-semibold ml-1">{{ dashboardKpis().success }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Failure:</span> <span class="font-semibold ml-1" [class.text-rose-600]="dashboardKpis().failureCount > 0" [class.text-slate-500]="dashboardKpis().failureCount === 0">{{ dashboardKpis().failure }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Ramp-up end:</span> <span class="text-amber-600 font-semibold ml-1">{{ dashboardKpis().rampUpEnd }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Ramp-down:</span> <span class="text-amber-600 font-semibold ml-1">{{ dashboardKpis().rampDown }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Ramp-up duration:</span> <span class="text-blue-600 font-semibold ml-1">{{ dashboardKpis().rampUpDuration }}</span></div>
+            <div><span class="text-slate-400 font-semibold uppercase tracking-wider">Max concurrent users:</span> <span class="text-slate-900 font-semibold ml-1">{{ dashboardKpis().maxUsers }}</span></div>
+          </div>
+
+          <!-- Chart -->
+          <div class="px-4 pb-4 flex flex-col lg:flex-row gap-4">
+            <div class="flex-1 bg-slate-50/50 border border-slate-100 rounded-md p-3 min-h-[260px]">
+              <svg viewBox="0 0 600 220" class="w-full h-full" preserveAspectRatio="none">
+                <!-- grid -->
+                @for (y of [0, 0.25, 0.5, 0.75, 1]; track y) {
+                  <line [attr.x1]="0" [attr.x2]="600" [attr.y1]="20 + y * 180" [attr.y2]="20 + y * 180" stroke="#e2e8f0" stroke-width="0.5" />
+                }
+                <!-- users polyline (ramp up flat ramp down) -->
+                <polyline fill="none" stroke="#10b981" stroke-width="2" points="20,200 130,200 200,30 470,30 540,200 580,200" />
+                <!-- failures baseline -->
+                <line x1="20" y1="200" x2="580" y2="200" stroke="#ef4444" stroke-width="1.5" />
+                <!-- notepad bars -->
+                <rect x="195" y="48" width="14" height="152" fill="#1e3a8a" rx="2" />
+                <rect x="350" y="48" width="14" height="152" fill="#1e3a8a" rx="2" />
+                <rect x="465" y="48" width="14" height="152" fill="#1e3a8a" rx="2" />
+                <!-- y-axis labels -->
+                @for (lbl of [{v:'1.0',y:24},{v:'0.5',y:114},{v:'0',y:204}]; track lbl.v) {
+                  <text [attr.x]="2" [attr.y]="lbl.y" font-size="9" fill="#94a3b8">{{ lbl.v }}</text>
+                }
+                <text x="300" y="218" font-size="9" fill="#94a3b8" text-anchor="middle">elapsed (mm:ss)</text>
+              </svg>
+            </div>
+            <!-- Legend -->
+            <div class="lg:w-48 bg-white border border-slate-100 rounded-md p-3">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-[16px] text-slate-500">list</span>
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Chart Legend</h4>
+              </div>
+              <ul class="space-y-2 text-xs text-slate-700">
+                <li class="flex items-center gap-2"><span class="size-3 rounded-sm bg-emerald-500"></span> users</li>
+                <li class="flex items-center gap-2"><span class="size-3 rounded-sm bg-rose-500"></span> failures</li>
+                <li class="flex items-center gap-2"><span class="size-3 rounded-sm bg-blue-900"></span> notepad</li>
+                <li class="flex items-center gap-2"><span class="size-3 rounded-sm bg-amber-500"></span> Avg baseline</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Plan Overview -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-slate-500">menu_book</span>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Test Plan Overview</h3>
+          </div>
+
+          <!-- KPI row -->
+          <div class="px-4 py-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-3 text-[11px] border-b border-slate-100">
+            <div class="inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-slate-400">trending_up</span>
+              <span class="text-slate-400 font-semibold uppercase tracking-wider">Ramp-up time:</span>
+              <span class="text-slate-900 font-semibold ml-1">{{ dashboardKpis().rampUpDuration }}</span>
+            </div>
+            <div class="inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-slate-400">speed</span>
+              <span class="text-slate-400 font-semibold uppercase tracking-wider">Users per minute:</span>
+              <span class="text-slate-900 font-semibold ml-1">{{ dashboardKpis().usersPerMinute }}</span>
+            </div>
+            <div class="inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-slate-400">group</span>
+              <span class="text-slate-400 font-semibold uppercase tracking-wider">Total users:</span>
+              <span class="text-slate-900 font-semibold ml-1">{{ dashboardKpis().maxUsers }}</span>
+            </div>
+            <div class="inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-slate-400">timer</span>
+              <span class="text-slate-400 font-semibold uppercase tracking-wider">Delay:</span>
+              <span class="text-slate-900 font-semibold ml-1">1 every 10 sec</span>
+            </div>
+            <div class="inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-slate-400">horizontal_rule</span>
+              <span class="text-slate-400 font-semibold uppercase tracking-wider">Steady state time:</span>
+              <span class="text-slate-900 font-semibold ml-1">{{ dashboardKpis().steadyState }}</span>
+            </div>
+          </div>
+
+          <!-- Stacked area chart -->
+          <div class="px-4 pb-4 pt-3">
+            <div class="bg-slate-50/50 border border-slate-100 rounded-md p-3 min-h-[220px]">
+              <svg viewBox="0 0 600 200" class="w-full h-full" preserveAspectRatio="none">
+                @for (y of [0, 0.25, 0.5, 0.75, 1]; track y) {
+                  <line [attr.x1]="20" [attr.x2]="580" [attr.y1]="10 + y * 160" [attr.y2]="10 + y * 160" stroke="#e2e8f0" stroke-width="0.5" />
+                }
+                <!-- ramp up area (blue) -->
+                <polygon fill="#93c5fd" fill-opacity="0.55" stroke="#3b82f6" stroke-width="1" points="20,170 200,170 200,20" />
+                <!-- steady state area (green) -->
+                <polygon fill="#86efac" fill-opacity="0.55" stroke="#22c55e" stroke-width="1" points="200,20 400,20 400,170 200,170" />
+                <!-- ramp down area (yellow) -->
+                <polygon fill="#fde68a" fill-opacity="0.65" stroke="#f59e0b" stroke-width="1" points="400,20 580,170 400,170" />
+                <!-- x labels -->
+                <text x="20" y="195" font-size="9" fill="#94a3b8">00:00</text>
+                <text x="200" y="195" font-size="9" fill="#94a3b8" text-anchor="middle">00:01</text>
+                <text x="400" y="195" font-size="9" fill="#94a3b8" text-anchor="middle">00:02</text>
+                <text x="580" y="195" font-size="9" fill="#94a3b8" text-anchor="end">00:03</text>
+              </svg>
+            </div>
+            <!-- Legend -->
+            <div class="flex flex-wrap items-center gap-4 justify-center mt-3 text-[11px] text-slate-600">
+              <span class="inline-flex items-center gap-1.5"><span class="size-3 rounded-sm bg-blue-300 border border-blue-500"></span> Rampup interval</span>
+              <span class="inline-flex items-center gap-1.5"><span class="size-3 rounded-sm bg-emerald-300 border border-emerald-500"></span> Steady state time</span>
+              <span class="inline-flex items-center gap-1.5"><span class="size-3 rounded-sm bg-amber-200 border border-amber-500"></span> Rampdown interval</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else if (activeTab() === 'dashboard') {
       <div class="mt-6 space-y-5">
         <!-- Header -->
         <div class="flex items-center justify-between">
@@ -3157,122 +3374,128 @@
           </div>
         </div>
 
-        <!-- Test run cards grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- Test run list (full-width rows) -->
+        <div class="flex flex-col gap-3">
           @for (run of filteredTestRuns(); track run.id) {
-            <div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-              [ngClass]="run.status === 'disabled' ? 'opacity-60' : ''">
-              <div class="flex items-start justify-between gap-2 mb-3">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-                      [ngClass]="testRunStatusColor(run.status)">
-                      <span class="material-symbols-outlined text-[12px]">{{ testRunStatusIcon(run.status) }}</span>
-                      {{ run.status }}
-                    </span>
-                    <span class="text-[11px] text-slate-400">{{ run.startedAt }}</span>
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                 [class.border-l-blue-400]="run.status === 'running'"
+                 [class.border-l-amber-400]="run.status === 'queued'"
+                 [class.border-l-emerald-400]="run.status === 'completed'"
+                 [class.border-l-rose-400]="run.status === 'failed'"
+                 [class.border-l-slate-300]="run.status === 'disabled'"
+                 [class.opacity-60]="run.status === 'disabled'"
+                 style="border-left-width: 3px;">
+              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                <!-- Identity & Status -->
+                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
+                  <div class="size-10 flex items-center justify-center rounded-md shrink-0"
+                       [ngClass]="testRunStatusColor(run.status)">
+                    <span class="material-symbols-outlined">{{ testRunStatusIcon(run.status) }}</span>
                   </div>
-                  <h3 class="text-sm font-bold text-slate-900 truncate">{{ run.name }}</h3>
-                  <p class="text-[11px] text-slate-500">{{ run.project }}</p>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  @if (run.status === 'running') {
-                    <button (click)="stopTestRun(run.id)" title="Stop"
-                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200">
-                      <span class="material-symbols-outlined text-[18px]">stop</span>
-                    </button>
-                  } @else if (run.status === 'queued') {
-                    <button (click)="runTestRun(run.id)" title="Run now"
-                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
-                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                    </button>
-                  } @else if (run.status === 'failed') {
-                    <button (click)="retryTestRun(run.id)" title="Retry"
-                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200">
-                      <span class="material-symbols-outlined text-[18px]">refresh</span>
-                    </button>
-                  } @else if (run.status === 'completed') {
-                    <button (click)="retryTestRun(run.id)" title="Re-run"
-                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
-                      <span class="material-symbols-outlined text-[18px]">replay</span>
-                    </button>
-                  } @else if (run.status === 'disabled') {
-                    <button (click)="toggleTestRunDisabled(run.id)" title="Enable"
-                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200">
-                      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                    </button>
-                  }
-                  @if (run.status !== 'disabled') {
-                    <button (click)="toggleTestRunDisabled(run.id)" title="Disable"
-                      class="size-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100">
-                      <span class="material-symbols-outlined text-[18px]">do_not_disturb_on</span>
-                    </button>
-                  }
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <div class="flex items-center justify-between text-[10px] text-slate-500 mb-1">
-                  <span>{{ run.elapsed }} / {{ run.duration }}</span>
-                  <span class="font-semibold">{{ run.progress }}%</span>
-                </div>
-                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full transition-all duration-500"
-                    [ngClass]="{
-                      'bg-blue-500': run.status === 'running',
-                      'bg-emerald-500': run.status === 'completed',
-                      'bg-rose-500': run.status === 'failed',
-                      'bg-amber-400': run.status === 'queued',
-                      'bg-slate-300': run.status === 'disabled'
-                    }"
-                    [style.width.%]="run.progress"></div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-4 gap-2 mb-3">
-                <div class="bg-slate-50 rounded-lg p-2">
-                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">rLoaders</div>
-                  <div class="text-sm font-bold text-slate-900 mt-0.5">{{ run.rLoadersActive }}/{{ run.rLoadersTotal }}</div>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-2">
-                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">vUsers</div>
-                  <div class="text-sm font-bold text-slate-900 mt-0.5">{{ run.vUsers }}</div>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-2">
-                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Resp</div>
-                  <div class="text-sm font-bold text-slate-900 mt-0.5">{{ run.responseTime }}<span class="text-[9px] font-normal text-slate-400">ms</span></div>
-                </div>
-                <div class="bg-slate-50 rounded-lg p-2">
-                  <div class="text-[9px] text-slate-500 uppercase tracking-wide font-medium">Success</div>
-                  <div class="text-sm font-bold mt-0.5"
-                    [ngClass]="run.successRate >= 95 ? 'text-emerald-600' : run.successRate >= 80 ? 'text-amber-600' : 'text-rose-600'">
-                    {{ run.successRate }}%
+                  <div class="flex flex-col min-w-0">
+                    <h3 class="font-bold text-slate-900 text-sm truncate">{{ run.name }}</h3>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-md inline-flex items-center gap-1"
+                            [ngClass]="testRunStatusColor(run.status)">
+                        {{ run.status }}
+                      </span>
+                      <span class="text-[11px] text-slate-500">{{ run.startedAt }}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[260px]">{{ run.project }} · {{ run.processes.join(', ') }}</p>
                   </div>
                 </div>
-              </div>
 
-              <div class="flex items-center justify-between text-[11px] pt-3 border-t border-slate-100">
-                <div class="flex items-center gap-3 text-slate-500">
-                  <span class="inline-flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[13px]">repeat</span>
-                    {{ run.iterations }}
-                  </span>
-                  @if (run.errors > 0) {
-                    <span class="inline-flex items-center gap-1 text-rose-600 font-medium">
-                      <span class="material-symbols-outlined text-[13px]">error</span>
-                      {{ run.errors }}
+                <!-- Quick stats -->
+                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
+                  <div class="flex flex-col w-[45%] sm:w-auto min-w-[120px]">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Progress</span>
+                    <div class="flex items-center gap-2">
+                      <div class="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500"
+                             [ngClass]="{
+                               'bg-blue-500': run.status === 'running',
+                               'bg-emerald-500': run.status === 'completed',
+                               'bg-rose-500': run.status === 'failed',
+                               'bg-amber-400': run.status === 'queued',
+                               'bg-slate-300': run.status === 'disabled'
+                             }"
+                             [style.width.%]="run.progress"></div>
+                      </div>
+                      <span class="text-[11px] font-semibold text-slate-700">{{ run.progress }}%</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mt-0.5">{{ run.elapsed }} / {{ run.duration }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">rLoaders</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ run.rLoadersActive }}/{{ run.rLoadersTotal }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">vUsers</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ run.vUsers }}</span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Response</span>
+                    <span class="text-xs font-semibold text-slate-700">{{ run.responseTime }}<span class="text-[10px] font-normal text-slate-400 ml-0.5">ms</span></span>
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Success</span>
+                    <span class="text-xs font-semibold"
+                          [ngClass]="run.successRate >= 95 ? 'text-emerald-600' : run.successRate >= 80 ? 'text-amber-600' : 'text-rose-600'">
+                      {{ run.successRate }}%
                     </span>
-                  }
+                  </div>
+                  <div class="flex flex-col w-[45%] sm:w-auto">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Iter / Err</span>
+                    <span class="text-xs font-semibold text-slate-700">
+                      {{ run.iterations }}
+                      @if (run.errors > 0) {
+                        <span class="text-rose-600">· {{ run.errors }} err</span>
+                      }
+                    </span>
+                  </div>
                 </div>
-                <div class="flex items-center gap-1 text-slate-400 truncate max-w-[50%]">
-                  <span class="material-symbols-outlined text-[13px]">playlist_play</span>
-                  <span class="truncate">{{ run.processes.join(', ') }}</span>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                  <div class="flex items-center gap-1">
+                    @if (run.status === 'running') {
+                      <button (click)="stopTestRun(run.id)" title="Stop"
+                              class="size-8 flex items-center justify-center rounded-md text-rose-600 hover:bg-rose-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">stop</span>
+                      </button>
+                    } @else if (run.status === 'queued') {
+                      <button (click)="runTestRun(run.id)" title="Run now"
+                              class="size-8 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                      </button>
+                    } @else if (run.status === 'failed') {
+                      <button (click)="retryTestRun(run.id)" title="Retry"
+                              class="size-8 flex items-center justify-center rounded-md text-amber-600 hover:bg-amber-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">refresh</span>
+                      </button>
+                    } @else if (run.status === 'completed') {
+                      <button (click)="retryTestRun(run.id)" title="Re-run"
+                              class="size-8 flex items-center justify-center rounded-md text-primary hover:bg-primary/10 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">replay</span>
+                      </button>
+                    } @else if (run.status === 'disabled') {
+                      <button (click)="toggleTestRunDisabled(run.id)" title="Enable"
+                              class="size-8 flex items-center justify-center rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                      </button>
+                    }
+                    @if (run.status !== 'disabled') {
+                      <button (click)="toggleTestRunDisabled(run.id)" title="Disable"
+                              class="size-8 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">do_not_disturb_on</span>
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
             </div>
-          }
-          @if (filteredTestRuns().length === 0) {
-            <div class="col-span-full bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center">
+          } @empty {
+            <div class="bg-white border border-dashed border-slate-200 rounded-lg p-12 text-center">
               <span class="material-symbols-outlined text-4xl text-slate-300">search_off</span>
               <p class="text-sm text-slate-500 mt-2">No test runs match your filters</p>
             </div>

@@ -201,10 +201,11 @@ export class App implements OnInit {
       };
       const nextTab = tabMap[path] || 'dashboard';
       this.activeTab.set(nextTab);
-      // Auto-sync mode with tab (in case of deep links / browser nav)
+      // Auto-sync mode only for tabs exclusive to one environment.
+      // dashboard / schedules / projects / help exist in both — leave mode alone.
       if (['test-plans', 'test-runs', 'botmanagers'].includes(nextTab)) {
         this.appMode.set('loader');
-      } else if (['dashboard', 'process-monitor', 'rwatchers', 'schedules'].includes(nextTab)) {
+      } else if (['process-monitor', 'reports', 'rwatchers'].includes(nextTab)) {
         this.appMode.set('watcher');
       }
     });
@@ -549,6 +550,38 @@ export class App implements OnInit {
       case 'busy': return 'bg-amber-100 text-amber-700';
       case 'offline': return 'bg-slate-200 text-slate-600';
     }
+  }
+  onlineBotManagerCount() {
+    return this.botManagers().filter(b => b.status !== 'offline').length;
+  }
+  loaderStartRLoaders() {
+    this.botManagers.update(list => list.map(b =>
+      b.status === 'offline' ? b : { ...b, status: 'connected', connectedRLoaders: 5, availableRLoaders: 5, lastStatusMessage: '5 rLoaders started' }
+    ));
+  }
+
+  // --- Loader Dashboard signals ---
+  selectedDashboardPlan = signal<string>('test');
+  selectedDashboardRun = signal<string>('#2 at 03/13/26 12:55 AM');
+  selectedDashboardProject = signal<string>('myproject');
+  selectedDashboardCycle = signal<string>('Default');
+  dashboardShowMixed = signal<boolean>(true);
+
+  dashboardKpis() {
+    return {
+      startDate: '03/13/26 12:55 AM',
+      endDate: '03/13/26 12:58 AM',
+      duration: '00:03:00',
+      success: '8 (100%)',
+      failure: '0 (0%)',
+      failureCount: 0,
+      rampUpEnd: '03/13/26 12:56 AM',
+      rampDown: '03/13/26 12:58 AM',
+      rampUpDuration: '00:00:09',
+      maxUsers: 1,
+      usersPerMinute: 1,
+      steadyState: '00:01:00'
+    };
   }
 
   dashboardProcessSearch = signal<string>('');
