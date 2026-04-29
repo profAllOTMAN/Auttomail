@@ -119,6 +119,20 @@ export interface TestPlan {
   active: boolean;       // toggle
 }
 
+export interface Report {
+  id: string;
+  type: 'summary' | 'raw' | 'transaction';
+  name: string;
+  fileName: string;
+  outputPath: string;
+  processMonitorIds: string[];
+  emails: string;
+  scheduled: boolean;
+  duration: string;
+  timeInterval?: string;
+  separator?: string;
+}
+
 export interface BotManager {
   id: string;
   name: string;
@@ -545,6 +559,131 @@ export class App implements OnInit {
       startedAt: 'Just now',
       processes: ['notepad']
     }, ...runs]);
+  }
+
+  // --- Reports (Watcher mode) ---
+  reports = signal<Report[]>([
+    {
+      id: 'rep-1', type: 'summary', name: 'REP', fileName: 'rep', outputPath: 'c:\\automai',
+      processMonitorIds: ['1'], emails: '', scheduled: false, duration: 'Previous hour'
+    },
+    {
+      id: 'rep-2', type: 'summary', name: 'rp', fileName: 'rp', outputPath: 'c:\\automai',
+      processMonitorIds: ['2'], emails: '', scheduled: false, duration: 'Previous hour'
+    },
+    {
+      id: 'rep-3', type: 'summary', name: 'myreport', fileName: 'report', outputPath: 'c:\\automai',
+      processMonitorIds: ['1'], emails: 'bmusinyan@automai.com', scheduled: true,
+      duration: 'Today', timeInterval: 'Today', separator: 'Comma'
+    }
+  ]);
+
+  reportDrawerType = signal<'summary' | 'raw' | 'transaction' | null>(null);
+  editingReportId = signal<string | null>(null);
+
+  // form fields
+  reportFormName = signal<string>('');
+  reportFormFileName = signal<string>('');
+  reportFormPath = signal<string>('');
+  reportFormMonitors = signal<string[]>([]);
+  reportFormScheduled = signal<boolean>(false);
+  reportFormEmail = signal<string>('');
+  reportFormDuration = signal<string>('Previous hour');
+  reportFormInterval = signal<string>('Today');
+  reportFormSeparator = signal<string>('Comma');
+
+  openCreateReport(type: 'summary' | 'raw' | 'transaction') {
+    this.editingReportId.set(null);
+    this.reportDrawerType.set(type);
+    this.reportFormName.set('');
+    this.reportFormFileName.set('');
+    this.reportFormPath.set('');
+    this.reportFormMonitors.set([]);
+    this.reportFormScheduled.set(false);
+    this.reportFormEmail.set('');
+    this.reportFormDuration.set('Previous hour');
+    this.reportFormInterval.set('Today');
+    this.reportFormSeparator.set('Comma');
+  }
+
+  openEditReport(id: string) {
+    const r = this.reports().find(x => x.id === id);
+    if (!r) return;
+    this.editingReportId.set(id);
+    this.reportDrawerType.set(r.type);
+    this.reportFormName.set(r.name);
+    this.reportFormFileName.set(r.fileName);
+    this.reportFormPath.set(r.outputPath);
+    this.reportFormMonitors.set([...r.processMonitorIds]);
+    this.reportFormScheduled.set(r.scheduled);
+    this.reportFormEmail.set(r.emails);
+    this.reportFormDuration.set(r.duration);
+    this.reportFormInterval.set(r.timeInterval ?? 'Today');
+    this.reportFormSeparator.set(r.separator ?? 'Comma');
+  }
+
+  closeReportDrawer() {
+    this.reportDrawerType.set(null);
+    this.editingReportId.set(null);
+  }
+
+  toggleReportFormMonitor(id: string) {
+    this.reportFormMonitors.update(list =>
+      list.includes(id) ? list.filter(x => x !== id) : [...list, id]
+    );
+  }
+
+  saveReport() {
+    const type = this.reportDrawerType();
+    if (!type) return;
+    const editId = this.editingReportId();
+    const payload: Report = {
+      id: editId ?? ('rep-' + Date.now()),
+      type,
+      name: this.reportFormName() || 'Untitled',
+      fileName: this.reportFormFileName() || 'report',
+      outputPath: this.reportFormPath() || 'c:\\automai',
+      processMonitorIds: this.reportFormMonitors(),
+      emails: this.reportFormEmail(),
+      scheduled: this.reportFormScheduled(),
+      duration: this.reportFormDuration(),
+      timeInterval: this.reportFormScheduled() ? this.reportFormInterval() : undefined,
+      separator: this.reportFormScheduled() ? this.reportFormSeparator() : undefined
+    };
+    this.reports.update(list =>
+      editId ? list.map(r => r.id === editId ? payload : r) : [...list, payload]
+    );
+    this.closeReportDrawer();
+  }
+
+  deleteReport(id: string) {
+    this.reports.update(list => list.filter(r => r.id !== id));
+  }
+
+  runReport(id: string) {
+    // Stub: in prod this would trigger the export pipeline
+    const r = this.reports().find(x => x.id === id);
+    if (r) console.log('Run report:', r.name);
+  }
+
+  downloadReport(id: string) {
+    const r = this.reports().find(x => x.id === id);
+    if (r) console.log('Download report:', r.name);
+  }
+
+  reportProcessMonitorNames(report: Report) {
+    return report.processMonitorIds
+      .map(pmId => this.monitors().find(m => m.id === pmId)?.name)
+      .filter((n): n is string => !!n)
+      .join(', ');
+  }
+
+  monitorById(id: string): ProcessMonitor | undefined {
+    return this.monitors().find(m => m.id === id);
+  }
+
+  reportTypeLabel(t: Report['type']) {
+    return t === 'summary' ? 'SUMMARY' : t === 'raw' ? 'RAW DATA' : 'TRANSACTION';
   }
 
   // --- BotManagers (Loader mode) ---
