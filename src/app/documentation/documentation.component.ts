@@ -48,6 +48,7 @@ export class DocumentationComponent {
     { id: 'buttons', label: 'Buttons', icon: 'smart_button' },
     { id: 'inputs', label: 'Inputs & Forms', icon: 'text_format' },
     { id: 'cards', label: 'Cards', icon: 'dashboard' },
+    { id: 'app-components', label: 'App Components', icon: 'widgets' },
     { id: 'badges', label: 'Badges & Status', icon: 'label' },
     { id: 'modals', label: 'Modals & Drawers', icon: 'web_asset' },
     { id: 'icons', label: 'Icons', icon: 'emoji_symbols' },

@@ -682,6 +682,52 @@ export class App implements OnInit {
     return this.monitors().find(m => m.id === id);
   }
 
+  // Shared kebab-menu open state (scoped by composite id e.g. 'watcher:1')
+  openKebabId = signal<string | null>(null);
+  toggleKebab(id: string) {
+    this.openKebabId.update(c => c === id ? null : id);
+  }
+  closeKebab() {
+    this.openKebabId.set(null);
+  }
+
+  // Drag-to-reorder (Schedule processes)
+  scheduleDragSourceId = signal<string | null>(null);
+  scheduleDragOverId = signal<string | null>(null);
+  scheduleDragScheduleId = signal<string | null>(null);
+  onScheduleDragStart(scheduleId: string, monitorId: string) {
+    this.scheduleDragScheduleId.set(scheduleId);
+    this.scheduleDragSourceId.set(monitorId);
+  }
+  onScheduleDragOver(monitorId: string) {
+    if (this.scheduleDragOverId() !== monitorId) {
+      this.scheduleDragOverId.set(monitorId);
+    }
+  }
+  onScheduleDragEnd() {
+    this.scheduleDragSourceId.set(null);
+    this.scheduleDragOverId.set(null);
+    this.scheduleDragScheduleId.set(null);
+  }
+  onScheduleDrop(scheduleId: string, targetMonitorId: string) {
+    const sourceId = this.scheduleDragSourceId();
+    if (!sourceId || sourceId === targetMonitorId) {
+      this.onScheduleDragEnd();
+      return;
+    }
+    this.schedules.update(list => list.map(s => {
+      if (s.id !== scheduleId) return s;
+      const order = [...s.processOrder];
+      const fromIdx = order.indexOf(sourceId);
+      const toIdx = order.indexOf(targetMonitorId);
+      if (fromIdx === -1 || toIdx === -1) return s;
+      order.splice(fromIdx, 1);
+      order.splice(toIdx, 0, sourceId);
+      return { ...s, processOrder: order };
+    }));
+    this.onScheduleDragEnd();
+  }
+
   reportTypeLabel(t: Report['type']) {
     return t === 'summary' ? 'SUMMARY' : t === 'raw' ? 'RAW DATA' : 'TRANSACTION';
   }

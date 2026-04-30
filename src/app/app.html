@@ -1198,25 +1198,25 @@
                   </div>
                 </div>
 
-                <!-- Quick Stats -->
-                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                <!-- Quick Stats (no-wrap, grid for stable alignment) -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[600px]">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">IP Address</span>
-                    <span class="text-xs font-semibold text-slate-700 font-mono">{{ watcher.ipAddress }}</span>
+                    <span class="text-xs font-semibold text-slate-700 font-mono truncate">{{ watcher.ipAddress }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">BotManager</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ watcher.botManager }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ watcher.botManager }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Last Ping</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ watcher.lastPing }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ watcher.lastPing }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Processes</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ processCountForWatcher(watcher.id) }} assigned</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ processCountForWatcher(watcher.id) }} assigned</span>
                   </div>
-                  <div class="flex flex-col w-full sm:w-auto sm:max-w-[200px]">
+                  <div class="flex flex-col min-w-0 col-span-2 sm:col-span-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Groups</span>
                     @if ((watcher.groups?.length ?? 0) > 0) {
                       <div class="flex flex-wrap gap-1 mt-0.5">
@@ -1232,7 +1232,7 @@
 
                 <!-- Actions -->
                 <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
-                  <!-- Inline action buttons (icon + label) -->
+                  <!-- Primary actions (icon + label) -->
                   <div class="flex items-center gap-1">
                     @if (watcher.status === 'offline') {
                       <button (click)="activateWatcher(watcher.id)"
@@ -1262,32 +1262,32 @@
                         <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
                       </button>
                     }
-                    <button (click)="editWatcher(watcher.id)"
-                            class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">edit</span> Edit
-                    </button>
                   </div>
                   <button (click)="toggleRWatcherExpand(watcher.id)" class="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-primary px-3 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
                     <span class="material-symbols-outlined text-[16px]">{{ expandedRWatcher() === watcher.id ? 'expand_less' : 'expand_more' }}</span>
                     {{ expandedRWatcher() === watcher.id ? 'Less' : 'Details' }}
                   </button>
-                  <div class="relative group">
-                    <button class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                  <!-- Kebab menu (Edit / Delete / etc.) -->
+                  <div class="relative">
+                    <button (click)="toggleKebab('watcher:' + watcher.id)" title="More"
+                            class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
                       <span class="material-symbols-outlined text-[20px]">more_vert</span>
                     </button>
-                    <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                      <div class="py-1">
-                        <button (click)="editWatcher(watcher.id)" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                          <span class="material-symbols-outlined text-[16px]">edit</span> Edit Configuration
+                    @if (openKebabId() === 'watcher:' + watcher.id) {
+                      <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
+                      <div class="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
+                        <button (click)="editWatcher(watcher.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">edit</span> Edit configuration
                         </button>
-                        <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                          <span class="material-symbols-outlined text-[16px]">restart_alt</span> Restart Connection
+                        <button (click)="closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">restart_alt</span> Restart connection
                         </button>
-                        <button (click)="confirmDeleteRWatcher(watcher.id)" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <div class="my-1 border-t border-slate-100"></div>
+                        <button (click)="confirmDeleteRWatcher(watcher.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
                           <span class="material-symbols-outlined text-[16px]">delete</span> Remove rWatcher
                         </button>
                       </div>
-                    </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -1926,29 +1926,29 @@
                     </div>
                   </div>
 
-                  <!-- Quick Stats -->
-                  <div class="flex flex-wrap items-center gap-4 sm:gap-8 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
-                    <div class="flex flex-col w-[45%] sm:w-auto">
+                  <!-- Quick Stats (no-wrap, grid for stable alignment) -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[600px]">
+                    <div class="flex flex-col min-w-0">
                       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Time Zone</span>
-                      <span class="text-xs font-semibold text-slate-700">{{ sched.timezone }}</span>
+                      <span class="text-xs font-semibold text-slate-700 truncate">{{ sched.timezone }}</span>
                     </div>
-                    <div class="flex flex-col w-[45%] sm:w-auto">
+                    <div class="flex flex-col min-w-0">
                       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Last Run</span>
-                      <span class="text-xs font-semibold text-slate-700">{{ sched.lastRun }}</span>
+                      <span class="text-xs font-semibold text-slate-700 truncate">{{ sched.lastRun }}</span>
                     </div>
-                    <div class="flex flex-col w-[45%] sm:w-auto">
+                    <div class="flex flex-col min-w-0">
                       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Next Run</span>
-                      <span class="text-xs font-semibold text-slate-700">{{ sched.nextRun }}</span>
+                      <span class="text-xs font-semibold text-slate-700 truncate">{{ sched.nextRun }}</span>
                     </div>
-                    <div class="flex flex-col w-[45%] sm:w-auto">
+                    <div class="flex flex-col min-w-0">
                       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Processes</span>
-                      <span class="text-xs font-semibold text-slate-700">{{ monitorsForSchedule(sched.id).length }} linked</span>
+                      <span class="text-xs font-semibold text-slate-700 truncate">{{ monitorsForSchedule(sched.id).length }} linked</span>
                     </div>
                   </div>
 
                   <!-- Actions -->
-                  <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0 flex-wrap">
-                    <div class="flex items-center gap-1 flex-wrap">
+                  <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
+                    <div class="flex items-center gap-1">
                       <button (click)="toggleScheduleStatus(sched.id)"
                               class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors"
                               [class.text-slate-600]="sched.status === 'active'"
@@ -1963,15 +1963,30 @@
                               class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors text-primary hover:bg-primary/10 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
                         <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all
                       </button>
-                      <button (click)="confirmDeleteSchedule(sched.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">delete</span> Delete
-                      </button>
                     </div>
                     <button (click)="toggleScheduleExpand(sched.id)" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-primary px-2 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">{{ expandedSchedule() === sched.id ? 'expand_less' : 'expand_more' }}</span>
                       {{ expandedSchedule() === sched.id ? 'Less' : 'Priority' }}
                     </button>
+                    <!-- Kebab -->
+                    <div class="relative">
+                      <button (click)="toggleKebab('schedule:' + sched.id)" title="More"
+                              class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                        <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                      </button>
+                      @if (openKebabId() === 'schedule:' + sched.id) {
+                        <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
+                        <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
+                          <button (click)="openDrawer('schedule', 'standalone'); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">edit</span> Edit schedule
+                          </button>
+                          <div class="my-1 border-t border-slate-100"></div>
+                          <button (click)="confirmDeleteSchedule(sched.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">delete</span> Delete schedule
+                          </button>
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
 
@@ -1979,29 +1994,34 @@
                 @if (expandedSchedule() === sched.id) {
                   <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4">
                     <div class="flex items-center justify-between mb-3">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Execution Order (first → last)</span>
+                      <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Execution Order (first → last)</span>
+                        <span class="text-[10px] text-slate-500">Drag rows to reorder priority</span>
+                      </div>
                       <span class="text-[10px] text-slate-500">{{ monitorsForSchedule(sched.id).length }} process(es) linked</span>
                     </div>
                     @if (monitorsForSchedule(sched.id).length === 0) {
                       <p class="text-xs text-slate-400 text-center py-4">No processes linked to this schedule yet.</p>
                     } @else {
                       <ol class="space-y-2">
-                        @for (m of monitorsForSchedule(sched.id); track m.id; let i = $index, last = $last) {
-                          <li class="flex items-center gap-3 bg-white border border-slate-200 rounded-md p-2.5">
+                        @for (m of monitorsForSchedule(sched.id); track m.id; let i = $index) {
+                          <li draggable="true"
+                              (dragstart)="onScheduleDragStart(sched.id, m.id)"
+                              (dragover)="$event.preventDefault(); onScheduleDragOver(m.id)"
+                              (drop)="$event.preventDefault(); onScheduleDrop(sched.id, m.id)"
+                              (dragend)="onScheduleDragEnd()"
+                              class="flex items-center gap-3 bg-white border rounded-md p-2.5 cursor-grab active:cursor-grabbing transition-all"
+                              [class.border-slate-200]="scheduleDragOverId() !== m.id || scheduleDragScheduleId() !== sched.id"
+                              [class.border-primary]="scheduleDragOverId() === m.id && scheduleDragScheduleId() === sched.id"
+                              [class.shadow-md]="scheduleDragOverId() === m.id && scheduleDragScheduleId() === sched.id"
+                              [class.opacity-50]="scheduleDragSourceId() === m.id && scheduleDragScheduleId() === sched.id">
+                            <span class="size-6 flex items-center justify-center text-slate-400 shrink-0" title="Drag to reorder">
+                              <span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+                            </span>
                             <span class="size-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold shrink-0">{{ i + 1 }}</span>
                             <div class="flex-1 min-w-0">
                               <p class="text-sm font-semibold text-slate-900 truncate">{{ m.name }}</p>
                               <p class="text-[11px] text-slate-500 truncate">{{ m.scenarioAssigned }} · {{ m.projectLinked }}</p>
-                            </div>
-                            <div class="flex items-center gap-1 shrink-0">
-                              <button (click)="moveScheduleProcessUp(sched.id, m.id)" [disabled]="i === 0" title="Move up"
-                                      class="size-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
-                                <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
-                              </button>
-                              <button (click)="moveScheduleProcessDown(sched.id, m.id)" [disabled]="last" title="Move down"
-                                      class="size-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
-                                <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
-                              </button>
                             </div>
                           </li>
                         }
@@ -2076,31 +2096,46 @@
         <!-- Reports list -->
         <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
           <!-- Header row -->
-          <div class="hidden md:grid md:grid-cols-[200px_120px_1fr_1fr_1fr_120px] gap-4 px-4 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <div class="hidden md:grid md:grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             <div>Action</div>
             <div>Type</div>
             <div>Report name</div>
             <div>Process Monitor</div>
             <div>Emails</div>
-            <div></div>
+            <div class="text-right">Status</div>
           </div>
 
           @for (rep of reports(); track rep.id) {
-            <div class="grid grid-cols-1 md:grid-cols-[200px_120px_1fr_1fr_1fr_120px] gap-4 px-4 py-3 border-b border-slate-100 last:border-b-0 items-center hover:bg-slate-50/50 transition-colors">
+            <div class="grid grid-cols-1 md:grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 gap-y-2 px-5 py-3 border-b border-slate-100 last:border-b-0 items-center hover:bg-slate-50/50 transition-colors">
               <!-- Actions -->
-              <div class="flex items-center gap-1.5">
-                <button (click)="deleteReport(rep.id)" title="Delete"
-                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">delete</span> Delete
-                </button>
-                <button (click)="downloadReport(rep.id)" title="Download"
-                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">download</span> Export
-                </button>
-                <button (click)="runReport(rep.id)" title="Run"
+              <div class="flex items-center gap-1 md:border-r md:border-slate-100 md:pr-4">
+                <button (click)="runReport(rep.id)"
                         class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
                   <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
                 </button>
+                <button (click)="downloadReport(rep.id)"
+                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">download</span> Export
+                </button>
+                <!-- Kebab -->
+                <div class="relative">
+                  <button (click)="toggleKebab('report:' + rep.id)" title="More"
+                          class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                  </button>
+                  @if (openKebabId() === 'report:' + rep.id) {
+                    <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
+                    <div class="absolute left-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
+                      <button (click)="openEditReport(rep.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">edit</span> Edit report
+                      </button>
+                      <div class="my-1 border-t border-slate-100"></div>
+                      <button (click)="deleteReport(rep.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">delete</span> Delete report
+                      </button>
+                    </div>
+                  }
+                </div>
               </div>
 
               <!-- Type -->
@@ -2113,7 +2148,7 @@
               <!-- Name -->
               <div class="min-w-0">
                 <button (click)="openEditReport(rep.id)"
-                        class="text-sm font-semibold text-primary hover:underline truncate text-left">
+                        class="block text-sm font-semibold text-primary hover:underline truncate text-left max-w-full">
                   {{ rep.name }}
                 </button>
                 <p class="text-[11px] text-slate-400 truncate">{{ rep.outputPath }}/{{ rep.fileName }}</p>
@@ -2135,6 +2170,8 @@
                   <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
                     <span class="material-symbols-outlined text-[12px]">mail</span> Email Report
                   </span>
+                } @else {
+                  <span class="text-[10px] text-slate-400">Manual</span>
                 }
               </div>
             </div>
@@ -3527,25 +3564,25 @@
                   </div>
                 </div>
 
-                <!-- Quick stats -->
-                <div class="flex flex-wrap items-center gap-4 sm:gap-8 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                <!-- Quick stats (no-wrap, grid for stable alignment) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[480px]">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Project</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ plan.project }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ plan.project }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Modified</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ plan.modifiedDate }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ plan.modifiedDate }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Modified by</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ plan.modifiedBy }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ plan.modifiedBy }}</span>
                   </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
-                  <div class="flex items-center gap-1 flex-wrap">
+                  <div class="flex items-center gap-1">
                     <button (click)="toggleTestPlanActive(plan.id)"
                             class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors"
                             [class.text-slate-600]="plan.active"
@@ -3560,13 +3597,28 @@
                             class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors text-primary hover:bg-primary/10 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
                       <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
                     </button>
-                    <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">edit</span> Edit
+                  </div>
+                  <!-- Kebab -->
+                  <div class="relative">
+                    <button (click)="toggleKebab('plan:' + plan.id)" title="More"
+                            class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                      <span class="material-symbols-outlined text-[20px]">more_vert</span>
                     </button>
-                    <button (click)="deleteTestPlan(plan.id)"
-                            class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">delete</span> Delete
-                    </button>
+                    @if (openKebabId() === 'plan:' + plan.id) {
+                      <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
+                      <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
+                        <button (click)="closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">edit</span> Edit test plan
+                        </button>
+                        <button (click)="closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">content_copy</span> Duplicate
+                        </button>
+                        <div class="my-1 border-t border-slate-100"></div>
+                        <button (click)="deleteTestPlan(plan.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px]">delete</span> Delete
+                        </button>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -3701,9 +3753,9 @@
                   </div>
                 </div>
 
-                <!-- Quick stats -->
-                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
-                  <div class="flex flex-col w-[45%] sm:w-auto min-w-[120px]">
+                <!-- Quick stats (no-wrap, grid for stable alignment) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[760px]">
+                  <div class="flex flex-col min-w-0 col-span-2 sm:col-span-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Progress</span>
                     <div class="flex items-center gap-2">
                       <div class="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
@@ -3719,30 +3771,30 @@
                       </div>
                       <span class="text-[11px] font-semibold text-slate-700">{{ run.progress }}%</span>
                     </div>
-                    <span class="text-[10px] text-slate-400 mt-0.5">{{ run.elapsed }} / {{ run.duration }}</span>
+                    <span class="text-[10px] text-slate-400 mt-0.5 truncate">{{ run.elapsed }} / {{ run.duration }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">rLoaders</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ run.rLoadersActive }}/{{ run.rLoadersTotal }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ run.rLoadersActive }}/{{ run.rLoadersTotal }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">vUsers</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ run.vUsers }}</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ run.vUsers }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Response</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ run.responseTime }}<span class="text-[10px] font-normal text-slate-400 ml-0.5">ms</span></span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ run.responseTime }}<span class="text-[10px] font-normal text-slate-400 ml-0.5">ms</span></span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Success</span>
-                    <span class="text-xs font-semibold"
+                    <span class="text-xs font-semibold truncate"
                           [ngClass]="run.successRate >= 95 ? 'text-emerald-600' : run.successRate >= 80 ? 'text-amber-600' : 'text-rose-600'">
                       {{ run.successRate }}%
                     </span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Iter / Err</span>
-                    <span class="text-xs font-semibold text-slate-700">
+                    <span class="text-xs font-semibold text-slate-700 truncate">
                       {{ run.iterations }}
                       @if (run.errors > 0) {
                         <span class="text-rose-600">· {{ run.errors }} err</span>
@@ -3901,22 +3953,22 @@
                   </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:flex-1 xl:justify-end py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4">
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[640px]">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Hostname</span>
-                    <span class="text-xs font-semibold text-slate-700 font-mono">{{ bm.hostname }}</span>
+                    <span class="text-xs font-semibold text-slate-700 font-mono truncate">{{ bm.hostname }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">RDP Access</span>
-                    <span class="text-xs font-semibold text-slate-700 font-mono">{{ bm.rdpAccess }}</span>
+                    <span class="text-xs font-semibold text-slate-700 font-mono truncate">{{ bm.rdpAccess }}</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Connected</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ bm.connectedRLoaders }} rLoaders</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ bm.connectedRLoaders }} rLoaders</span>
                   </div>
-                  <div class="flex flex-col w-[45%] sm:w-auto">
+                  <div class="flex flex-col min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Available</span>
-                    <span class="text-xs font-semibold text-slate-700">{{ bm.availableRLoaders }} idle</span>
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ bm.availableRLoaders }} idle</span>
                   </div>
                 </div>
 

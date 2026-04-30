@@ -464,6 +464,208 @@
         </div>
       </section>
 
+      <!-- ══════════════════════════════════════════ APP COMPONENTS ══════════════════════════════════════════ -->
+      <section id="doc-app-components" class="doc-section">
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">App Components</h2>
+        <p class="text-sm text-slate-500 mb-6">Live patterns assembled across the Watcher and Loader products. All cards share the same row-shell, action style, KPI grid, and kebab-menu pattern.</p>
+
+        <div class="space-y-8">
+          <!-- Product switcher -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Product Switcher</h3>
+            <div class="bg-slate-900 rounded-lg p-4 inline-flex items-center">
+              <button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold hover:bg-white/20 transition-colors">
+                <span class="text-[10px] font-medium uppercase tracking-wider text-white/60">Product</span>
+                <span class="size-5 flex items-center justify-center rounded-md bg-white/15">
+                  <span class="material-symbols-outlined text-[14px] text-white">visibility</span>
+                </span>
+                <span>Watcher</span>
+                <span class="material-symbols-outlined text-[16px] text-white/70">expand_more</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">Trigger pill with current product icon + name + chevron. Opens a click-toggled dropdown with all products + Soon badges.</p>
+          </div>
+
+          <!-- Kebab menu -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Kebab Menu (Edit / Delete)</h3>
+            <div class="relative inline-block">
+              <button class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                <span class="material-symbols-outlined text-[20px]">more_vert</span>
+              </button>
+              <div class="absolute left-10 top-0 w-48 bg-white rounded-md shadow-lg border border-slate-200 z-10 py-1">
+                <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[16px]">edit</span> Edit configuration
+                </button>
+                <button class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[16px]">restart_alt</span> Restart connection
+                </button>
+                <div class="my-1 border-t border-slate-100"></div>
+                <button class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[16px]">delete</span> Remove
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-16 font-mono">Used on every card (rWatcher, Test Plan, Schedule, Report, BotManager). Edit + destructive actions live here.</p>
+          </div>
+
+          <!-- Action buttons (icon + label) -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Action Buttons (Icon + Label)</h3>
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-wrap items-center gap-2">
+              <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">power</span> Activate
+              </button>
+              <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate
+              </button>
+              <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
+              </button>
+              <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">stop</span> Stop
+              </button>
+              <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">download</span> Export
+              </button>
+              <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">refresh</span> Retry
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold + state color. Always icon + label, never icon-only.</p>
+          </div>
+
+          <!-- rWatcher list-row card -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">rWatcher Card (Watcher)</h3>
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm border-l-emerald-400" style="border-left-width: 3px;">
+              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                <div class="flex items-center gap-4 xl:min-w-[280px]">
+                  <div class="size-10 flex items-center justify-center rounded-md bg-emerald-50 text-emerald-600 shrink-0">
+                    <span class="material-symbols-outlined">desktop_windows</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <h3 class="font-bold text-slate-900 text-sm">rWatcher001</h3>
+                    <span class="flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md text-emerald-700 bg-emerald-100 mt-0.5 self-start">
+                      <span class="size-1.5 rounded-full bg-emerald-500"></span> Online
+                    </span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-3 gap-x-6 xl:flex-1 xl:max-w-[400px]">
+                  <div class="flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">IP</span><span class="text-xs font-semibold text-slate-700 font-mono">192.168.1.105</span></div>
+                  <div class="flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">BotManager</span><span class="text-xs font-semibold text-slate-700">BotManager-1</span></div>
+                  <div class="flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Processes</span><span class="text-xs font-semibold text-slate-700">2 assigned</span></div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100"><span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate</button>
+                  <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run</button>
+                  <button class="size-8 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">Status border-l + icon block + identity / KPI grid / actions + kebab. Same shell used by Schedule, Test Plan, Test Run, BotManager.</p>
+          </div>
+
+          <!-- Schedule card with drag handle -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Schedule Priority List (Drag-and-Drop)</h3>
+            <div class="bg-slate-50/50 border border-slate-200 rounded-lg p-4 max-w-2xl">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Execution Order (first → last)</span>
+                <span class="text-[10px] text-slate-500">Drag rows to reorder priority</span>
+              </div>
+              <ol class="space-y-2">
+                <li class="flex items-center gap-3 bg-white border border-slate-200 rounded-md p-2.5 cursor-grab">
+                  <span class="size-6 flex items-center justify-center text-slate-400"><span class="material-symbols-outlined text-[18px]">drag_indicator</span></span>
+                  <span class="size-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">1</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900">Process Notepad</p>
+                    <p class="text-[11px] text-slate-500">Notepad Data Entry · My First Project</p>
+                  </div>
+                </li>
+                <li class="flex items-center gap-3 bg-white border-2 border-primary rounded-md p-2.5 shadow-md">
+                  <span class="size-6 flex items-center justify-center text-slate-400"><span class="material-symbols-outlined text-[18px]">drag_indicator</span></span>
+                  <span class="size-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">2</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900">SFDC Auth Monitor</p>
+                    <p class="text-[11px] text-slate-500">SFDC Auth Flow · CRM Integration</p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">draggable="true" + dragstart/dragover/drop handlers reorder processOrder. Hover ring (border-primary + shadow-md) signals drop target.</p>
+          </div>
+
+          <!-- Test Plan / Test Run / Report row -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Reports Row (Watcher)</h3>
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+              <div class="hidden md:grid md:grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <div>Action</div><div>Type</div><div>Report name</div><div>Process Monitor</div><div>Emails</div><div class="text-right">Status</div>
+              </div>
+              <div class="grid grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 px-5 py-3 items-center">
+                <div class="flex items-center gap-1 border-r border-slate-100 pr-4">
+                  <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run</button>
+                  <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600"><span class="material-symbols-outlined text-[16px]">download</span> Export</button>
+                  <button class="size-8 flex items-center justify-center rounded-md text-slate-400"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+                </div>
+                <div><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">SUMMARY</span></div>
+                <div class="min-w-0">
+                  <span class="block text-sm font-semibold text-primary">myreport</span>
+                  <p class="text-[11px] text-slate-400 truncate">c:\automai/report</p>
+                </div>
+                <div class="text-sm text-slate-700 truncate">Process Notepad</div>
+                <div class="text-xs text-slate-600 truncate">bmusinyan&#64;automai.com</div>
+                <div class="flex items-center justify-end">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-[12px]">mail</span> Email Report
+                  </span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">CSS-grid row with action column separated by border-right. Edit + Delete live in the kebab.</p>
+          </div>
+
+          <!-- Side drawer pattern -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Side Drawer (Form)</h3>
+            <div class="border border-slate-200 rounded-lg overflow-hidden max-w-md">
+              <div class="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="size-10 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined">description</span>
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="text-base font-bold text-slate-900 truncate">Create summary report</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Export or schedule custom reports</p>
+                  </div>
+                </div>
+                <button class="size-8 flex items-center justify-center rounded-md text-rose-500 hover:bg-rose-50">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div class="px-5 py-4 space-y-3">
+                <div>
+                  <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Report name *</span>
+                  <input type="text" placeholder="myreport" class="w-full px-3 py-2 text-sm rounded-md border border-slate-300" />
+                </div>
+                <label class="flex items-start gap-2 py-1 cursor-pointer select-none">
+                  <input type="checkbox" class="mt-0.5 size-4 rounded border-slate-300" />
+                  <span class="text-sm text-slate-700">Email reports with custom intervals</span>
+                </label>
+              </div>
+              <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-md">Cancel</button>
+                <button class="inline-flex items-center gap-1 px-4 py-2 text-sm font-semibold text-white bg-primary rounded-md">
+                  <span class="material-symbols-outlined text-[18px]">add</span> Create
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-mono">Right-side panel (w-[440px]) with header (icon + title), scrollable body, sticky footer (Cancel + primary). Used by Reports, AddWatcher, AddSchedule, CreateProcessMonitor drawers.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- ══════════════════════════════════════════ BADGES ══════════════════════════════════════════ -->
       <section id="doc-badges" class="doc-section">
         <h2 class="text-2xl font-bold text-slate-900 mb-1">Badges & Status</h2>
