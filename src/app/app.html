@@ -1393,9 +1393,16 @@
     } @else if (activeTab() === 'help') {
       <!-- Help tab: 2-column layout — sidebar cards + detail panel -->
       <div class="mt-6 max-w-5xl mx-auto w-full space-y-6">
-        <div>
-          <h2 class="text-xl font-bold text-slate-900 mb-1">Help &amp; Guides</h2>
-          <p class="text-sm text-slate-500">Step-by-step guides for every feature in Automai Watcher.</p>
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">Help &amp; Guides</h2>
+            <p class="text-sm text-slate-500">Step-by-step guides for every feature in Automai Watcher.</p>
+          </div>
+          <button (click)="navigate('/help/documentation2')"
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 text-primary text-xs font-semibold bg-primary/5 hover:bg-primary/10 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+            Feature documentation
+          </button>
         </div>
 
         <div class="grid grid-cols-[280px_1fr] gap-4">
@@ -4234,6 +4241,8 @@
 
     } @else if (activeTab() === 'documentation') {
       <app-documentation class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation>
+    } @else if (activeTab() === 'help-documentation2') {
+      <app-documentation2 class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation2>
     }
   </main>
 

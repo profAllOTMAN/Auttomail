@@ -1,0 +1,878 @@
+<div class="grid grid-cols-[260px_1fr] min-h-[calc(100vh-130px)] bg-background-light">
+  <!-- Sidebar -->
+  <aside class="border-r border-slate-200 bg-white sticky top-[112px] self-start max-h-[calc(100vh-130px)] overflow-y-auto custom-scrollbar">
+    <div class="px-4 py-4 border-b border-slate-100">
+      <button (click)="back()" class="text-xs text-slate-400 hover:text-slate-700 inline-flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Help
+      </button>
+      <h2 class="text-base font-bold text-slate-900 mt-2">Feature documentation</h2>
+      <p class="text-[11px] text-slate-500 mt-0.5">All wizards, drawers, and pages — screen by screen.</p>
+    </div>
+    <nav class="p-2 space-y-0.5">
+      @for (s of sections; track s.id) {
+        <button (click)="scrollTo(s.id)"
+                class="w-full text-left px-3 py-2 rounded-md text-xs flex items-center gap-2 transition-colors"
+                [ngClass]="activeSection() === s.id ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'">
+          <span class="material-symbols-outlined text-[16px]" [ngClass]="activeSection() === s.id ? 'text-primary' : 'text-slate-400'">{{ s.icon }}</span>
+          {{ s.label }}
+        </button>
+      }
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="px-6 py-6 max-w-5xl space-y-12">
+    <!-- ══════════════════════════════════════════ OVERVIEW ══════════════════════════════════════════ -->
+    <section id="doc2-overview">
+      <h1 class="text-3xl font-bold text-slate-900 mb-2">Feature documentation</h1>
+      <p class="text-base text-slate-600 mb-4">Every wizard step, every drawer state, every page in one place. Use the sidebar to jump.</p>
+      <div class="grid grid-cols-2 gap-4 max-w-2xl">
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <div class="size-9 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-2">
+            <span class="material-symbols-outlined text-[20px]">view_carousel</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Wizards</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Step-by-step flows rendered start to finish.</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <div class="size-9 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-2">
+            <span class="material-symbols-outlined text-[20px]">web_asset</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Drawers</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Each drawer in opened state, on top of its parent page.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ ONBOARDING ══════════════════════════════════════════ -->
+    <section id="doc2-onboarding" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Onboarding (3-step wizard)</h2>
+        <p class="text-sm text-slate-500 mt-1">First-run flow: rWatcher → Schedule → Process Monitor. Each step opens the matching drawer.</p>
+      </div>
+
+      @for (s of [
+        { n: 1, label: 'Add an rWatcher', icon: 'desktop_windows', desc: 'Register a remote machine that will run scenarios.' },
+        { n: 2, label: 'Create a Schedule', icon: 'schedule', desc: 'Define when monitors execute.' },
+        { n: 3, label: 'Create Process Monitor', icon: 'monitoring', desc: 'Tie scenario + watchers + schedule together.' }
+      ]; track s.n) {
+        <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+          <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Step {{ s.n }} / 3 · {{ s.label }}</figcaption>
+          <div class="p-6 grid grid-cols-3 gap-3">
+            @for (d of [1, 2, 3]; track d) {
+              <div class="border rounded-lg p-3"
+                   [ngClass]="d < s.n ? 'border-emerald-300 bg-emerald-50' : d === s.n ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-slate-200'">
+                <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold mb-2"
+                     [ngClass]="d < s.n ? 'bg-emerald-500 text-white' : d === s.n ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500'">
+                  @if (d < s.n) {
+                    <span class="material-symbols-outlined text-[16px]">check</span>
+                  } @else {
+                    {{ d }}
+                  }
+                </div>
+                <p class="text-xs font-semibold text-slate-800">{{ d === 1 ? 'rWatcher' : d === 2 ? 'Schedule' : 'Monitor' }}</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">{{ d < s.n ? 'Done' : d === s.n ? 'Current' : 'Pending' }}</p>
+              </div>
+            }
+          </div>
+          <div class="px-6 pb-6">
+            <div class="border border-slate-200 rounded-md p-4 bg-slate-50/50">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="size-9 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[20px]">{{ s.icon }}</span>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900">{{ s.label }}</h3>
+              </div>
+              <p class="text-xs text-slate-600">{{ s.desc }}</p>
+            </div>
+          </div>
+        </figure>
+      }
+    </section>
+
+    <!-- ══════════════════════════════════════════ PROCESS MONITOR PAGE ══════════════════════════════════════════ -->
+    <section id="doc2-pm-page" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Process Monitor — Page</h2>
+        <p class="text-sm text-slate-500 mt-1">List view with KPIs, search, filters, and per-monitor row.</p>
+      </div>
+
+      <!-- Empty state -->
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">State 1 · Empty</figcaption>
+        <div class="p-6">
+          <div class="bg-white border border-slate-200 rounded-lg p-12 text-center">
+            <div class="bg-blue-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500">
+              <span class="material-symbols-outlined text-3xl">monitoring</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">No process monitors yet</h3>
+            <p class="text-sm text-slate-500 mb-4">Run the create-monitor wizard to build your first one.</p>
+            <button class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-full inline-flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">add</span> New Monitor
+            </button>
+          </div>
+        </div>
+      </figure>
+
+      <!-- Populated state -->
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">State 2 · Populated, with filters</figcaption>
+        <div class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+              <p class="text-2xl font-bold text-slate-900">4</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Processes</p>
+              <div class="text-[10px] mt-1 flex gap-2"><span class="text-emerald-600 font-semibold">3 Active</span> · <span class="text-slate-500 font-semibold">1 Inactive</span></div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+              <p class="text-2xl font-bold text-slate-900">3</p>
+              <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">rWatchers</p>
+              <div class="text-[10px] mt-1 flex gap-2"><span class="text-emerald-600 font-semibold">2 Active</span> · <span class="text-slate-500 font-semibold">1 Offline</span></div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input type="text" class="px-3 py-2 text-sm border border-slate-300 rounded-md flex-1 min-w-[160px]" placeholder="Filter by process..." />
+            <select class="text-xs border border-slate-300 rounded-md py-2 px-2"><option>All BotManagers</option></select>
+            <select class="text-xs border border-slate-300 rounded-md py-2 px-2"><option>All Watchers</option></select>
+            <select class="text-xs border border-slate-300 rounded-md py-2 px-2"><option>All Schedules</option></select>
+          </div>
+          @for (m of [
+            { name: 'Process Notepad', status: 'running', msg: 'Processing items...', watchers: 3 },
+            { name: 'SFDC Auth Monitor', status: 'running', msg: 'Auth flow validated', watchers: 2 },
+            { name: 'Legacy Data Sync', status: 'pending', msg: 'Waiting for schedule', watchers: 1 },
+            { name: 'Invoice Processing', status: 'disabled', msg: 'Manually disabled', watchers: 2 }
+          ]; track m.name) {
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="size-2 rounded-full"
+                      [class.bg-blue-500]="m.status === 'running'"
+                      [class.bg-amber-400]="m.status === 'pending'"
+                      [class.bg-slate-300]="m.status === 'disabled'"></span>
+                <div>
+                  <p class="text-sm font-bold text-slate-900">{{ m.name }}</p>
+                  <p class="text-[11px] text-slate-500">{{ m.msg }} · {{ m.watchers }} rWatchers</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                      [ngClass]="m.status === 'running' ? 'bg-blue-100 text-blue-700' : m.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">
+                  {{ m.status }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      </figure>
+
+      <!-- Drilldown -->
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">State 3 · Drill-down (sub-processes + transactions)</figcaption>
+        <div class="p-6">
+          <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
+            <h3 class="text-sm font-bold text-slate-900 mb-3">Process Notepad — sub-processes</h3>
+            <ul class="space-y-2">
+              <li class="flex items-center justify-between bg-white p-2.5 rounded border border-slate-200">
+                <span class="text-xs font-semibold">Open Application</span>
+                <span class="text-[10px] text-emerald-600 font-bold">PASSED · 2s</span>
+              </li>
+              <li class="flex items-center justify-between bg-white p-2.5 rounded border border-blue-200 ring-1 ring-blue-100">
+                <span class="text-xs font-semibold">Data Entry <span class="ml-1 text-blue-600">(running)</span></span>
+                <span class="text-[10px] text-blue-600 font-bold">42/100</span>
+              </li>
+              <li class="flex items-center justify-between bg-white p-2.5 rounded border border-slate-200 opacity-60">
+                <span class="text-xs">Validation</span>
+                <span class="text-[10px] text-slate-500 font-bold">PENDING</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ PROCESS MONITOR WIZARD ══════════════════════════════════════════ -->
+    <section id="doc2-pm-wizard" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Process Monitor — Wizard (7 steps)</h2>
+        <p class="text-sm text-slate-500 mt-1">Live at /help/new. Steps: Purpose → Name → Project &amp; Scenario → Watchers → Schedule → Events → Done.</p>
+      </div>
+
+      @for (step of [
+        { n: 1, label: 'Purpose', body: 'purpose' },
+        { n: 2, label: 'Name', body: 'name' },
+        { n: 3, label: 'Project & Scenario', body: 'scenario' },
+        { n: 4, label: 'Watchers', body: 'watchers' },
+        { n: 5, label: 'Schedule', body: 'schedule' },
+        { n: 6, label: 'Events', body: 'events' },
+        { n: 7, label: 'Done', body: 'done' }
+      ]; track step.n) {
+        <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+          <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Step {{ step.n }} / 7 · {{ step.label }}</figcaption>
+          <div class="p-6 space-y-5">
+            <!-- Step indicator -->
+            <div class="flex items-center justify-between">
+              @for (i of [1,2,3,4,5,6,7]; track i) {
+                <div class="flex flex-col items-center gap-1 flex-1">
+                  <div class="size-7 rounded-full flex items-center justify-center text-[10px] font-bold"
+                       [ngClass]="i < step.n ? 'bg-emerald-500 text-white' : i === step.n ? 'bg-primary text-white ring-4 ring-primary/20' : 'bg-slate-200 text-slate-500'">
+                    @if (i < step.n) { <span class="material-symbols-outlined text-[14px]">check</span> } @else { {{ i }} }
+                  </div>
+                  <span class="text-[9px] font-medium text-slate-500 truncate max-w-[80px]">{{ ['Purpose','Name','Project','Watchers','Schedule','Events','Done'][i - 1] }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Step body -->
+            @if (step.body === 'purpose') {
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">What's the purpose of this monitor?</h3>
+                <p class="text-sm text-slate-500 mb-4">Pick the goal so we can pre-fill sensible defaults.</p>
+                <div class="grid grid-cols-3 gap-3">
+                  <button class="border-2 border-primary bg-primary/5 ring-2 ring-primary/10 p-4 rounded-lg text-left">
+                    <span class="material-symbols-outlined text-primary mb-1">monitoring</span>
+                    <p class="text-sm font-bold">Production health</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Run on a schedule, alert on failures.</p>
+                  </button>
+                  <button class="border border-slate-200 hover:border-slate-300 p-4 rounded-lg text-left">
+                    <span class="material-symbols-outlined text-slate-500 mb-1">science</span>
+                    <p class="text-sm font-bold">Smoke / regression</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Validate after deploys.</p>
+                  </button>
+                  <button class="border border-slate-200 hover:border-slate-300 p-4 rounded-lg text-left">
+                    <span class="material-symbols-outlined text-slate-500 mb-1">tune</span>
+                    <p class="text-sm font-bold">Custom</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Build from scratch.</p>
+                  </button>
+                </div>
+              </div>
+            } @else if (step.body === 'name') {
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Name your monitor</h3>
+                <p class="text-sm text-slate-500 mb-4">Give it a name your team will recognise.</p>
+                <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Monitor name *</span>
+                <input type="text" value="Order Checkout — Production" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md mb-3" />
+                <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Description</span>
+                <textarea rows="3" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Optional context..."></textarea>
+              </div>
+            } @else if (step.body === 'scenario') {
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Pick project &amp; scenario</h3>
+                <p class="text-sm text-slate-500 mb-4">Both are recorded in Scenario Builder.</p>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Project</span>
+                    <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>CRM Integration</option></select>
+                  </div>
+                  <div>
+                    <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Scenario</span>
+                    <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>SFDC Auth Flow</option></select>
+                  </div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs text-slate-600">
+                  <p class="font-semibold text-slate-700 mb-1">Scenario preview</p>
+                  <p>Login → MFA → dashboard load. 2 sub-processes, 5 transactions.</p>
+                </div>
+              </div>
+            } @else if (step.body === 'watchers') {
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Assign rWatchers</h3>
+                <p class="text-sm text-slate-500 mb-4">Pick the machines that will execute this scenario.</p>
+                <div class="space-y-2">
+                  @for (w of [
+                    { n: 'rWatcher001', sel: true,  st: 'Online' },
+                    { n: 'rWatcher002', sel: false, st: 'Offline' },
+                    { n: 'rWatcher003', sel: true,  st: 'Busy' }
+                  ]; track w.n) {
+                    <label class="flex items-center gap-3 border rounded-md p-3 cursor-pointer"
+                           [ngClass]="w.sel ? 'border-primary bg-primary/5' : 'border-slate-200'">
+                      <input type="checkbox" [checked]="w.sel" class="size-4 rounded border-slate-300" />
+                      <span class="material-symbols-outlined text-slate-500">desktop_windows</span>
+                      <div class="flex-1">
+                        <p class="text-sm font-semibold">{{ w.n }}</p>
+                        <p class="text-[11px] text-slate-500">{{ w.st }}</p>
+                      </div>
+                    </label>
+                  }
+                </div>
+              </div>
+            } @else if (step.body === 'schedule') {
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Schedule</h3>
+                <p class="text-sm text-slate-500 mb-4">When should this monitor run?</p>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                  <button class="border-2 border-primary bg-primary/5 p-3 rounded-md text-left">
+                    <p class="text-sm font-semibold">Use existing schedule</p>
+                    <p class="text-[11px] text-slate-500">Hourly Production · America/New_York</p>
+                  </button>
+                  <button class="border border-slate-200 p-3 rounded-md text-left">
+                    <p class="text-sm font-semibold">Create new</p>
+                    <p class="text-[11px] text-slate-500">Opens the Schedule drawer</p>
+                  </button>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs">
+                  <p class="font-semibold text-slate-700 mb-1">Next 5 runs</p>
+                  <p class="text-slate-600">10:00 · 11:00 · 12:00 · 13:00 · 14:00 EDT</p>
+                </div>
+              </div>
+            } @else if (step.body === 'events') {
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Notification events</h3>
+                <p class="text-sm text-slate-500 mb-4">Tell us when to alert and how.</p>
+                <div class="space-y-2 mb-3">
+                  @for (e of ['On failure', 'On recovery', 'Every run', 'On threshold breach']; track e) {
+                    <label class="flex items-center gap-2 text-sm">
+                      <input type="checkbox" [checked]="e === 'On failure' || e === 'On recovery'" class="size-4 rounded border-slate-300" />
+                      {{ e }}
+                    </label>
+                  }
+                </div>
+                <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Channel</span>
+                <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Webhook · #ops-alerts</option></select>
+              </div>
+            } @else {
+              <div class="text-center py-6">
+                <div class="size-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-4">
+                  <span class="material-symbols-outlined text-3xl">check_circle</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Monitor created</h3>
+                <p class="text-sm text-slate-500 mb-4">"Order Checkout — Production" is live and waiting for its first scheduled run.</p>
+                <div class="flex items-center justify-center gap-2">
+                  <button class="px-4 py-2 text-sm font-semibold border border-slate-300 rounded-full">View monitor</button>
+                  <button class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-full">Create another</button>
+                </div>
+              </div>
+            }
+
+            <!-- Footer -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+              <button class="text-xs text-slate-500 inline-flex items-center gap-1" [disabled]="step.n === 1">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> Back
+              </button>
+              <span class="text-[11px] text-slate-400">{{ step.n }} of 7</span>
+              <button class="px-4 py-1.5 bg-primary text-white text-xs font-semibold rounded-full inline-flex items-center gap-1">
+                {{ step.n === 7 ? 'Finish' : 'Next' }}
+                @if (step.n !== 7) {
+                  <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                }
+              </button>
+            </div>
+          </div>
+        </figure>
+      }
+    </section>
+
+    <!-- ══════════════════════════════════════════ PROCESS MONITOR EDIT DRAWER ══════════════════════════════════════════ -->
+    <section id="doc2-pm-edit" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Process Monitor — Edit drawer</h2>
+        <p class="text-sm text-slate-500 mt-1">Opens from the kebab on a process monitor row. Same form fields as the wizard, single panel.</p>
+      </div>
+
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Edit drawer · pre-filled state</figcaption>
+        <div class="grid grid-cols-[1fr_440px]">
+          <!-- Faded parent page -->
+          <div class="p-4 bg-slate-100/60 opacity-60 pointer-events-none">
+            <p class="text-xs text-slate-500 mb-2">Process Monitors</p>
+            <div class="bg-white border border-slate-200 rounded p-3"><p class="text-sm">Process Notepad</p></div>
+          </div>
+          <!-- Drawer -->
+          <div class="bg-white border-l border-slate-200">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined">edit</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">Edit Process Monitor</h3>
+                  <p class="text-[11px] text-slate-500">Process Notepad</p>
+                </div>
+              </div>
+              <button class="size-8 flex items-center justify-center rounded-md text-rose-500 hover:bg-rose-50">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="px-5 py-4 space-y-3">
+              <div>
+                <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Name</span>
+                <input type="text" value="Process Notepad" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" />
+              </div>
+              <div>
+                <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Scenario</span>
+                <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Notepad Data Entry</option></select>
+              </div>
+              <div>
+                <span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Schedule</span>
+                <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Hourly Production</option></select>
+              </div>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-100 flex justify-end gap-2">
+              <button class="px-4 py-2 text-sm text-slate-700">Cancel</button>
+              <button class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md">Save</button>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ rWATCHER PAGE ══════════════════════════════════════════ -->
+    <section id="doc2-rwatcher-page" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">rWatcher — Page</h2>
+        <p class="text-sm text-slate-500 mt-1">List of registered watcher machines with status filter, bulk actions, and per-card kebab.</p>
+      </div>
+
+      <!-- KPI + filter -->
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">State 1 · Page header + KPIs + filter pills</figcaption>
+        <div class="p-6 space-y-4">
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center gap-3"><div class="size-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">check_circle</span></div><div><p class="text-xl font-bold">2</p><p class="text-[10px] text-slate-500 uppercase">Online</p></div></div>
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center gap-3"><div class="size-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">sync</span></div><div><p class="text-xl font-bold">1</p><p class="text-[10px] text-slate-500 uppercase">Busy</p></div></div>
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center gap-3"><div class="size-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">cloud_off</span></div><div><p class="text-xl font-bold">1</p><p class="text-[10px] text-slate-500 uppercase">Offline</p></div></div>
+          </div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <input type="text" class="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Search alias, IP, BotManager..." />
+            <div class="inline-flex rounded-full bg-slate-100 p-1">
+              <span class="px-3 py-1 text-xs font-semibold rounded-full bg-white text-slate-900 shadow-sm">All</span>
+              <span class="px-3 py-1 text-xs font-semibold text-slate-500">Available</span>
+              <span class="px-3 py-1 text-xs font-semibold text-slate-500">Busy</span>
+              <span class="px-3 py-1 text-xs font-semibold text-slate-500">Offline</span>
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+              <button class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">power</span> Activate all</button>
+              <button class="px-3 py-1.5 text-xs font-semibold text-white bg-primary rounded-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all</button>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- Cards each state -->
+      @for (w of [
+        { st: 'online', label: 'Online (idle)' },
+        { st: 'busy', label: 'Busy (running a scenario)' },
+        { st: 'offline', label: 'Offline (last seen 2h ago)' }
+      ]; track w.st) {
+        <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+          <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Card state · {{ w.label }}</figcaption>
+          <div class="p-4">
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden"
+                 [class.border-l-emerald-400]="w.st === 'online'"
+                 [class.border-l-blue-400]="w.st === 'busy'"
+                 [class.border-l-slate-300]="w.st === 'offline'"
+                 style="border-left-width: 3px;">
+              <div class="p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="size-10 flex items-center justify-center rounded-md"
+                       [class.bg-emerald-50]="w.st === 'online'" [class.text-emerald-600]="w.st === 'online'"
+                       [class.bg-blue-50]="w.st === 'busy'" [class.text-blue-600]="w.st === 'busy'"
+                       [class.bg-slate-100]="w.st === 'offline'" [class.text-slate-500]="w.st === 'offline'">
+                    <span class="material-symbols-outlined">desktop_windows</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-sm">rWatcher00{{ w.st === 'online' ? '1' : w.st === 'busy' ? '3' : '2' }}</h3>
+                    <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-md inline-flex items-center gap-1"
+                          [class.text-emerald-700]="w.st === 'online'" [class.bg-emerald-100]="w.st === 'online'"
+                          [class.text-blue-700]="w.st === 'busy'" [class.bg-blue-100]="w.st === 'busy'"
+                          [class.text-slate-600]="w.st === 'offline'" [class.bg-slate-100]="w.st === 'offline'">
+                      {{ w.st }}
+                    </span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-3 gap-x-6 text-xs">
+                  <div><p class="text-[10px] text-slate-400 uppercase">IP</p><p class="font-semibold">192.168.1.105</p></div>
+                  <div><p class="text-[10px] text-slate-400 uppercase">Processes</p><p class="font-semibold">2 assigned</p></div>
+                  <div><p class="text-[10px] text-slate-400 uppercase">Groups</p><p class="font-semibold">Production</p></div>
+                </div>
+                <div class="flex items-center gap-1">
+                  @if (w.st === 'offline') {
+                    <button class="px-2 py-1.5 text-xs font-semibold text-emerald-600 inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">power</span> Activate</button>
+                  } @else if (w.st === 'busy') {
+                    <button class="px-2 py-1.5 text-xs font-semibold text-rose-600 inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">stop</span> Stop</button>
+                  } @else {
+                    <button class="px-2 py-1.5 text-xs font-semibold text-primary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run</button>
+                  }
+                  <button class="size-8 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100"><span class="material-symbols-outlined">more_vert</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      }
+    </section>
+
+    <!-- ══════════════════════════════════════════ rWATCHER DRAWER ══════════════════════════════════════════ -->
+    <section id="doc2-rwatcher-drawer" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">rWatcher — Add drawer</h2>
+        <p class="text-sm text-slate-500 mt-1">Opens from "+ Add rWatcher" or onboarding step 1. Captures alias, IP, BotManager, group.</p>
+      </div>
+
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Drawer · empty form</figcaption>
+        <div class="grid grid-cols-[1fr_440px]">
+          <div class="p-4 bg-slate-100/60 opacity-60"><p class="text-xs text-slate-500">rWatchers list (faded)</p></div>
+          <div class="bg-white border-l border-slate-200">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-md bg-primary/10 text-primary flex items-center justify-center"><span class="material-symbols-outlined">add_box</span></div>
+                <div>
+                  <h3 class="text-base font-bold">Register rWatcher</h3>
+                  <p class="text-[11px] text-slate-500">A remote desktop machine that runs scenarios.</p>
+                </div>
+              </div>
+              <button class="size-8 flex items-center justify-center rounded-md text-rose-500"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="px-5 py-4 space-y-3">
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Alias *</span><input type="text" placeholder="rWatcher004" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" /></div>
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">IP address *</span><input type="text" placeholder="192.168.1.108" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md font-mono" /></div>
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">BotManager</span><select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>BotManager-1</option><option>BotManager-2</option></select></div>
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Groups</span><div class="flex gap-1 flex-wrap"><span class="text-[10px] px-2 py-1 rounded bg-slate-100">Production</span><span class="text-[10px] px-2 py-1 rounded bg-slate-100">QA</span><button class="text-[10px] px-2 py-1 rounded border border-dashed border-slate-300 text-slate-500">+ Add</button></div></div>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-100 flex justify-end gap-2"><button class="px-4 py-2 text-sm text-slate-700">Cancel</button><button class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check</span> Register</button></div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ SCHEDULE PAGE ══════════════════════════════════════════ -->
+    <section id="doc2-schedule-page" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Schedule — Page</h2>
+        <p class="text-sm text-slate-500 mt-1">Cards listing each schedule with timezone, last run, next run, status, and linked process count.</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Active schedule · expanded</figcaption>
+        <div class="p-4 space-y-3">
+          <div class="bg-white border border-slate-200 rounded-lg shadow-sm border-l-emerald-400" style="border-left-width: 3px;">
+            <div class="p-4 flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center"><span class="material-symbols-outlined">schedule</span></div>
+                <div>
+                  <p class="text-sm font-bold">Hourly Production</p>
+                  <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-md text-emerald-700 bg-emerald-100">Active · Every hour</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-4 gap-x-6 text-xs">
+                <div><p class="text-[10px] text-slate-400 uppercase">Time Zone</p><p class="font-semibold">America/New_York</p></div>
+                <div><p class="text-[10px] text-slate-400 uppercase">Last Run</p><p class="font-semibold">09:00 EDT</p></div>
+                <div><p class="text-[10px] text-slate-400 uppercase">Next Run</p><p class="font-semibold">10:00 EDT</p></div>
+                <div><p class="text-[10px] text-slate-400 uppercase">Processes</p><p class="font-semibold">2 linked</p></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button class="px-2 py-1.5 text-xs font-semibold text-slate-600 inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate</button>
+                <button class="px-2 py-1.5 text-xs font-semibold text-primary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all</button>
+                <button class="px-2 py-1.5 text-xs font-semibold text-slate-600 inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">expand_less</span> Less</button>
+                <button class="size-8 flex items-center justify-center rounded-md text-slate-400"><span class="material-symbols-outlined">more_vert</span></button>
+              </div>
+            </div>
+            <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Execution order (drag to reorder)</span>
+              </div>
+              <ol class="space-y-2">
+                <li class="flex items-center gap-3 bg-white border border-slate-200 rounded-md p-2.5 cursor-grab">
+                  <span class="text-slate-400"><span class="material-symbols-outlined text-[18px]">drag_indicator</span></span>
+                  <span class="size-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">1</span>
+                  <p class="text-sm font-semibold flex-1">Process Notepad</p>
+                </li>
+                <li class="flex items-center gap-3 bg-white border-2 border-primary rounded-md p-2.5 shadow-md cursor-grab">
+                  <span class="text-slate-400"><span class="material-symbols-outlined text-[18px]">drag_indicator</span></span>
+                  <span class="size-6 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">2</span>
+                  <p class="text-sm font-semibold flex-1">SFDC Auth Monitor</p>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ SCHEDULE DRAWER ══════════════════════════════════════════ -->
+    <section id="doc2-schedule-drawer" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Schedule — Add drawer</h2>
+        <p class="text-sm text-slate-500 mt-1">Cadence, timezone, and which monitors run on it.</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Drawer · creating "Nightly Data Sync"</figcaption>
+        <div class="grid grid-cols-[1fr_440px]">
+          <div class="p-4 bg-slate-100/60 opacity-60"><p class="text-xs text-slate-500">Schedules list (faded)</p></div>
+          <div class="bg-white border-l border-slate-200">
+            <div class="px-5 py-4 border-b border-slate-100 flex justify-between">
+              <div class="flex items-center gap-3"><div class="size-10 rounded-md bg-primary/10 text-primary flex items-center justify-center"><span class="material-symbols-outlined">event_note</span></div><div><h3 class="text-base font-bold">Create schedule</h3><p class="text-[11px] text-slate-500">When should monitors execute?</p></div></div>
+              <button class="size-8 flex items-center justify-center rounded-md text-rose-500"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="px-5 py-4 space-y-3">
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Name *</span><input type="text" value="Nightly Data Sync" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" /></div>
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Cadence</span><select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Daily at 02:00</option></select></div>
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Time zone</span><select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>UTC</option></select></div>
+              <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Linked monitors</span><div class="flex gap-1 flex-wrap"><span class="px-2 py-1 text-xs rounded bg-primary/10 text-primary">Legacy Data Sync ×</span></div></div>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-100 flex justify-end gap-2"><button class="px-4 py-2 text-sm text-slate-700">Cancel</button><button class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md">Create</button></div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ SCHEDULE PRIORITY DRAG ══════════════════════════════════════════ -->
+    <section id="doc2-schedule-priority" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Schedule — Priority drag</h2>
+        <p class="text-sm text-slate-500 mt-1">Three states of the priority drag interaction.</p>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        @for (s of [
+          { label: 'Idle', drop: false, drag: false },
+          { label: 'Dragging row 2', drop: false, drag: true },
+          { label: 'Hovering drop target', drop: true, drag: true }
+        ]; track s.label) {
+          <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+            <figcaption class="px-3 py-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ s.label }}</figcaption>
+            <ol class="space-y-2 p-3 bg-slate-50/30">
+              <li class="flex items-center gap-2 bg-white border rounded p-2 cursor-grab"
+                  [ngClass]="s.drop ? 'border-2 border-primary shadow-md' : 'border-slate-200'">
+                <span class="text-slate-400"><span class="material-symbols-outlined text-[16px]">drag_indicator</span></span>
+                <span class="size-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">1</span>
+                <p class="text-xs font-semibold">Process Notepad</p>
+              </li>
+              <li class="flex items-center gap-2 bg-white border border-slate-200 rounded p-2 cursor-grab"
+                  [class.opacity-50]="s.drag">
+                <span class="text-slate-400"><span class="material-symbols-outlined text-[16px]">drag_indicator</span></span>
+                <span class="size-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">2</span>
+                <p class="text-xs font-semibold">SFDC Auth</p>
+              </li>
+              <li class="flex items-center gap-2 bg-white border border-slate-200 rounded p-2 cursor-grab">
+                <span class="text-slate-400"><span class="material-symbols-outlined text-[16px]">drag_indicator</span></span>
+                <span class="size-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">3</span>
+                <p class="text-xs font-semibold">Legacy Sync</p>
+              </li>
+            </ol>
+          </figure>
+        }
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ REPORTS PAGE ══════════════════════════════════════════ -->
+    <section id="doc2-reports-page" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Reports — Page</h2>
+        <p class="text-sm text-slate-500 mt-1">Manage exported &amp; scheduled reports. Three create-action pills, one row per report.</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reports list — manual + scheduled rows</figcaption>
+        <div class="p-4 space-y-3">
+          <div class="flex gap-2">
+            <button class="px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">add</span> Summary report</button>
+            <button class="px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">add</span> Raw data</button>
+            <button class="px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">add</span> Transaction data</button>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <div class="grid grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <div>Action</div><div>Type</div><div>Report name</div><div>Process Monitor</div><div>Emails</div><div class="text-right">Status</div>
+            </div>
+            @for (r of [
+              { name: 'REP', email: '', scheduled: false },
+              { name: 'rp', email: '', scheduled: false },
+              { name: 'myreport', email: 'bmusinyan@automai.com', scheduled: true }
+            ]; track r.name) {
+              <div class="grid grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 px-5 py-3 items-center border-b border-slate-100 last:border-b-0">
+                <div class="flex items-center gap-1 border-r border-slate-100 pr-4">
+                  <button class="px-2 py-1.5 text-xs font-semibold text-primary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run</button>
+                  <button class="px-2 py-1.5 text-xs font-semibold text-emerald-600 inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span> Export</button>
+                  <button class="size-8 flex items-center justify-center rounded-md text-slate-400"><span class="material-symbols-outlined">more_vert</span></button>
+                </div>
+                <div><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">SUMMARY</span></div>
+                <div><p class="text-sm font-semibold text-primary">{{ r.name }}</p><p class="text-[11px] text-slate-400">c:\automai/{{ r.name }}</p></div>
+                <div class="text-sm">pm1</div>
+                <div class="text-xs text-slate-600 truncate">{{ r.email || '—' }}</div>
+                <div class="flex justify-end">
+                  @if (r.scheduled) {
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase">Email Report</span>
+                  } @else {
+                    <span class="text-[10px] text-slate-400">Manual</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ REPORTS DRAWER ══════════════════════════════════════════ -->
+    <section id="doc2-reports-drawer" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Reports — Create drawer</h2>
+        <p class="text-sm text-slate-500 mt-1">Two states — schedule toggle off (manual export only) and on (with email + interval + separator).</p>
+      </div>
+
+      @for (s of [
+        { label: 'State 1 · Schedule off (manual export only)', sched: false },
+        { label: 'State 2 · Schedule on (email, interval, separator visible)', sched: true }
+      ]; track s.label) {
+        <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+          <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ s.label }}</figcaption>
+          <div class="grid grid-cols-[1fr_440px]">
+            <div class="p-4 bg-slate-100/60 opacity-60"><p class="text-xs text-slate-500">Reports list (faded)</p></div>
+            <div class="bg-white border-l border-slate-200">
+              <div class="px-5 py-4 border-b border-slate-100 flex justify-between"><div class="flex items-center gap-3"><div class="size-10 rounded-md bg-primary/10 text-primary flex items-center justify-center"><span class="material-symbols-outlined">description</span></div><div><h3 class="text-base font-bold">Create summary report</h3><p class="text-[11px] text-slate-500">Export or schedule custom reports</p></div></div><button class="size-8 flex items-center justify-center rounded-md text-rose-500"><span class="material-symbols-outlined">close</span></button></div>
+              <div class="px-5 py-4 space-y-3">
+                <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Process monitors</span><div class="border border-slate-300 rounded-md px-2 py-2"><span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">Process Notepad ×</span></div></div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Report name *</span><input value="myreport" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" /></div>
+                  <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">File name *</span><input value="report" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" /></div>
+                </div>
+                <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Output path</span><input value="c:\automai" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" /></div>
+                <label class="flex items-start gap-2 py-1 cursor-pointer"><input type="checkbox" [checked]="s.sched" class="mt-0.5 size-4 rounded border-slate-300" /><span class="text-sm">Email reports with custom intervals</span></label>
+                <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Duration</span><select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Previous hour</option></select></div>
+                @if (s.sched) {
+                  <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Email address</span><input value="bmusinyan@automai.com" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md" /></div>
+                  <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Time interval</span><select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Today</option></select></div>
+                  <div><span class="text-[11px] font-semibold text-slate-600 block mb-1.5">Separator</span><select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"><option>Comma</option></select></div>
+                }
+              </div>
+              <div class="px-5 py-3 border-t border-slate-100 flex justify-end gap-2"><button class="px-4 py-2 text-sm text-slate-700">Cancel</button><button class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">add</span> Create</button></div>
+            </div>
+          </div>
+        </figure>
+      }
+    </section>
+
+    <!-- ══════════════════════════════════════════ HELP CENTER ══════════════════════════════════════════ -->
+    <section id="doc2-help-center" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Help Center</h2>
+        <p class="text-sm text-slate-500 mt-1">Two-column layout: onboarding cards on the left, expanded checklist on the right.</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Help Center · Run Process card selected</figcaption>
+        <div class="p-6 grid grid-cols-[280px_1fr] gap-4">
+          <div class="space-y-2">
+            <p class="text-[10px] uppercase font-semibold text-slate-400">Onboarding Checklist</p>
+            <div class="border-2 border-primary bg-primary/5 rounded-xl p-3 flex items-center gap-3"><div class="size-9 rounded-full bg-blue-100 flex items-center justify-center"><span class="material-symbols-outlined text-[18px] text-blue-600">rocket_launch</span></div><div><p class="text-xs font-bold">Run Process</p><p class="text-[10px] text-slate-500">3 / 6 complete</p></div></div>
+            <div class="border border-slate-200 rounded-xl p-3 flex items-center gap-3"><div class="size-9 rounded-full bg-amber-100 flex items-center justify-center"><span class="material-symbols-outlined text-[18px] text-amber-600">desktop_windows</span></div><div><p class="text-xs font-bold">Watcher</p><p class="text-[10px] text-slate-500">0 / 4 complete</p></div></div>
+            <div class="border border-slate-200 rounded-xl p-3 flex items-center gap-3"><div class="size-9 rounded-full bg-emerald-100 flex items-center justify-center"><span class="material-symbols-outlined text-[18px] text-emerald-600">notifications</span></div><div><p class="text-xs font-bold">Notification</p><p class="text-[10px] text-slate-500">0 / 7 complete</p></div></div>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-5 bg-slate-50/30">
+            <h3 class="text-base font-bold mb-3">Run Process — Checklist</h3>
+            <ol class="space-y-2 text-sm">
+              @for (st of [
+                { n: 1, t: 'Record scenario', done: true },
+                { n: 2, t: 'Send scenario', done: true },
+                { n: 3, t: 'Add watcher (check availability)', done: true },
+                { n: 4, t: 'Add process & assign default schedule', done: false },
+                { n: 5, t: 'Run the process', done: false },
+                { n: 6, t: 'See it running in the queue', done: false }
+              ]; track st.n) {
+                <li class="flex items-start gap-2 p-2 rounded" [class.bg-emerald-50]="st.done">
+                  <span class="size-5 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
+                        [ngClass]="st.done ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'">
+                    @if (st.done) { <span class="material-symbols-outlined text-[12px]">check</span> } @else { {{ st.n }} }
+                  </span>
+                  <span [ngClass]="st.done ? 'text-slate-700 line-through' : 'text-slate-800'">{{ st.t }}</span>
+                </li>
+              }
+            </ol>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ SMART ADD PROCESS (CHAT) ══════════════════════════════════════════ -->
+    <section id="doc2-smart-add" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Smart Add Process (chat)</h2>
+        <p class="text-sm text-slate-500 mt-1">Conversational variant of the create-monitor wizard. Lives at /help/new3.</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mid-conversation · scenario step</figcaption>
+        <div class="p-4 max-w-2xl mx-auto">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+            <div class="flex justify-start"><div class="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm max-w-[80%]">What scenario would you like this monitor to run?</div></div>
+            <div class="flex justify-end"><div class="bg-primary text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm max-w-[80%]">SFDC Auth Flow</div></div>
+            <div class="flex justify-start"><div class="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm max-w-[80%]">Got it. Which rWatcher should run it? Available: rWatcher001, rWatcher003.</div></div>
+            <div class="flex gap-2"><input type="text" placeholder="Type a reply..." class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-full" /><button class="size-9 rounded-full bg-primary text-white flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">send</span></button></div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ LIVE TEST MONITOR ══════════════════════════════════════════ -->
+    <section id="doc2-live-monitor" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Live Test Monitor</h2>
+        <p class="text-sm text-slate-500 mt-1">Real-time view at /help/new4 — KPIs, status filter, and per-test rows.</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Live Test Monitor</figcaption>
+        <div class="p-4 space-y-3">
+          <div class="grid grid-cols-6 gap-2">
+            @for (k of [
+              { label: 'Running', value: '2', icon: 'play_circle' },
+              { label: 'Queued',  value: '1', icon: 'schedule' },
+              { label: 'vUsers',  value: '390', icon: 'group' },
+              { label: 'rLoaders', value: '13', icon: 'hub' },
+              { label: 'Avg Resp', value: '348ms', icon: 'timer' },
+              { label: 'Errors',  value: '60', icon: 'error' }
+            ]; track k.label) {
+              <div class="bg-white border border-slate-200 rounded-lg p-3"><p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">{{ k.icon }}</span> {{ k.label }}</p><p class="text-lg font-bold mt-1">{{ k.value }}</p></div>
+            }
+          </div>
+          <div class="bg-white border-l-4 border-l-blue-400 border border-slate-200 rounded p-3 flex items-center justify-between">
+            <div><p class="text-sm font-bold">Peak Hour Login Load</p><p class="text-[11px] text-slate-500">Customer Portal · 8/10 rLoaders · 240 vUsers</p></div>
+            <button class="px-2 py-1.5 text-xs font-semibold text-rose-600 inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">stop</span> Stop</button>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════════════════════════════ PRODUCT SWITCHER ══════════════════════════════════════════ -->
+    <section id="doc2-product-switcher" class="space-y-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Product Switcher</h2>
+        <p class="text-sm text-slate-500 mt-1">Header pill that flips the entire app theme + nav between Watcher and Loader (Worker / Tester coming soon).</p>
+      </div>
+      <figure class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <figcaption class="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Switcher dropdown · open</figcaption>
+        <div class="p-6 flex justify-center">
+          <div class="w-72 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+            <div class="px-3 py-2 border-b border-slate-100 flex justify-between"><span class="text-[10px] font-bold text-slate-400 uppercase">Switch product</span><button class="size-6 flex items-center justify-center text-slate-400"><span class="material-symbols-outlined text-[16px]">close</span></button></div>
+            <ul class="py-1">
+              @for (p of [
+                { l: 'Watcher', i: 'visibility', d: 'Process monitoring & rWatcher agents', avail: true,  active: true },
+                { l: 'Loader',  i: 'speed',      d: 'Load testing with rLoader desktops',   avail: true,  active: false },
+                { l: 'Worker',  i: 'precision_manufacturing', d: 'Background job orchestration', avail: false, active: false },
+                { l: 'Tester',  i: 'science',    d: 'End-to-end test automation', avail: false, active: false }
+              ]; track p.l) {
+                <li>
+                  <button class="w-full px-3 py-2.5 flex items-center gap-3 text-left"
+                          [class.bg-primary]="p.active" [class.bg-opacity-5]="p.active"
+                          [class.opacity-60]="!p.avail">
+                    <span class="size-9 flex items-center justify-center rounded-lg"
+                          [class.bg-primary]="p.active" [class.text-white]="p.active"
+                          [class.bg-slate-100]="!p.active" [class.text-slate-600]="!p.active">
+                      <span class="material-symbols-outlined text-[20px]">{{ p.i }}</span>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <span class="flex items-center gap-2"><span class="text-sm font-semibold">{{ p.l }}</span>
+                        @if (!p.avail) {
+                          <span class="text-[9px] font-bold uppercase text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Soon</span>
+                        } @else if (p.active) {
+                          <span class="text-[9px] font-bold uppercase text-primary bg-primary/10 px-1.5 py-0.5 rounded">Active</span>
+                        }
+                      </span>
+                      <span class="block text-[11px] text-slate-500 truncate">{{ p.d }}</span>
+                    </div>
+                    @if (p.active) {
+                      <span class="material-symbols-outlined text-[18px] text-primary">check</span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </figure>
+    </section>
+  </main>
+</div>

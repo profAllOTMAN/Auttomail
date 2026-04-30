@@ -11,6 +11,7 @@ export const routes: Routes = [
   { path: 'test-plans', data: { tab: 'test-plans' }, children: [] },
   { path: 'test-runs', data: { tab: 'test-runs' }, children: [] },
   { path: 'botmanagers', data: { tab: 'botmanagers' }, children: [] },
+  { path: 'help/documentation2', data: { tab: 'help-documentation2' }, children: [] },
   { path: 'help/new', data: { tab: 'help-new' }, children: [] },
   { path: 'help/new3', data: { tab: 'help-new3' }, children: [] },
   { path: 'help/new4', data: { tab: 'help-new4' }, children: [] },

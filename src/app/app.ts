@@ -6,6 +6,7 @@ import {AddWatcherDrawerComponent} from './drawers/add-watcher.component';
 import {AddScheduleDrawerComponent} from './drawers/add-schedule.component';
 import {CreateProcessMonitorDrawerComponent} from './drawers/create-process-monitor.component';
 import {DocumentationComponent} from './documentation/documentation.component';
+import {Documentation2Component} from './documentation/documentation2.component';
 
 export interface SubProcess {
   id: string;
@@ -156,7 +157,8 @@ export interface BotManager {
     AddWatcherDrawerComponent,
     AddScheduleDrawerComponent,
     CreateProcessMonitorDrawerComponent,
-    DocumentationComponent
+    DocumentationComponent,
+    Documentation2Component
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -220,6 +222,10 @@ export class App implements OnInit {
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
       // Check for multi-segment paths first
+      if (url.startsWith('/help/documentation2')) {
+        this.activeTab.set('help-documentation2');
+        return;
+      }
       if (url.startsWith('/help/new4')) {
         this.activeTab.set('help-new4');
         return;
