@@ -1398,17 +1398,26 @@
             <h2 class="text-xl font-bold text-slate-900 mb-1">Help &amp; Guides</h2>
             <p class="text-sm text-slate-500">Step-by-step guides for every feature in Automai Watcher.</p>
           </div>
-          <button (click)="navigate('/help/documentation2')"
-                  class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 text-primary text-xs font-semibold bg-primary/5 hover:bg-primary/10 transition-colors">
-            <span class="material-symbols-outlined text-[16px]">menu_book</span>
-            Feature documentation
-          </button>
         </div>
 
         <div class="grid grid-cols-[280px_1fr] gap-4">
           <!-- Left sidebar -->
           <div class="space-y-2">
             <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Onboarding Checklist</p>
+
+            <!-- Ask for Assistance (top) -->
+            <div (click)="selectedHelpCard.set('assistance')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
+              [ngClass]="selectedHelpCard() === 'assistance' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-primary">support_agent</span>
+                </div>
+                <div>
+                  <span class="text-sm font-semibold text-slate-900 block">Ask for Assistance</span>
+                  <span class="text-[10px] text-slate-400">Q&amp;A from the knowledge base</span>
+                </div>
+              </div>
+            </div>
 
             <!-- Getting Started -->
             <div (click)="selectedHelpCard.set('process')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
@@ -1468,19 +1477,6 @@
               </div>
             </div>
 
-            <!-- Knowledge-base assistant — opens chat instead of a guided drawer -->
-            <button (click)="navigate('/help/kb-chat')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-primary/40 transition-all">
-              <div class="flex items-center gap-3">
-                <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[20px] text-primary">support_agent</span>
-                </div>
-                <div class="min-w-0">
-                  <span class="text-sm font-semibold text-slate-900 block">Ask the assistant</span>
-                  <span class="text-[10px] text-slate-400">Q&amp;A from the knowledge base</span>
-                </div>
-              </div>
-            </button>
-
             <!-- Resources -->
             <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mt-6! mb-3">Resources</p>
 
@@ -1503,43 +1499,103 @@
                 <p class="text-[11px] text-slate-400">Learn how to set up your first watcher in minutes.</p>
               </div>
             </a>
-
-            <button (click)="navigate('/help/new4')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-blue-300 transition-all flex items-center gap-3">
-              <div class="size-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[18px]">speed</span>
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-slate-900">Test Monitor</p>
-                <p class="text-[11px] text-slate-400">Live view of running load tests and KPIs.</p>
-              </div>
-            </button>
-
-            <!-- Chat-bot launcher -->
-            <button (click)="navigate('/help/new3')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-primary/40 transition-all flex items-center gap-3">
-              <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-slate-900">Smart Add (Chat)</p>
-                <p class="text-[11px] text-slate-400">Conversational way to set up a process monitor.</p>
-              </div>
-            </button>
-
-            <!-- Feature documentation -->
-            <button (click)="navigate('/help/documentation2')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-primary/40 transition-all flex items-center gap-3">
-              <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-[18px]">menu_book</span>
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-slate-900">Feature documentation</p>
-                <p class="text-[11px] text-slate-400">Every wizard, drawer, and use case in one page.</p>
-              </div>
-            </button>
+            <!-- Hidden routes still accessible via direct URL: /help/new3 (Smart Add Chat), /help/new4 (Test Monitor), /help/documentation2 (Feature Documentation), /help/kb-chat (Standalone assistant) -->
           </div>
 
           <!-- Right detail panel -->
           <div class="border border-slate-200 rounded-xl bg-white p-6 min-h-[400px]">
-            @if (selectedHelpCard() === 'process') {
+            @if (selectedHelpCard() === 'assistance') {
+              <!-- Inline knowledge-base chat -->
+              <div class="flex items-start justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[20px] text-primary">support_agent</span>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-slate-900">Ask for Assistance</h3>
+                    <p class="text-[11px] text-slate-400">
+                      Q&amp;A from
+                      <a href="https://help.automai.com/s/knowledge-base" target="_blank" rel="noopener" class="text-primary hover:underline">help.automai.com</a>.
+                      I answer questions — I won't run setup actions.
+                    </p>
+                  </div>
+                </div>
+                <button (click)="kbReset()" class="text-xs text-slate-400 hover:text-slate-700 inline-flex items-center gap-1 shrink-0">
+                  <span class="material-symbols-outlined text-sm">refresh</span> Reset
+                </button>
+              </div>
+
+              <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col h-[60vh] min-h-[420px]">
+                <!-- Messages -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                  @for (msg of kbMessages(); track $index) {
+                    @if (msg.from === 'user') {
+                      <div class="flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm max-w-[80%]">{{ msg.text }}</div>
+                      </div>
+                    } @else {
+                      <div class="flex justify-start gap-2">
+                        <div class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                          <span class="material-symbols-outlined text-[18px]">support_agent</span>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm max-w-[80%]">
+                          @if (msg.topic) {
+                            <span class="inline-block mb-1 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">{{ msg.topic }}</span>
+                          }
+                          <p class="text-slate-800 whitespace-pre-wrap">{{ msg.text }}</p>
+                          @if (msg.href) {
+                            <a [href]="msg.href" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline">
+                              <span class="material-symbols-outlined text-[14px]">open_in_new</span> View on knowledge base
+                            </a>
+                          }
+                        </div>
+                      </div>
+                    }
+                  }
+                  @if (kbTyping()) {
+                    <div class="flex justify-start gap-2">
+                      <div class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[18px]">support_agent</span>
+                      </div>
+                      <div class="bg-slate-50 border border-slate-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm">
+                        <span class="inline-flex gap-1">
+                          <span class="size-1.5 rounded-full bg-slate-400 animate-bounce"></span>
+                          <span class="size-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0.15s"></span>
+                          <span class="size-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0.3s"></span>
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Suggested questions -->
+                @if (kbMessages().length <= 1) {
+                  <div class="px-4 pb-2">
+                    <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-2">Suggested questions</p>
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (q of kbSuggestedQuestions; track q) {
+                        <button (click)="kbAskSuggested(q)" class="text-xs px-3 py-1.5 rounded-full bg-slate-50 hover:bg-primary/10 hover:text-primary border border-slate-200 transition-colors">
+                          {{ q }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Input -->
+                <div class="px-4 py-3 border-t border-slate-100 flex items-center gap-2">
+                  <input type="text" [value]="kbInput()" (input)="kbInput.set($any($event.target).value)" (keydown.enter)="kbSend()"
+                         placeholder="Ask about license, rWatchers, schedules, reports..."
+                         class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                  <button (click)="kbSend()"
+                          [disabled]="kbInput().trim().length === 0 || kbTyping()"
+                          class="size-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40">
+                    <span class="material-symbols-outlined">send</span>
+                  </button>
+                </div>
+              </div>
+
+            } @else if (selectedHelpCard() === 'process') {
               <!-- Getting Started integrated flow -->
               <div class="flex items-center gap-3 mb-2">
                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">

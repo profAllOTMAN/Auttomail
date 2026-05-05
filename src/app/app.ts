@@ -281,7 +281,7 @@ export class App implements OnInit {
   card2Steps = signal<string[]>([]);
   card3Steps = signal<string[]>([]);
   selectedMonitorId = signal<string | null>(null);
-  selectedHelpCard = signal<'process' | 'rwatchers' | 'calendar' | 'reports' | 'notifications' | null>('process');
+  selectedHelpCard = signal<'process' | 'rwatchers' | 'calendar' | 'reports' | 'notifications' | 'assistance' | null>('process');
   installSteps = signal<string[]>(['download', 'login', 'botmanager', 'record']);
 
   allStepsComplete() {
