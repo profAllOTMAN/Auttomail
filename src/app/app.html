@@ -1457,7 +1457,7 @@
               </div>
             </div>
 
-            <!-- Export Reports (empty) -->
+            <!-- Export Reports -->
             <div (click)="selectedHelpCard.set('reports')" class="border rounded-xl p-4 bg-white cursor-pointer transition-all"
               [ngClass]="selectedHelpCard() === 'reports' ? 'border-primary/40 shadow-sm bg-primary/5' : 'border-slate-200 hover:border-slate-300'">
               <div class="flex items-center gap-3">
@@ -1467,6 +1467,19 @@
                 <span class="text-sm font-semibold text-slate-900">Export Reports</span>
               </div>
             </div>
+
+            <!-- Knowledge-base assistant — opens chat instead of a guided drawer -->
+            <button (click)="navigate('/help/kb-chat')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-primary/40 transition-all">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[20px] text-primary">support_agent</span>
+                </div>
+                <div class="min-w-0">
+                  <span class="text-sm font-semibold text-slate-900 block">Ask the assistant</span>
+                  <span class="text-[10px] text-slate-400">Q&amp;A from the knowledge base</span>
+                </div>
+              </div>
+            </button>
 
             <!-- Resources -->
             <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mt-6! mb-3">Resources</p>
@@ -1498,6 +1511,28 @@
               <div>
                 <p class="text-sm font-semibold text-slate-900">Test Monitor</p>
                 <p class="text-[11px] text-slate-400">Live view of running load tests and KPIs.</p>
+              </div>
+            </button>
+
+            <!-- Chat-bot launcher -->
+            <button (click)="navigate('/help/new3')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-primary/40 transition-all flex items-center gap-3">
+              <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Smart Add (Chat)</p>
+                <p class="text-[11px] text-slate-400">Conversational way to set up a process monitor.</p>
+              </div>
+            </button>
+
+            <!-- Feature documentation -->
+            <button (click)="navigate('/help/documentation2')" type="button" class="w-full text-left border border-slate-200 rounded-xl p-4 bg-white hover:border-primary/40 transition-all flex items-center gap-3">
+              <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">menu_book</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Feature documentation</p>
+                <p class="text-[11px] text-slate-400">Every wizard, drawer, and use case in one page.</p>
               </div>
             </button>
           </div>
@@ -1562,6 +1597,50 @@
                     @if (gsActiveStep() === step.id) {
                       <div class="px-3.5 pb-3.5 pt-0">
                         <div class="ml-8.5 border-t border-slate-200/60 pt-3">
+
+                          @if (step.id === 'license') {
+                            <!-- Step 0: License upload -->
+                            <p class="text-xs text-slate-500 mb-3">Upload the <strong>.lic</strong> file we sent with your purchase. The platform unlocks every product (Watcher, Loader) once a valid license is loaded.</p>
+                            <div class="border-2 border-dashed rounded-lg p-4 bg-slate-50/50 mb-3"
+                                 [class.border-emerald-300]="licenseUploadStatus() === 'valid'"
+                                 [class.bg-emerald-50]="licenseUploadStatus() === 'valid'"
+                                 [class.border-rose-300]="licenseUploadStatus() === 'invalid'"
+                                 [class.bg-rose-50]="licenseUploadStatus() === 'invalid'"
+                                 [class.border-slate-300]="licenseUploadStatus() === 'idle' || licenseUploadStatus() === 'uploading'">
+                              @if (licenseUploadStatus() === 'idle' || licenseUploadStatus() === 'uploading') {
+                                <div class="text-center">
+                                  <div class="size-12 rounded-full bg-white border border-slate-200 flex items-center justify-center mx-auto mb-2">
+                                    <span class="material-symbols-outlined text-[24px] text-slate-500">{{ licenseUploadStatus() === 'uploading' ? 'progress_activity' : 'upload_file' }}</span>
+                                  </div>
+                                  <p class="text-xs font-semibold text-slate-700 mb-2">{{ licenseUploadStatus() === 'uploading' ? 'Uploading…' : 'Choose a license file' }}</p>
+                                  <p class="text-[11px] text-slate-500 mb-3">Accepted: <code class="font-mono bg-slate-100 px-1 rounded">.lic</code> · Max 1 MB</p>
+                                  <label class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-md cursor-pointer hover:bg-primary/90 transition-colors">
+                                    <span class="material-symbols-outlined text-[14px]">upload</span> Browse…
+                                    <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                                  </label>
+                                </div>
+                              } @else if (licenseUploadStatus() === 'valid') {
+                                <div class="flex items-start gap-3">
+                                  <div class="size-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined">verified</span>
+                                  </div>
+                                  <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-emerald-700">License activated</p>
+                                    <p class="text-[11px] text-emerald-700 truncate">{{ licenseFileName() }}</p>
+                                    <p class="text-[11px] text-slate-600 mt-1">Expires: <strong>{{ licenseExpiry() }}</strong> · 50 rWatcher seats · Loader enabled</p>
+                                  </div>
+                                  <label class="text-[11px] text-emerald-700 underline cursor-pointer shrink-0">
+                                    Replace
+                                    <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                                  </label>
+                                </div>
+                              }
+                            </div>
+                            <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-md p-2.5 mb-3">
+                              <span class="material-symbols-outlined text-[14px] text-blue-500 mt-0.5">info</span>
+                              <p class="text-[11px] text-blue-700">Your license file was sent to the email used at purchase. If you can't find it, contact <code class="font-mono">support&#64;automai.com</code>.</p>
+                            </div>
+                          }
 
                           @if (step.id === 'record-send') {
                             <!-- Step 1: Record & Send Scenario (merged steps 2+3) -->
@@ -1746,9 +1825,14 @@
                 </li>
               </ol>
 
-              <button (click)="navigate('/rwatchers')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">desktop_windows</span> Go to Watchers
-              </button>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <button (click)="openDrawer('watcher', 'standalone')" class="flex-1 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">add</span> Add rWatcher (guided)
+                </button>
+                <button (click)="navigate('/rwatchers')" class="flex-1 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">desktop_windows</span> Go to Watchers
+                </button>
+              </div>
 
             } @else if (selectedHelpCard() === 'calendar') {
               <div class="flex items-center gap-3 mb-5">
@@ -1756,17 +1840,26 @@
                   <span class="material-symbols-outlined text-[20px] text-violet-500">calendar_month</span>
                 </div>
                 <div>
-                  <h3 class="text-base font-bold text-slate-900">Calendar Maintenance</h3>
-                  <p class="text-[11px] text-slate-400">Define maintenance windows and recurring schedules.</p>
+                  <h3 class="text-base font-bold text-slate-900">Schedule</h3>
+                  <p class="text-[11px] text-slate-400">Define when monitors run and the order they execute in.</p>
                 </div>
               </div>
 
-              <div class="flex flex-col items-center justify-center py-12 text-center">
-                <div class="size-14 rounded-full bg-violet-50 flex items-center justify-center mb-3">
-                  <span class="material-symbols-outlined text-2xl text-violet-400">calendar_month</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-600 mb-1">Coming Soon</p>
-                <p class="text-xs text-slate-400">Content will be added in a future update.</p>
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Checklist</p>
+              <ol class="space-y-2.5 mb-5 text-xs text-slate-600 list-decimal list-inside">
+                <li>Open the Schedules page</li>
+                <li>Click <strong>+ Create Schedule</strong></li>
+                <li>Set name, cadence, and timezone</li>
+                <li>Pick the monitors that run on it</li>
+                <li>Drag rows in the Priority panel to reorder execution</li>
+              </ol>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <button (click)="openDrawer('schedule', 'standalone')" class="flex-1 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">event_note</span> Create Schedule (guided)
+                </button>
+                <button (click)="navigate('/schedules')" class="flex-1 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">calendar_month</span> Go to Schedules
+                </button>
               </div>
 
             } @else if (selectedHelpCard() === 'reports') {
@@ -1780,13 +1873,17 @@
                 </div>
               </div>
 
-              <div class="flex flex-col items-center justify-center py-12 text-center">
-                <div class="size-14 rounded-full bg-cyan-50 flex items-center justify-center mb-3">
-                  <span class="material-symbols-outlined text-2xl text-cyan-400">download</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-600 mb-1">Coming Soon</p>
-                <p class="text-xs text-slate-400">Content will be added in a future update.</p>
-              </div>
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Checklist</p>
+              <ol class="space-y-2.5 mb-5 text-xs text-slate-600 list-decimal list-inside">
+                <li>Open the Reports tab</li>
+                <li>Pick <strong>Summary</strong>, <strong>Raw data</strong>, or <strong>Transaction data</strong></li>
+                <li>Select process monitors and name the report</li>
+                <li>Optional: enable email scheduling with interval &amp; separator</li>
+                <li>Click <strong>Run</strong> to generate immediately, or let it run on schedule</li>
+              </ol>
+              <button (click)="navigate('/reports')" class="w-full py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">analytics</span> Go to Reports
+              </button>
 
             } @else if (selectedHelpCard() === 'notifications') {
               <div class="flex items-center gap-3 mb-5">
@@ -2103,18 +2200,18 @@
         <!-- Reports list -->
         <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
           <!-- Header row -->
-          <div class="hidden md:grid md:grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <div class="hidden md:grid md:grid-cols-[260px_1.6fr_100px_1fr_1.2fr_140px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             <div>Action</div>
-            <div>Type</div>
             <div>Report name</div>
+            <div>Type</div>
             <div>Process Monitor</div>
             <div>Emails</div>
             <div class="text-right">Status</div>
           </div>
 
           @for (rep of reports(); track rep.id) {
-            <div class="grid grid-cols-1 md:grid-cols-[260px_100px_1.4fr_1fr_1.2fr_140px] gap-x-6 gap-y-2 px-5 py-3 border-b border-slate-100 last:border-b-0 items-center hover:bg-slate-50/50 transition-colors">
-              <!-- Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-[260px_1.6fr_100px_1fr_1.2fr_140px] gap-x-6 gap-y-2 px-5 py-3 border-b border-slate-100 last:border-b-0 items-center hover:bg-slate-50/50 transition-colors">
+              <!-- Actions (left) -->
               <div class="flex items-center gap-1 md:border-r md:border-slate-100 md:pr-4">
                 <button (click)="runReport(rep.id)"
                         class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
@@ -2145,20 +2242,20 @@
                 </div>
               </div>
 
-              <!-- Type -->
-              <div>
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">
-                  {{ reportTypeLabel(rep.type) }}
-                </span>
-              </div>
-
-              <!-- Name -->
+              <!-- Name (primary column) -->
               <div class="min-w-0">
                 <button (click)="openEditReport(rep.id)"
                         class="block text-sm font-semibold text-primary hover:underline truncate text-left max-w-full">
                   {{ rep.name }}
                 </button>
                 <p class="text-[11px] text-slate-400 truncate">{{ rep.outputPath }}/{{ rep.fileName }}</p>
+              </div>
+
+              <!-- Type -->
+              <div>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">
+                  {{ reportTypeLabel(rep.type) }}
+                </span>
               </div>
 
               <!-- Process Monitor -->
@@ -4243,6 +4340,101 @@
       <app-documentation class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation>
     } @else if (activeTab() === 'help-documentation2') {
       <app-documentation2 class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation2>
+    } @else if (activeTab() === 'help-kb-chat') {
+      <!-- Knowledge-base chat (Q&A only) -->
+      <div class="mt-6 max-w-3xl mx-auto w-full">
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <button (click)="navigate('/help')" class="text-xs text-slate-400 hover:text-slate-700 inline-flex items-center gap-1 mb-2">
+              <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Help Center
+            </button>
+            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+              <div class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined">support_agent</span>
+              </div>
+              Knowledge base assistant
+            </h2>
+            <p class="text-sm text-slate-500 mt-1 ml-[52px]">Ask anything about Automai. I answer from <a href="https://help.automai.com/s/knowledge-base" target="_blank" rel="noopener" class="text-primary hover:underline">help.automai.com</a> — I don't run setup actions.</p>
+          </div>
+          <button (click)="kbReset()" class="text-xs text-slate-400 hover:text-slate-700 inline-flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">refresh</span> Reset
+          </button>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col min-h-[60vh]">
+          <!-- Messages -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+            @for (msg of kbMessages(); track $index) {
+              @if (msg.from === 'user') {
+                <div class="flex justify-end">
+                  <div class="bg-primary text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm max-w-[80%]">{{ msg.text }}</div>
+                </div>
+              } @else {
+                <div class="flex justify-start gap-2">
+                  <div class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="material-symbols-outlined text-[18px]">support_agent</span>
+                  </div>
+                  <div class="bg-slate-50 border border-slate-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm max-w-[80%]">
+                    @if (msg.topic) {
+                      <span class="inline-block mb-1 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">{{ msg.topic }}</span>
+                    }
+                    <p class="text-slate-800 whitespace-pre-wrap">{{ msg.text }}</p>
+                    @if (msg.href) {
+                      <a [href]="msg.href" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline">
+                        <span class="material-symbols-outlined text-[14px]">open_in_new</span> View on knowledge base
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+            }
+            @if (kbTyping()) {
+              <div class="flex justify-start gap-2">
+                <div class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">support_agent</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl rounded-bl-sm px-3 py-2 text-sm">
+                  <span class="inline-flex gap-1">
+                    <span class="size-1.5 rounded-full bg-slate-400 animate-bounce"></span>
+                    <span class="size-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0.15s"></span>
+                    <span class="size-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0.3s"></span>
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Suggested questions -->
+          @if (kbMessages().length <= 1) {
+            <div class="px-4 pb-2">
+              <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-2">Suggested questions</p>
+              <div class="flex flex-wrap gap-1.5">
+                @for (q of kbSuggestedQuestions; track q) {
+                  <button (click)="kbAskSuggested(q)" class="text-xs px-3 py-1.5 rounded-full bg-slate-50 hover:bg-primary/10 hover:text-primary border border-slate-200 transition-colors">
+                    {{ q }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Input -->
+          <div class="px-4 py-3 border-t border-slate-100 flex items-center gap-2">
+            <input type="text" [value]="kbInput()" (input)="kbInput.set($any($event.target).value)" (keydown.enter)="kbSend()"
+                   placeholder="Ask about license, rWatchers, schedules, reports..."
+                   class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button (click)="kbSend()"
+                    [disabled]="kbInput().trim().length === 0 || kbTyping()"
+                    class="size-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40">
+              <span class="material-symbols-outlined">send</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mt-3 text-center">
+          Looking to actually create a process? Use <button (click)="navigate('/help/new3')" class="text-primary hover:underline font-semibold">Smart Add Process</button> or the <button (click)="navigate('/help/new')" class="text-primary hover:underline font-semibold">guided wizard</button>.
+        </p>
+      </div>
     }
   </main>
 

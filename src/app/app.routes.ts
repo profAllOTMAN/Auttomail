@@ -1,7 +1,7 @@
 import {Routes} from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'help/new', pathMatch: 'full' },
   { path: 'dashboard', data: { tab: 'dashboard' }, children: [] },
   { path: 'process-monitors', data: { tab: 'process-monitor' }, children: [] },
   { path: 'rwatchers', data: { tab: 'rwatchers' }, children: [] },
@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'test-runs', data: { tab: 'test-runs' }, children: [] },
   { path: 'botmanagers', data: { tab: 'botmanagers' }, children: [] },
   { path: 'help/documentation2', data: { tab: 'help-documentation2' }, children: [] },
+  { path: 'help/kb-chat', data: { tab: 'help-kb-chat' }, children: [] },
   { path: 'help/new', data: { tab: 'help-new' }, children: [] },
   { path: 'help/new3', data: { tab: 'help-new3' }, children: [] },
   { path: 'help/new4', data: { tab: 'help-new4' }, children: [] },

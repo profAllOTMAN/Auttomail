@@ -226,6 +226,10 @@ export class App implements OnInit {
         this.activeTab.set('help-documentation2');
         return;
       }
+      if (url.startsWith('/help/kb-chat')) {
+        this.activeTab.set('help-kb-chat');
+        return;
+      }
       if (url.startsWith('/help/new4')) {
         this.activeTab.set('help-new4');
         return;
@@ -874,17 +878,151 @@ export class App implements OnInit {
 
   // ── Getting Started integrated flow ──
   gettingStartedSteps: {id: string; label: string; icon: string; description: string; optional?: boolean; videoUrl?: string}[] = [
+    {id: 'license', label: 'Upload License File', icon: 'verified', description: 'Activate the platform with the license file we sent you.'},
     {id: 'record-send', label: 'Record & Send Scenario', icon: 'videocam', description: 'Record your scenario in ScenarioBuilder and send it to Director.', videoUrl: 'https://www.youtube.com/embed/placeholder-record'},
     {id: 'botmanager', label: 'Verify BotManager', icon: 'dns', description: 'Confirm BotManager is connected and ready.', videoUrl: 'https://www.youtube.com/embed/placeholder-botmanager'},
-    {id: 'rwatcher', label: 'Add an rWatcher', icon: 'desktop_windows', description: 'Create and start a bot that will execute your scenario.', videoUrl: 'https://www.youtube.com/embed/placeholder-rwatcher'},
+    {id: 'rwatcher', label: 'Add your first rWatcher', icon: 'desktop_windows', description: 'Create and start a bot that will execute your scenario.', videoUrl: 'https://www.youtube.com/embed/placeholder-rwatcher'},
     {id: 'schedule', label: 'Create a Schedule', icon: 'schedule', description: 'Define how often your Process Monitor runs.', videoUrl: 'https://www.youtube.com/embed/placeholder-schedule'},
     {id: 'monitor', label: 'Create Process Monitor', icon: 'monitoring', description: 'Tie your scenario, rWatcher, and schedule together.', videoUrl: 'https://www.youtube.com/embed/placeholder-monitor'},
     {id: 'results', label: 'See it Run', icon: 'play_circle', description: 'Watch your bot execute the scenario automatically.', videoUrl: 'https://www.youtube.com/embed/placeholder-results'},
     {id: 'reports', label: 'Export Reports', icon: 'download', description: 'Download and share your automation results.', optional: true}
   ];
-  gsActiveStep = signal<string>('record-send');
+  gsActiveStep = signal<string>('license');
   gsCompletedSteps = signal<string[]>([]);
   gsPreviewStep = signal<string | null>(null);
+
+  // ── Knowledge-base chat (Q&A only — no setup actions) ──
+  // Source: https://help.automai.com/s/knowledge-base
+  readonly kbAnswers: { keywords: string[]; answer: string; topic: string; href: string }[] = [
+    {
+      keywords: ['license', 'activate', 'lic', 'expir'],
+      topic: 'Licensing',
+      answer: 'Upload your .lic file from the onboarding wizard (step "Upload License File"). The license unlocks every product (Watcher, Loader). To replace it later, go to Profile → License Details. Expiry date and seat count are shown after activation.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['rwatcher', 'watcher', 'agent', 'desktop'],
+      topic: 'rWatchers',
+      answer: 'An rWatcher is a remote desktop agent that executes scenarios. Register one from the rWatchers page or the onboarding wizard step 3. After registering, select the rWatcher and click Start to bring it online. Status flips Online → Busy when a scenario is running.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['botmanager', 'bot manager', 'connection'],
+      topic: 'BotManager',
+      answer: 'BotManager is the service that hosts rWatcher sessions. It registers itself with Director on install. Verify Connected status from BotManagers page. License limits the maximum number of rLoaders you can start.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['schedule', 'cadence', 'cron', 'when'],
+      topic: 'Schedules',
+      answer: 'A schedule defines when monitors execute. Create one from the Schedules page (or onboarding step 4). Set name, cadence, and timezone, then drag the linked processes into the order they should run.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['process monitor', 'monitor', 'create process'],
+      topic: 'Process Monitors',
+      answer: 'A Process Monitor ties a scenario, an rWatcher, and a schedule together. Use the Smart Add (Chat) for a guided conversation, or the wizard at /help/new (steps 5+).',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['scenario', 'record', 'scenariobuilder'],
+      topic: 'Scenarios',
+      answer: 'Scenarios are recorded in ScenarioBuilder (desktop app) and sent to Director. The recording captures every UI interaction. Practice the flow manually first, then start recording.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['report', 'export', 'csv'],
+      topic: 'Reports',
+      answer: 'Three report types: Summary, Raw data, Transaction data. Create one from the Reports page. Toggle "Email reports with custom intervals" to schedule recurring email exports.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['loader', 'rloader', 'load test'],
+      topic: 'Loader',
+      answer: 'Loader is the load-testing product (switch via the product pill in the header). Test Plans define what scenarios to run and how many rLoaders. Test Runs show live + historical executions.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['ramp', 'steady', 'duration'],
+      topic: 'Loader — Ramp & Steady State',
+      answer: 'Ramp-up policy staggers user starts so you do not crash the app under test (default: 1 user every 15s). Steady State Time begins when the LAST user starts playing — that gives you a guaranteed window of full-load data.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    },
+    {
+      keywords: ['notification', 'webhook', 'email', 'alert'],
+      topic: 'Notifications',
+      answer: 'Configure webhook (Teams/Slack) or email alerts in the Notifications section of a process or test plan. Email requires SMTP configured in Director Configurations.',
+      href: 'https://help.automai.com/s/knowledge-base'
+    }
+  ];
+
+  kbMessages = signal<{ from: 'user' | 'bot'; text: string; topic?: string; href?: string }[]>([
+    { from: 'bot', text: 'Hi! Ask me anything about Automai — licensing, rWatchers, schedules, reports, Loader, ramp policies, etc. I answer from the knowledge base, I won\'t set anything up for you.', }
+  ]);
+  kbInput = signal<string>('');
+  kbTyping = signal<boolean>(false);
+
+  kbSuggestedQuestions = [
+    'How do I upload my license?',
+    'How do I create an rWatcher?',
+    'What is steady state time?',
+    'How do schedules work?',
+    'How do I export a report?'
+  ];
+
+  kbAskSuggested(q: string) {
+    this.kbInput.set(q);
+    this.kbSend();
+  }
+
+  kbSend() {
+    const text = this.kbInput().trim();
+    if (!text || this.kbTyping()) return;
+    this.kbMessages.update(m => [...m, { from: 'user', text }]);
+    this.kbInput.set('');
+    this.kbTyping.set(true);
+
+    setTimeout(() => {
+      const lower = text.toLowerCase();
+      const match = this.kbAnswers.find(a => a.keywords.some(k => lower.includes(k)));
+      if (match) {
+        this.kbMessages.update(m => [...m, { from: 'bot', text: match.answer, topic: match.topic, href: match.href }]);
+      } else {
+        this.kbMessages.update(m => [...m, {
+          from: 'bot',
+          text: 'I don\'t have an answer for that yet. The full knowledge base lives at help.automai.com — try a keyword like license, rwatcher, schedule, report, or loader.',
+          href: 'https://help.automai.com/s/knowledge-base'
+        }]);
+      }
+      this.kbTyping.set(false);
+    }, 500);
+  }
+
+  kbReset() {
+    this.kbMessages.set([
+      { from: 'bot', text: 'Hi! Ask me anything about Automai. I answer from the knowledge base — I won\'t set anything up for you.' }
+    ]);
+    this.kbInput.set('');
+  }
+
+  // License upload state
+  licenseFileName = signal<string | null>(null);
+  licenseUploadStatus = signal<'idle' | 'uploading' | 'valid' | 'invalid'>('idle');
+  licenseExpiry = signal<string | null>(null);
+  uploadLicense(file: File | null) {
+    if (!file) return;
+    this.licenseFileName.set(file.name);
+    this.licenseUploadStatus.set('uploading');
+    setTimeout(() => {
+      this.licenseUploadStatus.set('valid');
+      this.licenseExpiry.set('2027-05-05');
+      this.gsMarkComplete('license');
+    }, 700);
+  }
+  onLicenseFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.uploadLicense(input.files?.[0] ?? null);
+  }
 
   gsMarkComplete(stepId: string) {
     this.gsCompletedSteps.update(s => s.includes(stepId) ? s : [...s, stepId]);
