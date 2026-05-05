@@ -222,6 +222,10 @@ export class App implements OnInit {
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
       // Check for multi-segment paths first
+      if (url.startsWith('/admin/license')) {
+        this.activeTab.set('admin-license');
+        return;
+      }
       if (url.startsWith('/help/documentation2')) {
         this.activeTab.set('help-documentation2');
         return;

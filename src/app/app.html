@@ -1596,19 +1596,19 @@
               </div>
 
             } @else if (selectedHelpCard() === 'process') {
-              <!-- Getting Started integrated flow -->
-              <div class="flex items-center gap-3 mb-2">
+              <!-- Getting Started — guided split layout -->
+              <div class="flex items-center gap-3 mb-4">
                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <span class="material-symbols-outlined text-[20px] text-blue-600">rocket_launch</span>
                 </div>
-                <div>
+                <div class="flex-1">
                   <h3 class="text-base font-bold text-slate-900">Getting Started</h3>
-                  <p class="text-[11px] text-slate-400">Follow each step to record, configure, and launch your first automated process.</p>
+                  <p class="text-[11px] text-slate-400">Pick a step on the left — execute it on the right.</p>
                 </div>
               </div>
 
               <!-- Progress bar -->
-              <div class="mb-5">
+              <div class="mb-4">
                 <div class="flex items-center justify-between mb-1.5">
                   <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Progress</span>
                   <span class="text-[10px] font-bold text-primary">{{ gsCompletedSteps().length }} / {{ gettingStartedSteps.length }}</span>
@@ -1618,41 +1618,59 @@
                 </div>
               </div>
 
-              <!-- Step list -->
-              <div class="space-y-1.5">
-                @for (step of gettingStartedSteps; track step.id; let i = $index) {
-                  <div class="border rounded-lg transition-all overflow-hidden"
-                    [ngClass]="gsActiveStep() === step.id ? 'border-primary/30 bg-primary/[0.03] shadow-sm' : (gsIsComplete(step.id) ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white')">
+              <!-- Split layout: step nav (left) + execution interface (right) -->
+              <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
+                <!-- Left: vertical step list -->
+                <ol class="space-y-1.5">
+                  @for (step of gettingStartedSteps; track step.id; let i = $index) {
+                    <li>
+                      <button (click)="gsActiveStep.set(step.id)" type="button"
+                              class="w-full text-left border rounded-lg p-3 transition-all flex items-start gap-2.5"
+                              [ngClass]="gsActiveStep() === step.id ? 'border-primary/40 bg-primary/[0.04] shadow-sm' : (gsIsComplete(step.id) ? 'border-emerald-200 bg-emerald-50/40 hover:bg-emerald-50/70' : 'border-slate-200 bg-white hover:border-slate-300')">
+                        @if (gsIsComplete(step.id)) {
+                          <div class="size-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <span class="material-symbols-outlined text-[13px]">check</span>
+                          </div>
+                        } @else {
+                          <div class="size-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5"
+                               [ngClass]="gsActiveStep() === step.id ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-400'">
+                            {{ i + 1 }}
+                          </div>
+                        }
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-semibold" [ngClass]="gsIsComplete(step.id) ? 'text-emerald-700' : 'text-slate-800'">{{ step.label }}</span>
+                            @if (step.optional) {
+                              <span class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
+                            }
+                          </div>
+                          <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{{ step.description }}</p>
+                        </div>
+                      </button>
+                    </li>
+                  }
+                </ol>
 
-                    <!-- Step header row -->
-                    <div class="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer" (click)="gsActiveStep.set(step.id)">
-                      <!-- Step number / check -->
-                      @if (gsIsComplete(step.id)) {
-                        <div class="size-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
-                          <span class="material-symbols-outlined text-[13px]">check</span>
+                <!-- Right: active step execution interface -->
+                @for (step of gettingStartedSteps; track step.id) {
+                  @if (gsActiveStep() === step.id) {
+                    <div class="border border-slate-200 rounded-lg bg-slate-50/30 p-4">
+                      <div class="flex items-start gap-3 mb-3">
+                        <div class="size-9 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <span class="material-symbols-outlined text-[20px]">{{ step.icon }}</span>
                         </div>
-                      } @else {
-                        <div class="size-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-bold"
-                          [ngClass]="gsActiveStep() === step.id ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-400'">
-                          {{ i + 1 }}
-                        </div>
-                      }
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-1.5">
-                          <span class="text-xs font-semibold" [ngClass]="gsIsComplete(step.id) ? 'text-emerald-700' : 'text-slate-800'">{{ step.label }}</span>
-                          @if (step.optional) {
-                            <span class="text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
-                          }
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2">
+                            <h4 class="text-sm font-bold text-slate-900">{{ step.label }}</h4>
+                            @if (gsIsComplete(step.id)) {
+                              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Done</span>
+                            }
+                          </div>
+                          <p class="text-xs text-slate-500 mt-0.5">{{ step.description }}</p>
                         </div>
                       </div>
-                      <span class="material-symbols-outlined text-[16px] text-slate-400 transition-transform"
-                        [ngClass]="gsActiveStep() === step.id ? 'rotate-180' : ''">expand_more</span>
-                    </div>
 
-                    <!-- Expanded content -->
-                    @if (gsActiveStep() === step.id) {
-                      <div class="px-3.5 pb-3.5 pt-0">
-                        <div class="ml-8.5 border-t border-slate-200/60 pt-3">
+                      <!-- Step body -->
 
                           @if (step.id === 'license') {
                             <!-- Step 0: License upload -->
@@ -1801,32 +1819,148 @@
                             </ol>
                           }
 
-                          <!-- Action buttons -->
-                          <div class="flex items-center gap-2 mt-1 flex-wrap">
-                            @if (step.id === 'rwatcher' || step.id === 'schedule' || step.id === 'monitor' || step.id === 'results' || step.id === 'reports') {
-                              <button (click)="gsStepAction(step.id)" class="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors">
-                                <span class="material-symbols-outlined text-[13px]">{{ step.icon }}</span>
-                                @if (step.id === 'rwatcher') { Open Add Watcher }
-                                @if (step.id === 'schedule') { Open Add Schedule }
-                                @if (step.id === 'monitor') { Create Process Monitor }
-                                @if (step.id === 'results') { Go to Process Monitors }
-                                @if (step.id === 'reports') { Go to Reports }
-                              </button>
+                      <!-- Step-specific execution interface -->
+                      @if (step.id === 'license') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3">
+                          <div class="flex items-start gap-3 mb-3">
+                            <div class="size-9 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                              <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+                            </div>
+                            <div class="flex-1">
+                              <p class="text-xs font-semibold text-slate-900">Admin → License</p>
+                              <p class="text-[11px] text-slate-500">Activate the platform from the dedicated Admin section.</p>
+                            </div>
+                            @if (licenseUploadStatus() === 'valid') {
+                              <span class="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Activated</span>
                             }
-                            <button (click)="gsOpenPreview(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100">
-                              <span class="material-symbols-outlined text-[13px]">menu_book</span> View Full Guide
+                          </div>
+                          @if (licenseUploadStatus() === 'valid') {
+                            <p class="text-[11px] text-slate-600 mb-3">Active license: <strong>{{ licenseFileName() }}</strong> · Expires {{ licenseExpiry() }} · 50 rWatcher seats.</p>
+                          }
+                          <button (click)="navigate('/admin/license')" class="w-full px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-2 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">{{ licenseUploadStatus() === 'valid' ? 'visibility' : 'upload' }}</span>
+                            {{ licenseUploadStatus() === 'valid' ? 'View / replace license' : 'Open Admin → License' }}
+                          </button>
+                        </div>
+                      } @else if (step.id === 'botmanager') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3 space-y-2">
+                          <div class="flex items-center justify-between">
+                            <p class="text-xs font-semibold text-slate-900">BotManager status</p>
+                            <span class="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">{{ botManagers().length }} registered</span>
+                          </div>
+                          <ul class="space-y-1.5">
+                            @for (bm of botManagers(); track bm.id) {
+                              <li class="flex items-center justify-between text-[11px] border border-slate-100 rounded p-2">
+                                <span class="font-semibold text-slate-700">{{ bm.name }}</span>
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                                      [ngClass]="botManagerStatusColor(bm.status)">{{ bm.status }}</span>
+                              </li>
+                            }
+                          </ul>
+                          <button (click)="navigate('/botmanagers'); setAppMode('loader')" class="w-full px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-2 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">dns</span> Open BotManagers page
+                          </button>
+                        </div>
+                      } @else if (step.id === 'rwatcher') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3">
+                          <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-slate-900">Your rWatchers</p>
+                            <span class="text-[10px] font-bold uppercase text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{{ rwatchers().length }} total</span>
+                          </div>
+                          @if (rwatchers().length > 0) {
+                            <ul class="space-y-1.5 mb-3">
+                              @for (w of rwatchers().slice(0, 3); track w.id) {
+                                <li class="flex items-center justify-between text-[11px] border border-slate-100 rounded p-2">
+                                  <span class="font-semibold text-slate-700">{{ w.alias }}</span>
+                                  <span class="text-slate-500">{{ w.status }}</span>
+                                </li>
+                              }
+                            </ul>
+                          } @else {
+                            <p class="text-[11px] text-slate-400 mb-3 text-center py-3">No rWatchers yet — create your first one.</p>
+                          }
+                          <div class="flex gap-2">
+                            <button (click)="openDrawer('watcher', 'standalone')" class="flex-1 px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">add</span> Open Add rWatcher
                             </button>
-                            <button (click)="gsToggleComplete(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors"
-                              [ngClass]="gsIsComplete(step.id) ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-                              <span class="material-symbols-outlined text-[13px]">{{ gsIsComplete(step.id) ? 'undo' : 'check' }}</span>
-                              {{ gsIsComplete(step.id) ? 'Undo' : 'Mark Complete' }}
+                            <button (click)="navigate('/rwatchers')" class="flex-1 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">desktop_windows</span> Go to rWatchers
                             </button>
                           </div>
+                        </div>
+                      } @else if (step.id === 'schedule') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3">
+                          <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-slate-900">Your schedules</p>
+                            <span class="text-[10px] font-bold uppercase text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{{ schedules().length }} total</span>
+                          </div>
+                          <div class="flex gap-2">
+                            <button (click)="openDrawer('schedule', 'standalone')" class="flex-1 px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">event_note</span> Open Add Schedule
+                            </button>
+                            <button (click)="navigate('/schedules')" class="flex-1 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">calendar_month</span> Go to Schedules
+                            </button>
+                          </div>
+                        </div>
+                      } @else if (step.id === 'monitor') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3">
+                          <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-semibold text-slate-900">Process monitors</p>
+                            <span class="text-[10px] font-bold uppercase text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{{ monitors().length }} total</span>
+                          </div>
+                          <div class="flex gap-2">
+                            <button (click)="openDrawer('monitor', 'standalone')" class="flex-1 px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">add</span> Open Create Monitor
+                            </button>
+                            <button (click)="navigate('/process-monitors')" class="flex-1 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">monitoring</span> Go to Monitors
+                            </button>
+                          </div>
+                        </div>
+                      } @else if (step.id === 'results') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3">
+                          <p class="text-xs font-semibold text-slate-900 mb-2">Watch your monitors run live</p>
+                          <p class="text-[11px] text-slate-500 mb-3">The Dashboard shows running monitors, success rate, and recent activity.</p>
+                          <div class="flex gap-2">
+                            <button (click)="navigate('/dashboard')" class="flex-1 px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">dashboard</span> Go to Dashboard
+                            </button>
+                            <button (click)="navigate('/process-monitors')" class="flex-1 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                              <span class="material-symbols-outlined text-[16px]">monitoring</span> Process Monitors
+                            </button>
+                          </div>
+                        </div>
+                      } @else if (step.id === 'reports') {
+                        <div class="border border-slate-200 rounded-md bg-white p-4 mb-3">
+                          <p class="text-xs font-semibold text-slate-900 mb-2">Export &amp; share results</p>
+                          <p class="text-[11px] text-slate-500 mb-3">Three report types: Summary, Raw data, Transaction data. Schedule recurring email exports if needed.</p>
+                          <button (click)="navigate('/reports')" class="w-full px-3 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-md inline-flex items-center justify-center gap-2 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">analytics</span> Go to Reports
+                          </button>
+                        </div>
+                      }
 
+                      <!-- Step controls -->
+                      <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                        <button (click)="gsToggleComplete(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors"
+                                [ngClass]="gsIsComplete(step.id) ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                          <span class="material-symbols-outlined text-[13px]">{{ gsIsComplete(step.id) ? 'undo' : 'check' }}</span>
+                          {{ gsIsComplete(step.id) ? 'Mark incomplete' : 'Mark complete' }}
+                        </button>
+                        <div class="flex items-center gap-2">
+                          <button (click)="gsOpenPreview(step.id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100">
+                            <span class="material-symbols-outlined text-[13px]">menu_book</span> Full guide
+                          </button>
+                          @if ($index < gettingStartedSteps.length - 1) {
+                            <button (click)="gsActiveStep.set(gettingStartedSteps[$index + 1].id)" class="px-3 py-1.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-colors bg-primary text-white hover:bg-primary/90">
+                              Next step <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+                            </button>
+                          }
                         </div>
                       </div>
-                    }
-                  </div>
+                    </div>
+                  }
                 }
               </div>
 
@@ -4396,6 +4530,94 @@
       <app-documentation class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation>
     } @else if (activeTab() === 'help-documentation2') {
       <app-documentation2 class="block -mx-4 sm:-mx-6 -mb-12"></app-documentation2>
+    } @else if (activeTab() === 'admin-license') {
+      <!-- Admin → License -->
+      <div class="mt-6 max-w-3xl mx-auto w-full space-y-6">
+        <div>
+          <button (click)="navigate('/help')" class="text-xs text-slate-400 hover:text-slate-700 inline-flex items-center gap-1 mb-2">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Help
+          </button>
+          <div class="flex items-center gap-3">
+            <div class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+              <span class="material-symbols-outlined">verified</span>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-slate-900">License</h2>
+              <p class="text-sm text-slate-500 mt-0.5">Admin → License — activate the platform with your <code class="font-mono bg-slate-100 px-1 rounded text-[11px]">.lic</code> file.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload card -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+          <div class="border-2 border-dashed rounded-lg p-6 mb-4"
+               [class.border-emerald-300]="licenseUploadStatus() === 'valid'"
+               [class.bg-emerald-50]="licenseUploadStatus() === 'valid'"
+               [class.border-rose-300]="licenseUploadStatus() === 'invalid'"
+               [class.bg-rose-50]="licenseUploadStatus() === 'invalid'"
+               [class.border-slate-300]="licenseUploadStatus() === 'idle' || licenseUploadStatus() === 'uploading'">
+            @if (licenseUploadStatus() === 'idle' || licenseUploadStatus() === 'uploading') {
+              <div class="text-center">
+                <div class="size-14 rounded-full bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3">
+                  <span class="material-symbols-outlined text-[28px] text-slate-500">{{ licenseUploadStatus() === 'uploading' ? 'progress_activity' : 'upload_file' }}</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-700 mb-1">{{ licenseUploadStatus() === 'uploading' ? 'Uploading…' : 'Choose your license file' }}</p>
+                <p class="text-xs text-slate-500 mb-4">Accepted: <code class="font-mono bg-slate-100 px-1 rounded">.lic</code> · Max 1 MB</p>
+                <label class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-md cursor-pointer hover:bg-primary/90 transition-colors">
+                  <span class="material-symbols-outlined text-[18px]">upload</span> Browse files
+                  <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                </label>
+              </div>
+            } @else if (licenseUploadStatus() === 'valid') {
+              <div class="flex items-start gap-4">
+                <div class="size-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[24px]">verified</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-base font-bold text-emerald-700">License activated</p>
+                  <p class="text-xs text-emerald-700 truncate">{{ licenseFileName() }}</p>
+                  <p class="text-xs text-slate-600 mt-1">Expires: <strong>{{ licenseExpiry() }}</strong> · 50 rWatcher seats · Loader enabled</p>
+                </div>
+                <label class="text-xs text-emerald-700 underline cursor-pointer shrink-0 self-center">
+                  Replace
+                  <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                </label>
+              </div>
+            }
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="border border-slate-200 rounded-md p-3">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">License key</p>
+              <p class="font-mono text-slate-700 truncate">{{ licenseUploadStatus() === 'valid' ? 'AUT-XXXX-7B43-9F12-AB54' : '—' }}</p>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Expires</p>
+              <p class="font-semibold text-slate-700">{{ licenseExpiry() ?? '—' }}</p>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">rWatcher seats</p>
+              <p class="font-semibold text-slate-700">{{ licenseUploadStatus() === 'valid' ? '50' : '—' }}</p>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Products</p>
+              <p class="font-semibold text-slate-700">{{ licenseUploadStatus() === 'valid' ? 'Watcher · Loader' : '—' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-md p-3">
+          <span class="material-symbols-outlined text-[18px] text-blue-500 mt-0.5">info</span>
+          <p class="text-xs text-blue-700">Your license file was sent to the email used at purchase. If you can't find it, contact <code class="font-mono">support&#64;automai.com</code>.</p>
+        </div>
+
+        @if (licenseUploadStatus() === 'valid') {
+          <button (click)="navigate('/help')" class="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-md inline-flex items-center justify-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span> Continue Getting Started
+          </button>
+        }
+      </div>
+
     } @else if (activeTab() === 'help-kb-chat') {
       <!-- Knowledge-base chat (Q&A only) -->
       <div class="mt-6 max-w-3xl mx-auto w-full">
