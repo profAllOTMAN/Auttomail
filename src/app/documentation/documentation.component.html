@@ -517,7 +517,7 @@
                 <span class="material-symbols-outlined text-[16px]">power</span> Activate
               </button>
               <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
-                <span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate
+                <span class="material-symbols-outlined text-[16px]">do_not_disturb_on</span> Deactivate
               </button>
               <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
                 <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
@@ -557,7 +557,7 @@
                   <div class="flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Processes</span><span class="text-xs font-semibold text-slate-700">2 assigned</span></div>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                  <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100"><span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate</button>
+                  <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100"><span class="material-symbols-outlined text-[16px]">do_not_disturb_on</span> Deactivate</button>
                   <button class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10"><span class="material-symbols-outlined text-[16px]">play_arrow</span> Run</button>
                   <button class="size-8 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
                 </div>
@@ -1548,6 +1548,327 @@
           </div>
 
         </div>
+      </section>
+
+      <!-- ==================== GUIDED TOUR COMPONENT ==================== -->
+      <section id="doc-guided-tour" class="doc-section scroll-mt-20">
+        <h2 class="text-3xl font-bold text-slate-900 mb-2">Guided Tour Component</h2>
+        <p class="text-slate-600 mb-6">A drop-in, signal-driven onboarding tour for Angular 21 apps. Persistent left-side panel, 4 parts × 8 sub-steps, sequential gating, auto-advance on real platform actions. Designed for copy-paste reuse — port the state shape and the panel template into any project, then wire your own action methods to <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">markTourActionDone()</code>.</p>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parts</p>
+            <p class="text-3xl font-bold text-primary mt-1">4</p>
+            <p class="text-xs text-slate-500 mt-1">Top-level groups in the panel</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sub-steps</p>
+            <p class="text-3xl font-bold text-primary mt-1">8</p>
+            <p class="text-xs text-slate-500 mt-1">Granular checked items</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Drawers</p>
+            <p class="text-3xl font-bold text-primary mt-1">4</p>
+            <p class="text-xs text-slate-500 mt-1">BotManager + watcher + schedule + monitor</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hooks</p>
+            <p class="text-3xl font-bold text-primary mt-1">8</p>
+            <p class="text-xs text-slate-500 mt-1">One per sub-step (auto-advance)</p>
+          </div>
+        </div>
+
+        <!-- 4 parts at a glance -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">The 4 parts</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="size-7 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">verified</span></span>
+              <h4 class="font-bold text-slate-900">Part 1 — Initial setup</h4>
+            </div>
+            <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+              <li>Upload license</li>
+              <li>Configure BotManager (drawer with advanced settings)</li>
+            </ul>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="size-7 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">desktop_windows</span></span>
+              <h4 class="font-bold text-slate-900">Part 2 — Watcher agent</h4>
+            </div>
+            <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+              <li>Click <strong>+ Add Watcher</strong> on rWatchers page</li>
+              <li>Activate &amp; run watcher (toggle online)</li>
+            </ul>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="size-7 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">schedule</span></span>
+              <h4 class="font-bold text-slate-900">Part 3 — Schedule &amp; monitor</h4>
+            </div>
+            <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+              <li>Click <strong>+ Add Schedule</strong></li>
+              <li>Activate &amp; run schedule</li>
+              <li>Click <strong>+ Create Monitor</strong> (events configured inline)</li>
+            </ul>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="size-7 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">play_circle</span></span>
+              <h4 class="font-bold text-slate-900">Part 4 — Run the monitor</h4>
+            </div>
+            <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+              <li>Click <strong>Run Now</strong> on a monitor row</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Sub-step states -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Sub-step states</h3>
+        <p class="text-slate-600 mb-3">Exactly one sub-step is "Now" at any time, computed from <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardTourActiveSubId()</code> — the first incomplete sub-step in document order. All other unfinished sub-steps render as Locked, all finished ones as Done. The button is only clickable when the sub-step is Now.</p>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+            <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">State</th>
+                <th class="px-4 py-3 text-left">Visual</th>
+                <th class="px-4 py-3 text-left">Click behavior</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary">Now</span></td>
+                <td class="px-4 py-3 text-slate-600">Primary tint, ring, radio_button_checked icon</td>
+                <td class="px-4 py-3 text-slate-600">Enabled — fires action.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Done</span></td>
+                <td class="px-4 py-3 text-slate-600">Emerald background, strikethrough, check_circle</td>
+                <td class="px-4 py-3 text-slate-600">Disabled.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500">Locked</span></td>
+                <td class="px-4 py-3 text-slate-600">Muted slate, lock icon</td>
+                <td class="px-4 py-3 text-slate-600">Disabled until prerequisites are done.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- State signals -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">State signals (drop in your service / root component)</h3>
+        <pre class="code-block mb-6"><code>// Master toggle — panel only renders when true.
+wizardChainActive = signal&lt;boolean&gt;(false);
+
+// One flag per sub-step.
+wizardActionsDone = signal&lt;{{ '{' }}
+  licenseUploaded: boolean;
+  botManagerConfigured: boolean;
+  watcherAdded: boolean;
+  watcherActivated: boolean;
+  scheduleAdded: boolean;
+  scheduleActivated: boolean;
+  monitorAdded: boolean;
+  monitorRun: boolean;
+{{ '}' }}&gt;({{ '{' }}
+  licenseUploaded: false, botManagerConfigured: false,
+  watcherAdded: false, watcherActivated: false,
+  scheduleAdded: false, scheduleActivated: false,
+  monitorAdded: false, monitorRun: false
+{{ '}' }});
+
+// Updated each time a sub-step completes (drives the "X min ago" label).
+wizardLastRefresh = signal&lt;Date&gt;(new Date());</code></pre>
+
+        <!-- markTourActionDone -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">The single funnel: <code class="bg-slate-100 px-2 py-0.5 rounded text-base">markTourActionDone()</code></h3>
+        <p class="text-slate-600 mb-3">Every sub-step transitions through this helper. It returns <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">true</code> only the first time a flag flips, so auto-advance side-effects fire exactly once.</p>
+        <pre class="code-block mb-6"><code>private markTourActionDone&lt;K extends keyof ReturnType&lt;typeof this.wizardActionsDone&gt;&gt;(key: K): boolean {{ '{' }}
+  if (this.wizardActionsDone()[key]) return false;
+  this.wizardActionsDone.update(s =&gt; ({{ '{' }}...s, [key]: true{{ '}' }}));
+  this.wizardLastRefresh.set(new Date());
+  return true;
+{{ '}' }}</code></pre>
+
+        <!-- Computed -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Active sub-step computed</h3>
+        <pre class="code-block mb-6"><code>wizardTourActiveSubId(): string {{ '{' }}
+  const a = this.wizardActionsDone();
+  if (!a.licenseUploaded) return 'license';
+  if (!a.botManagerConfigured) return 'botmanager';
+  if (!a.watcherAdded) return 'watcher-add';
+  if (!a.watcherActivated) return 'watcher-activate';
+  if (!a.scheduleAdded) return 'schedule-add';
+  if (!a.scheduleActivated) return 'schedule-activate';
+  if (!a.monitorAdded) return 'monitor-add';
+  if (!a.monitorRun) return 'monitor-run';
+  return 'done';
+{{ '}' }}</code></pre>
+
+        <!-- Hook examples -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Hook your existing action methods</h3>
+        <p class="text-slate-600 mb-3">Wrap your platform's existing methods with a single chain check. Each hook should: confirm the chain is active, confirm prerequisites are met, mark the sub-step done, and (optionally) navigate to the next part's page.</p>
+        <pre class="code-block mb-6"><code><span class="token-comment">// 1. Method called when user submits the BotManager drawer</span>
+wizardSaveBotManager() {{ '{' }}
+  if (!this.wizardBmConfigured()) return;
+  this.markTourActionDone(<span class="token-string">'botManagerConfigured'</span>);
+  this.activeDrawer.set(null);
+  if (this.wizardChainActive()) {{ '{' }}
+    this.navigate(<span class="token-string">'/rwatchers'</span>);  <span class="token-comment">// next page</span>
+  {{ '}' }}
+{{ '}' }}
+
+<span class="token-comment">// 2. Method called when a watcher row is activated (page button)</span>
+private maybeMarkWatcherActivated(id: string) {{ '{' }}
+  if (!this.wizardChainActive()) return;
+  if (!this.wizardActionsDone().watcherAdded) return; <span class="token-comment">// precondition</span>
+  if (this.wizardActionsDone().watcherActivated) return;
+  const w = this.rwatchers().find(x =&gt; x.id === id);
+  if (w &amp;&amp; (w.status === <span class="token-string">'online'</span> || w.status === <span class="token-string">'busy'</span>)
+      &amp;&amp; this.markTourActionDone(<span class="token-string">'watcherActivated'</span>)) {{ '{' }}
+    this.navigate(<span class="token-string">'/schedules'</span>);
+  {{ '}' }}
+{{ '}' }}
+
+<span class="token-comment">// 3. Wire the helper into all platform methods that change the watcher status</span>
+activateWatcher(id: string) {{ '{' }} <span class="token-comment">/* update state */</span>; this.maybeMarkWatcherActivated(id); {{ '}' }}
+runWatcher(id: string) {{ '{' }} <span class="token-comment">/* update state */</span>; this.maybeMarkWatcherActivated(id); {{ '}' }}
+toggleRWatcherOnlineStatus(id: string) {{ '{' }} <span class="token-comment">/* toggle */</span>; this.maybeMarkWatcherActivated(id); {{ '}' }}</code></pre>
+
+        <!-- Tour metadata -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Tour parts metadata</h3>
+        <p class="text-slate-600 mb-3">A single source of truth for the panel UI. Each part owns its label, icon, description, and an array of sub-steps. Each sub-step has an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">id</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">label</code>, derived <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">done</code> boolean, and an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">action</code> closure.</p>
+        <pre class="code-block mb-6"><code>wizardTourParts() {{ '{' }}
+  const a = this.wizardActionsDone();
+  return [
+    {{ '{' }}
+      id: <span class="token-string">'setup'</span>,
+      label: <span class="token-string">'Initial setup'</span>,
+      description: <span class="token-string">'License + BotManager configuration.'</span>,
+      icon: <span class="token-string">'verified'</span>,
+      subSteps: [
+        {{ '{' }}id: <span class="token-string">'license'</span>, label: <span class="token-string">'Upload license'</span>, done: a.licenseUploaded,
+         action: () =&gt; this.navigate(<span class="token-string">'/admin/license'</span>){{ '}' }},
+        {{ '{' }}id: <span class="token-string">'botmanager'</span>, label: <span class="token-string">'Configure BotManager'</span>, done: a.botManagerConfigured,
+         action: () =&gt; this.openDrawer(<span class="token-string">'botmanager'</span>, <span class="token-string">'onboarding'</span>){{ '}' }}
+      ]
+    {{ '}' }},
+    <span class="token-comment">/* ... part 2, 3, 4 ... */</span>
+  ];
+{{ '}' }}</code></pre>
+
+        <!-- Panel template -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Panel template (Angular 21)</h3>
+        <p class="text-slate-600 mb-3">Drop this into your app shell. Uses Tailwind classes; the only project-specific dependency is the host's <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">--color-primary</code> CSS variable.</p>
+        <pre class="code-block mb-6"><code>&lt;<span class="token-tag">div</span> *<span class="token-attr">ngIf</span>=<span class="token-string">"wizardChainActive()"</span>
+     <span class="token-attr">class</span>=<span class="token-string">"fixed top-0 left-0 bottom-0 z-[90] w-[320px] bg-white border-r border-slate-200 shadow-xl flex flex-col"</span>&gt;
+  &lt;<span class="token-tag">div</span> <span class="token-attr">class</span>=<span class="token-string">"px-4 py-3 bg-primary/5 border-b border-primary/20 flex items-center justify-between"</span>&gt;
+    &lt;<span class="token-tag">span</span> <span class="token-attr">class</span>=<span class="token-string">"text-[10px] font-bold text-primary uppercase tracking-wider"</span>&gt;Guided tour&lt;/<span class="token-tag">span</span>&gt;
+    &lt;<span class="token-tag">button</span> (<span class="token-attr">click</span>)=<span class="token-string">"wizardEndTour()"</span>&gt;Close&lt;/<span class="token-tag">button</span>&gt;
+  &lt;/<span class="token-tag">div</span>&gt;
+
+  &lt;<span class="token-tag">div</span> <span class="token-attr">class</span>=<span class="token-string">"flex-1 overflow-y-auto p-4 space-y-4"</span>&gt;
+    &#64;for (part of wizardTourParts(); track part.id; let i = $index) {{ '{' }}
+      &lt;<span class="token-tag">div</span> <span class="token-attr">class</span>=<span class="token-string">"rounded-lg border-2 p-3"</span>
+           [<span class="token-attr">ngClass</span>]=<span class="token-string">"wizardTourActivePart() === part.id ? 'border-primary bg-primary/5' : 'border-slate-200'"</span>&gt;
+        &lt;!-- Part header (icon, label, description) --&gt;
+        &#64;for (sub of part.subSteps; track sub.id) {{ '{' }}
+          &lt;<span class="token-tag">button</span> (<span class="token-attr">click</span>)=<span class="token-string">"sub.action()"</span>
+                  [<span class="token-attr">disabled</span>]=<span class="token-string">"sub.done || wizardTourActiveSubId() !== sub.id"</span>
+                  <span class="token-attr">class</span>=<span class="token-string">"w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-left"</span>
+                  [<span class="token-attr">ngClass</span>]=<span class="token-string">"sub.done ? 'bg-emerald-100 text-emerald-700 line-through opacity-80' : wizardTourActiveSubId() === sub.id ? 'bg-primary/10 text-primary ring-1 ring-primary/30' : 'text-slate-400 bg-slate-50/60'"</span>&gt;
+            &lt;<span class="token-tag">span</span> <span class="token-attr">class</span>=<span class="token-string">"material-symbols-outlined text-[16px]"</span>&gt;{{ '{{' }} sub.done ? 'check_circle' : wizardTourActiveSubId() === sub.id ? 'radio_button_checked' : 'lock' {{ '}}' }}&lt;/<span class="token-tag">span</span>&gt;
+            &lt;<span class="token-tag">span</span>&gt;{{ '{{' }} sub.label {{ '}}' }}&lt;/<span class="token-tag">span</span>&gt;
+          &lt;/<span class="token-tag">button</span>&gt;
+        {{ '}' }}
+      &lt;/<span class="token-tag">div</span>&gt;
+    {{ '}' }}
+  &lt;/<span class="token-tag">div</span>&gt;
+&lt;/<span class="token-tag">div</span>&gt;</code></pre>
+
+        <!-- Adding a new step -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Adding a new step or sub-step</h3>
+        <p class="text-slate-600 mb-3">Five-step recipe to extend the tour with a new sub-step (e.g. "Upload backup config" inside Part 1):</p>
+        <ol class="list-decimal list-inside space-y-2 text-sm text-slate-700 mb-3">
+          <li>Add a boolean field to <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardActionsDone</code> (e.g. <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">backupUploaded</code>) and reset it in <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardStartTour()</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardReset()</code>.</li>
+          <li>Insert a new <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">if (!a.backupUploaded) return 'backup-upload'</code> line in <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardTourActiveSubId()</code> in the order it should appear.</li>
+          <li>Add a sub-step entry to the right part in <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardTourParts()</code> — give it an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">id</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">label</code>, derived <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">done</code>, and an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">action</code> closure.</li>
+          <li>Wire the platform method that triggers the action through <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">markTourActionDone('backupUploaded')</code>. Add a precondition check so it only fires when prior sub-steps are done.</li>
+          <li>Add a hint case to <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">wizardChainHint()</code> so the top instruction banner reads correctly when this sub-step is "Now".</li>
+        </ol>
+
+        <!-- Lifecycle -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Tour lifecycle</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+            <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">Trigger</th>
+                <th class="px-4 py-3 text-left">Effect</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="px-4 py-3 font-mono text-xs">App load &amp; no license</td>
+                <td class="px-4 py-3 text-slate-600">First <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">NavigationEnd</code> calls <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">wizardStartTour()</code> → flag on, redirect to <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">/admin/license</code>.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-mono text-xs">Dashboard hero CTA</td>
+                <td class="px-4 py-3 text-slate-600">Empty-state hero on <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">/dashboard</code> while no license. Same <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">wizardStartTour()</code>.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-mono text-xs">Panel close button</td>
+                <td class="px-4 py-3 text-slate-600">Calls <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">wizardEndTour()</code> — flips chain off without resetting completed sub-steps.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 font-mono text-xs">All 8 sub-steps done</td>
+                <td class="px-4 py-3 text-slate-600">Panel renders the green "All set!" celebration card.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Files -->
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Files in this codebase</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+            <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">File</th>
+                <th class="px-4 py-3 text-left">Owns</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-mono text-xs">
+              <tr>
+                <td class="px-4 py-3"><span class="text-primary font-semibold">src/app/app.ts</span></td>
+                <td class="px-4 py-3 text-slate-600 font-sans">Tour state signals, hooks, sub-step metadata, helpers, lifecycle methods.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="text-primary font-semibold">src/app/app.html</span></td>
+                <td class="px-4 py-3 text-slate-600 font-sans">Left-side tour panel, BotManager drawer, dashboard empty-state hero.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="text-primary font-semibold">src/app/drawers/<wbr>add-watcher.component.ts</span></td>
+                <td class="px-4 py-3 text-slate-600 font-sans">Required-field gating (alias / BotManager / username / password).</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="text-primary font-semibold">src/app/drawers/<wbr>add-schedule.component.ts</span></td>
+                <td class="px-4 py-3 text-slate-600 font-sans">Required-field gating (schedule name).</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="text-primary font-semibold">src/app/drawers/<wbr>create-process-monitor.component.ts</span></td>
+                <td class="px-4 py-3 text-slate-600 font-sans">Inline events list, required fields, <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">openAddEvent</code> output.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3"><span class="text-primary font-semibold">src/styles.css</span></td>
+                <td class="px-4 py-3 text-slate-600 font-sans">Global <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">.drawer-slide-in</code> animation.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-xs text-slate-500">Companion artifacts: Figma design (Automai Watcher — Guided Tour Component), PDF spec at <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">docs/guided-tour-spec.pdf</code>.</p>
       </section>
 
       <!-- Footer -->

@@ -58,6 +58,7 @@ export class DocumentationComponent {
     { id: 'chat', label: 'Chat Agent', icon: 'smart_toy' },
     { id: 'spacing', label: 'Spacing & Layout', icon: 'grid_on' },
     { id: 'migration', label: 'Old vs New Design', icon: 'compare' },
+    { id: 'guided-tour', label: 'Guided Tour Component', icon: 'route' },
   ];
 
   scrollTo(id: string) {

@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900" [attr.data-app-mode]="appMode()">
+<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900 transition-[padding] duration-200" [attr.data-app-mode]="appMode()" [style.paddingLeft.px]="wizardChainActive() ? 360 : 0">
   <!-- Header -->
   <header class="header-gradient px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
     <div class="flex items-center gap-3 sm:gap-5">
@@ -426,6 +426,85 @@
         </div>
       </div>
     } @else if (activeTab() === 'dashboard') {
+      @if (!licenseAlreadyValid()) {
+        <!-- First-time empty state: no license, no real data, prompt user to start the tour -->
+        <div class="mt-12 max-w-2xl mx-auto text-center">
+          <div class="inline-flex size-20 rounded-full bg-primary/10 text-primary items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-[44px]">rocket_launch</span>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-900 mb-2">Welcome to Automai</h1>
+          <p class="text-sm text-slate-500 mb-8">Your dashboard is empty until you finish the initial setup. The guided tour walks you through the four parts: license &amp; BotManager, watcher, schedule &amp; monitor, and run.</p>
+
+          <!-- 4 part summary cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-left">
+            <div class="rounded-lg border border-slate-200 bg-white p-3">
+              <div class="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center mb-2">
+                <span class="material-symbols-outlined text-[18px]">verified</span>
+              </div>
+              <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 1</p>
+              <p class="text-xs text-slate-500 leading-snug">License &amp; BotManager</p>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3">
+              <div class="size-8 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
+                <span class="material-symbols-outlined text-[18px]">desktop_windows</span>
+              </div>
+              <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 2</p>
+              <p class="text-xs text-slate-500 leading-snug">Add &amp; activate watcher</p>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3">
+              <div class="size-8 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
+                <span class="material-symbols-outlined text-[18px]">schedule</span>
+              </div>
+              <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 3</p>
+              <p class="text-xs text-slate-500 leading-snug">Schedule &amp; monitor</p>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-3">
+              <div class="size-8 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center mb-2">
+                <span class="material-symbols-outlined text-[18px]">play_circle</span>
+              </div>
+              <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 4</p>
+              <p class="text-xs text-slate-500 leading-snug">Run the monitor</p>
+            </div>
+          </div>
+
+          <!-- Tour-type chooser — Watcher vs Loader -->
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Choose your guided tour</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-w-xl mx-auto text-left">
+            <button (click)="wizardStartTour('watcher')"
+              class="group p-4 rounded-xl border-2 border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors text-left">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="size-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">visibility</span>
+                </span>
+                <span class="text-sm font-bold text-slate-900">Watcher tour</span>
+              </div>
+              <p class="text-xs text-slate-500 leading-snug">Walks you through license → watcher → schedule → process monitor → run.</p>
+            </button>
+            <button (click)="wizardStartTour('loader')"
+              class="group p-4 rounded-xl border-2 border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors text-left">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="size-8 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">speed</span>
+                </span>
+                <span class="text-sm font-bold text-slate-900">Loader tour</span>
+              </div>
+              <p class="text-xs text-slate-500 leading-snug">License → BotManager reload → test plan → distribution &amp; ramp-up → run &amp; analysis.</p>
+            </button>
+          </div>
+          <div class="flex items-center justify-center gap-3 flex-wrap">
+            <button (click)="openTourDocs()"
+              class="px-5 py-3 rounded-full border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors inline-flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">description</span>
+              Tour docs
+            </button>
+            <button (click)="navigate('/help')"
+              class="px-5 py-3 rounded-full border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors inline-flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">menu_book</span>
+              Browse help center
+            </button>
+          </div>
+        </div>
+      } @else {
       <div class="mt-6 space-y-5">
         <!-- Header -->
         <div class="flex items-center justify-between">
@@ -877,6 +956,7 @@
         </div>
 
       </div>
+      }
     } @else if (activeTab() === 'process-monitor') {
       <div class="mt-4 sm:mt-6 space-y-4 mb-4 sm:mb-6">
         <!-- KPI Cards -->
@@ -920,20 +1000,6 @@
             <input type="text" [value]="filterByProcess()" (input)="filterByProcess.set($any($event.target).value)"
                    class="block w-full pl-9 pr-3 py-2 text-xs text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Filter by Process..." />
           </div>
-          <select (change)="filterByBotManager.set($any($event.target).value)"
-                  class="w-full sm:w-auto px-3 py-2 text-xs text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-            <option value="">All Bot Managers</option>
-            @for (bm of uniqueBotManagers(); track bm) {
-              <option [value]="bm">{{ bm }}</option>
-            }
-          </select>
-          <select (change)="filterByWatcher.set($any($event.target).value)"
-                  class="w-full sm:w-auto px-3 py-2 text-xs text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-            <option value="">All Watchers</option>
-            @for (w of rwatchers(); track w.id) {
-              <option [value]="w.alias">{{ w.alias }}</option>
-            }
-          </select>
           <select (change)="filterBySchedule.set($any($event.target).value)"
                   class="w-full sm:w-auto px-3 py-2 text-xs text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
             <option value="">All Schedules</option>
@@ -942,7 +1008,10 @@
             <option value="monthly">Monthly</option>
           </select>
           <div class="flex-1"></div>
-          <button (click)="openDrawer('monitor', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+          <button (click)="openDrawer('monitor', 'standalone')"
+            [class.tour-pulse]="isTourTarget('monitor-scenario')"
+            [appTourCoach]="'monitor-scenario'" [appTourCoachText]="'Click + New Monitor to open the form'"
+            class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> New Monitor
           </button>
         </div>
@@ -1018,28 +1087,42 @@
             <!-- Actions -->
             <div class="flex items-center justify-between sm:justify-end gap-4 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l shrink-0" [class.border-slate-100]="monitor.status !== 'disabled'" [class.border-slate-200]="monitor.status === 'disabled'">
               
-              <!-- Enable/Disable Toggle -->
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-medium" [class.text-slate-700]="monitor.status !== 'disabled'" [class.text-slate-400]="monitor.status === 'disabled'">
-                  {{ monitor.status === 'disabled' ? 'Disabled' : 'Enabled' }}
-                </span>
-                <button (click)="toggleEnableState(monitor.id)" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" [class.bg-primary]="monitor.status !== 'disabled'" [class.bg-slate-200]="monitor.status === 'disabled'">
-                  <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform" [class.translate-x-4]="monitor.status !== 'disabled'" [class.translate-x-1]="monitor.status === 'disabled'"></span>
+              <!-- Auto / Manual switch -->
+              <div class="inline-flex items-center bg-slate-100 rounded-full p-0.5" role="tablist" aria-label="Run mode">
+                <button (click)="monitor.runMode === 'manual' && toggleRunMode(monitor.id)"
+                        type="button"
+                        title="Auto — runs on schedule"
+                        class="px-2.5 py-1 text-[11px] font-semibold rounded-full inline-flex items-center gap-1 transition-colors"
+                        [class.bg-white]="monitor.runMode === 'auto'"
+                        [class.text-primary]="monitor.runMode === 'auto'"
+                        [class.shadow-sm]="monitor.runMode === 'auto'"
+                        [class.text-slate-500]="monitor.runMode !== 'auto'">
+                  <span class="material-symbols-outlined text-[14px]">schedule</span> Auto
+                </button>
+                <button (click)="monitor.runMode === 'auto' && toggleRunMode(monitor.id)"
+                        type="button"
+                        title="Manual — runs only when you click Run"
+                        class="px-2.5 py-1 text-[11px] font-semibold rounded-full inline-flex items-center gap-1 transition-colors"
+                        [class.bg-white]="monitor.runMode === 'manual'"
+                        [class.text-slate-900]="monitor.runMode === 'manual'"
+                        [class.shadow-sm]="monitor.runMode === 'manual'"
+                        [class.text-slate-500]="monitor.runMode !== 'manual'">
+                  <span class="material-symbols-outlined text-[14px]">touch_app</span> Manual
                 </button>
               </div>
 
               <!-- Run/Stop Button -->
-              <button (click)="toggleRunState(monitor.id)" 
-                      [disabled]="monitor.status === 'disabled'"
-                      class="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <button (click)="toggleRunState(monitor.id)"
+                      [class.tour-pulse]="isTourTarget('monitor-run') && firstPendingMonitorId() === monitor.id"
+                      [appTourCoach]="firstPendingMonitorId() === monitor.id ? 'monitor-run' : ''"
+                      [appTourCoachText]="'Click Run to launch the monitor'"
+                      class="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md shadow-sm transition-colors"
                       [class.bg-red-50]="monitor.status === 'running'"
                       [class.text-red-600]="monitor.status === 'running'"
                       [class.hover:bg-red-100]="monitor.status === 'running'"
-                      [class.bg-primary]="monitor.status === 'pending'"
-                      [class.text-white]="monitor.status === 'pending'"
-                      [class.hover:bg-primary/90]="monitor.status === 'pending'"
-                      [class.bg-slate-100]="monitor.status === 'disabled'"
-                      [class.text-slate-400]="monitor.status === 'disabled'">
+                      [class.bg-primary]="monitor.status !== 'running'"
+                      [class.text-white]="monitor.status !== 'running'"
+                      [class.hover:bg-primary/90]="monitor.status !== 'running'">
                 <span class="material-symbols-outlined text-[16px]">{{ monitor.status === 'running' ? 'stop' : 'play_arrow' }}</span>
                 {{ monitor.status === 'running' ? 'Stop' : 'Run' }}
               </button>
@@ -1072,7 +1155,10 @@
             <h2 class="text-xl font-bold text-slate-900">rWatchers</h2>
             <p class="text-sm text-slate-500 mt-1">Manage the machines that execute your automated processes.</p>
           </div>
-          <button (click)="openDrawer('watcher', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+          <button (click)="openDrawer('watcher', 'standalone')"
+            [class.tour-pulse]="isTourTarget('watcher-add')"
+            [appTourCoach]="'watcher-add'" [appTourCoachText]="'Click + Add rWatcher to start'"
+            class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> Add rWatcher
           </button>
         </div>
@@ -1145,17 +1231,35 @@
             </div>
           </div>
 
-          <!-- Bulk actions -->
-          <div class="flex items-center gap-2 self-start lg:self-auto">
-            <button (click)="activateAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md inline-flex items-center gap-1 transition-colors">
-              <span class="material-symbols-outlined text-[16px]">power</span> Activate all
-            </button>
-            <button (click)="deactivateAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md inline-flex items-center gap-1 transition-colors">
-              <span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate all
-            </button>
-            <button (click)="runAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary/90 rounded-md inline-flex items-center gap-1 transition-colors shadow-sm shadow-primary/20">
-              <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all
-            </button>
+          <!-- Bulk actions (selection-aware) -->
+          <div class="flex items-center gap-2 self-start lg:self-auto flex-wrap">
+            <label class="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-md cursor-pointer">
+              <input type="checkbox" [checked]="allFilteredWatchersSelected()" (change)="toggleSelectAllWatchers()"
+                     class="size-3.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+              Select all
+            </label>
+            @if (selectedWatcherIds().length > 0) {
+              <span class="text-xs font-semibold text-slate-500 px-2">{{ selectedWatcherIds().length }} selected</span>
+              <button (click)="runSelectedWatchers()" class="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary/90 rounded-md inline-flex items-center gap-1 transition-colors shadow-sm shadow-primary/20">
+                <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run selected
+              </button>
+              <button (click)="stopSelectedWatchers()" class="px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-md inline-flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">stop</span> Stop selected
+              </button>
+              <button (click)="clearWatcherSelection()" class="px-2 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-md inline-flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">close</span> Clear
+              </button>
+            } @else {
+              <button (click)="activateAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md inline-flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">power</span> Activate all
+              </button>
+              <button (click)="deactivateAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md inline-flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">do_not_disturb_on</span> Deactivate all
+              </button>
+              <button (click)="runAllWatchers()" class="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary/90 rounded-md inline-flex items-center gap-1 transition-colors shadow-sm shadow-primary/20">
+                <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run all
+              </button>
+            }
           </div>
         </div>
 
@@ -1169,9 +1273,15 @@
                  style="border-left-width: 3px;">
 
               <!-- Main Row -->
-              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4"
+                   [class.bg-primary]="isWatcherSelected(watcher.id)"
+                   [class.bg-opacity-5]="isWatcherSelected(watcher.id)">
                 <!-- Identity & Status -->
                 <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
+                  <input type="checkbox" [checked]="isWatcherSelected(watcher.id)" (change)="toggleWatcherSelection(watcher.id)"
+                         (click)="$event.stopPropagation()"
+                         [attr.aria-label]="'Select ' + watcher.alias"
+                         class="size-4 rounded border-slate-300 text-primary focus:ring-primary/30 shrink-0 mt-1 sm:mt-0" />
                   <div class="size-10 flex items-center justify-center rounded-md shrink-0"
                        [class.bg-emerald-50]="watcher.status === 'online'" [class.text-emerald-600]="watcher.status === 'online'"
                        [class.bg-blue-50]="watcher.status === 'busy'" [class.text-blue-600]="watcher.status === 'busy'"
@@ -1236,13 +1346,16 @@
                   <div class="flex items-center gap-1">
                     @if (watcher.status === 'offline') {
                       <button (click)="activateWatcher(watcher.id)"
+                              [class.tour-pulse]="isTourTarget('watcher-activate') && firstOfflineWatcherId() === watcher.id"
+                              [appTourCoach]="firstOfflineWatcherId() === watcher.id ? 'watcher-activate' : ''"
+                              [appTourCoachText]="'Click Activate to bring this watcher online'"
                               class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
                         <span class="material-symbols-outlined text-[16px]">power</span> Activate
                       </button>
                     } @else {
                       <button (click)="deactivateWatcher(watcher.id)"
                               class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">power_off</span> Deactivate
+                        <span class="material-symbols-outlined text-[16px]">do_not_disturb_on</span> Deactivate
                       </button>
                     }
                     @if (watcher.status === 'busy') {
@@ -1690,7 +1803,7 @@
                                   <p class="text-[11px] text-slate-500 mb-3">Accepted: <code class="font-mono bg-slate-100 px-1 rounded">.lic</code> · Max 1 MB</p>
                                   <label class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-md cursor-pointer hover:bg-primary/90 transition-colors">
                                     <span class="material-symbols-outlined text-[14px]">upload</span> Browse…
-                                    <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                                    <input type="file" class="hidden" (change)="onLicenseFile($event)" />
                                   </label>
                                 </div>
                               } @else if (licenseUploadStatus() === 'valid') {
@@ -1705,7 +1818,7 @@
                                   </div>
                                   <label class="text-[11px] text-emerald-700 underline cursor-pointer shrink-0">
                                     Replace
-                                    <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                                    <input type="file" class="hidden" (change)="onLicenseFile($event)" />
                                   </label>
                                 </div>
                               }
@@ -2169,7 +2282,10 @@
             <h2 class="text-xl font-bold text-slate-900">Schedules</h2>
             <p class="text-sm text-slate-500 mt-1">Define when process monitors run and the order they execute in.</p>
           </div>
-          <button (click)="openDrawer('schedule', 'standalone')" class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
+          <button (click)="openDrawer('schedule', 'standalone')"
+            [class.tour-pulse]="isTourTarget('schedule-add')"
+            [appTourCoach]="'schedule-add'" [appTourCoachText]="'Click + Create Schedule to set the cadence'"
+            class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
             <span class="material-symbols-outlined text-[18px]">add</span> Create Schedule
           </button>
         </div>
@@ -2244,12 +2360,15 @@
                   <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
                     <div class="flex items-center gap-1">
                       <button (click)="toggleScheduleStatus(sched.id)"
+                              [class.tour-pulse]="isTourTarget('schedule-activate') && firstDeactivatedScheduleId() === sched.id"
+                              [appTourCoach]="firstDeactivatedScheduleId() === sched.id ? 'schedule-activate' : ''"
+                              [appTourCoachText]="'Click Activate to turn this schedule on'"
                               class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors"
                               [class.text-slate-600]="sched.status === 'active'"
                               [class.hover:bg-slate-100]="sched.status === 'active'"
                               [class.text-emerald-600]="sched.status === 'deactivated'"
                               [class.hover:bg-emerald-50]="sched.status === 'deactivated'">
-                        <span class="material-symbols-outlined text-[16px]">{{ sched.status === 'active' ? 'power_off' : 'power' }}</span>
+                        <span class="material-symbols-outlined text-[16px]">{{ sched.status === 'active' ? 'do_not_disturb_on' : 'power' }}</span>
                         {{ sched.status === 'active' ? 'Deactivate' : 'Activate' }}
                       </button>
                       <button (click)="runScheduleProcesses(sched.id)"
@@ -2348,18 +2467,122 @@
         </div>
       }
     } @else if (activeTab() === 'projects') {
-      <!-- Projects placeholder -->
-      <div class="mt-6 max-w-5xl mx-auto w-full">
-        <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
-          <div class="bg-blue-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="material-symbols-outlined text-3xl text-blue-500">folder</span>
+      <!-- Projects (read-only catalogue, sourced from Scenario Builder) -->
+      <div class="mt-6 space-y-5">
+        <!-- Header with search -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              Projects
+              <button title="Refresh from Scenario Builder" class="size-7 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
+              </button>
+            </h2>
+            <span class="text-[11px] text-slate-500 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700">
+              <span class="material-symbols-outlined text-[14px]">cloud_download</span>
+              Synced from Scenario Builder
+            </span>
           </div>
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Projects</h3>
-          <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Organize your scenarios and processes into projects for easier management.</p>
-          <a href="getting-started.html#projects" target="_blank" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20 no-underline">
-            <span class="material-symbols-outlined text-[18px]">menu_book</span> Learn More
-          </a>
+          <div class="relative w-full sm:w-80">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+            <input type="text" [value]="projectSearch()" (input)="projectSearch.set($any($event.target).value)"
+              placeholder="Search process name"
+              class="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
         </div>
+
+        <!-- Filters row -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="relative flex-1 sm:max-w-xs">
+            <input type="text" [value]="projectSearch()" (input)="projectSearch.set($any($event.target).value)"
+              placeholder="Filter by process name"
+              class="w-full pl-3 pr-9 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            @if (projectSearch()) {
+              <button (click)="projectSearch.set('')" class="absolute right-2 top-1/2 -translate-y-1/2 size-7 rounded-md hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            }
+          </div>
+          <button (click)="projectSearch.set(''); projectDepartmentFilter.set('')" title="Clear filters"
+            class="size-10 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[18px]">layers_clear</span>
+          </button>
+          <div class="flex-1 sm:max-w-xs">
+            <select [value]="projectDepartmentFilter()" (change)="projectDepartmentFilter.set($any($event.target).value)"
+              class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+              <option value="">Select a department</option>
+              @for (d of projectDepartments(); track d) {
+                <option [value]="d">{{ d }}</option>
+              }
+            </select>
+          </div>
+          <label class="ml-auto inline-flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <button (click)="projectShowClosed.update(v => !v)" type="button"
+              class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+              [class.bg-rose-400]="projectShowClosed()"
+              [class.bg-slate-200]="!projectShowClosed()">
+              <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow-sm"
+                [class.translate-x-4]="projectShowClosed()"
+                [class.translate-x-0.5]="!projectShowClosed()"></span>
+            </button>
+            <span [class.text-rose-600]="projectShowClosed()" class="font-semibold">Project is closed</span>
+          </label>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+          <div class="grid grid-cols-[80px_1.5fr_100px_120px_140px_140px_140px_1.2fr] gap-x-3 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <div></div>
+            <div>Process name</div>
+            <div>Type</div>
+            <div>Reference time</div>
+            <div>Modified date</div>
+            <div>Modified by</div>
+            <div>Sent date</div>
+            <div>Description</div>
+          </div>
+          @if (filteredProjects().length === 0) {
+            <div class="px-5 py-12 text-center text-sm text-slate-500">No projects match the current filters.</div>
+          } @else {
+            @for (p of filteredProjects(); track p.id) {
+              <div class="grid grid-cols-[80px_1.5fr_100px_120px_140px_140px_140px_1.2fr] gap-x-3 px-5 py-3 items-center border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-2">
+                  <button (click)="openProjectDetail(p.id)" title="View project details"
+                    [class.tour-pulse]="isTourTarget('scenario-verify') && firstProjectId() === p.id"
+                    [appTourCoach]="firstProjectId() === p.id ? 'scenario-verify' : ''"
+                    [appTourCoachText]="'Click this tree icon to inspect the project'"
+                    class="size-8 rounded-md flex items-center justify-center text-emerald-600 hover:bg-emerald-50 transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">account_tree</span>
+                  </button>
+                  <button (click)="deleteProject(p.id)" title="Remove project"
+                    class="size-8 rounded-md flex items-center justify-center text-rose-500 hover:bg-rose-50 transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                  </button>
+                </div>
+                <button (click)="openProjectDetail(p.id)" class="text-left text-sm font-semibold text-slate-900 hover:text-primary truncate">{{ p.name }}</button>
+                <div class="text-sm text-slate-500">{{ p.type || '—' }}</div>
+                <div class="text-sm text-slate-500 inline-flex items-center gap-1">
+                  @if (p.referenceTime) {
+                    <span class="material-symbols-outlined text-[14px] text-amber-500">timer</span>
+                    {{ p.referenceTime }}
+                  } @else { <span>—</span> }
+                </div>
+                <div class="text-sm text-slate-700 inline-flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px] text-amber-500">schedule</span>
+                  {{ p.modifiedDate }}
+                </div>
+                <div class="text-sm text-slate-700 truncate">{{ p.modifiedBy }}</div>
+                <div class="text-sm text-slate-700 inline-flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px] text-emerald-500">schedule</span>
+                  {{ p.sentDate }}
+                </div>
+                <div class="text-sm text-slate-500 truncate">{{ p.description || '—' }}</div>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="text-[11px] text-slate-500 text-right">{{ filteredProjects().length }} of {{ projects().length }} projects</div>
       </div>
     } @else if (activeTab() === 'reports') {
       <!-- Reports (Manage reports) -->
@@ -2389,49 +2612,18 @@
 
         <!-- Reports list -->
         <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-          <!-- Header row -->
-          <div class="hidden md:grid md:grid-cols-[260px_1.6fr_100px_1fr_1.2fr_140px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            <div>Action</div>
+          <!-- Header row — Name first, Action on the right (matches rWatcher / Test Plan / Schedule pattern) -->
+          <div class="hidden md:grid md:grid-cols-[1.6fr_100px_1fr_1.2fr_140px_260px] gap-x-6 px-5 py-3 border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             <div>Report name</div>
             <div>Type</div>
             <div>Process Monitor</div>
             <div>Emails</div>
-            <div class="text-right">Status</div>
+            <div>Status</div>
+            <div class="text-right">Action</div>
           </div>
 
           @for (rep of reports(); track rep.id) {
-            <div class="grid grid-cols-1 md:grid-cols-[260px_1.6fr_100px_1fr_1.2fr_140px] gap-x-6 gap-y-2 px-5 py-3 border-b border-slate-100 last:border-b-0 items-center hover:bg-slate-50/50 transition-colors">
-              <!-- Actions (left) -->
-              <div class="flex items-center gap-1 md:border-r md:border-slate-100 md:pr-4">
-                <button (click)="runReport(rep.id)"
-                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
-                </button>
-                <button (click)="downloadReport(rep.id)"
-                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">download</span> Export
-                </button>
-                <!-- Kebab -->
-                <div class="relative">
-                  <button (click)="toggleKebab('report:' + rep.id)" title="More"
-                          class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
-                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
-                  </button>
-                  @if (openKebabId() === 'report:' + rep.id) {
-                    <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
-                    <div class="absolute left-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
-                      <button (click)="openEditReport(rep.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px]">edit</span> Edit report
-                      </button>
-                      <div class="my-1 border-t border-slate-100"></div>
-                      <button (click)="deleteReport(rep.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px]">delete</span> Delete report
-                      </button>
-                    </div>
-                  }
-                </div>
-              </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-[1.6fr_100px_1fr_1.2fr_140px_260px] gap-x-6 gap-y-2 px-5 py-3 border-b border-slate-100 last:border-b-0 items-center hover:bg-slate-50/50 transition-colors">
               <!-- Name (primary column) -->
               <div class="min-w-0">
                 <button (click)="openEditReport(rep.id)"
@@ -2459,7 +2651,7 @@
               </div>
 
               <!-- Schedule pill -->
-              <div class="flex items-center justify-end">
+              <div class="flex items-center">
                 @if (rep.scheduled) {
                   <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
                     <span class="material-symbols-outlined text-[12px]">mail</span> Email Report
@@ -2467,6 +2659,37 @@
                 } @else {
                   <span class="text-[10px] text-slate-400">Manual</span>
                 }
+              </div>
+
+              <!-- Actions (right) -->
+              <div class="flex items-center justify-end gap-1 md:border-l md:border-slate-100 md:pl-4">
+                <button (click)="runReport(rep.id)"
+                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
+                </button>
+                <button (click)="downloadReport(rep.id)"
+                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">download</span> Export
+                </button>
+                <!-- Kebab -->
+                <div class="relative">
+                  <button (click)="toggleKebab('report:' + rep.id)" title="More"
+                          class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                  </button>
+                  @if (openKebabId() === 'report:' + rep.id) {
+                    <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
+                    <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
+                      <button (click)="openEditReport(rep.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">edit</span> Edit report
+                      </button>
+                      <div class="my-1 border-t border-slate-100"></div>
+                      <button (click)="deleteReport(rep.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">delete</span> Delete report
+                      </button>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
           } @empty {
@@ -2649,17 +2872,17 @@
             @for (label of wizardStepLabels(); track label; let i = $index) {
               <div class="flex flex-col items-center gap-1.5 flex-1">
                 <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
-                  [ngClass]="i < wizardStep() ? 'bg-green-500 text-white' : i === wizardStep() ? 'bg-primary text-white ring-4 ring-primary/20' : 'bg-slate-200 text-slate-500'">
-                  @if (i < wizardStep()) {
+                  [ngClass]="i < wizardEffectiveStep() ? 'bg-green-500 text-white' : i === wizardEffectiveStep() ? 'bg-primary text-white ring-4 ring-primary/20' : 'bg-slate-200 text-slate-500'">
+                  @if (i < wizardEffectiveStep()) {
                     <span class="material-symbols-outlined text-sm">check</span>
                   } @else {
                     {{ i + 1 }}
                   }
                 </div>
-                <span class="text-[10px] font-medium text-center leading-tight" [ngClass]="i <= wizardStep() ? 'text-primary' : 'text-slate-400'">{{ label }}</span>
+                <span class="text-[10px] font-medium text-center leading-tight" [ngClass]="i <= wizardEffectiveStep() ? 'text-primary' : 'text-slate-400'">{{ label }}</span>
               </div>
               @if (i < wizardStepLabels().length - 1) {
-                <div class="h-0.5 flex-1 mt-[-18px] mx-1 rounded-full transition-all duration-300" [ngClass]="i < wizardStep() ? 'bg-green-500' : 'bg-slate-200'"></div>
+                <div class="h-0.5 flex-1 mt-[-18px] mx-1 rounded-full transition-all duration-300" [ngClass]="i < wizardEffectiveStep() ? 'bg-green-500' : 'bg-slate-200'"></div>
               }
             }
           </div>
@@ -2920,6 +3143,161 @@
                 </div>
               </div>
             </div>
+
+          <!-- Monitor flow: guided checklist that walks the user through real platform pages -->
+          } @else if (wizardType() === 'monitor') {
+            @if (!wizardRunDone()) {
+              <div class="p-8">
+                <div class="flex items-start gap-3 mb-6">
+                  <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-primary">route</span>
+                  </div>
+                  <div class="flex-1">
+                    <h2 class="text-xl font-bold text-slate-900">Walk through the platform</h2>
+                    <p class="text-[13px] text-slate-500 mt-0.5">Each step opens the real page in the app — create what you need there, and we'll guide you to the next one automatically.</p>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  <!-- Step 1: Watcher (add + activate) -->
+                  <button (click)="wizardOpenStep('watcher')"
+                    class="group w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-200"
+                    [ngClass]="wizardWatcherDone() ? 'border-emerald-200 bg-emerald-50' : wizardChainActiveStep() === 1 ? 'border-primary bg-primary/5 shadow-sm' : 'border-slate-200 hover:border-slate-300'">
+                    <div class="size-11 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="wizardWatcherDone() ? 'bg-emerald-500 text-white' : wizardChainActiveStep() === 1 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'">
+                      <span class="material-symbols-outlined">{{ wizardWatcherDone() ? 'check' : 'desktop_windows' }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 1</span>
+                        <span class="font-semibold text-sm text-slate-900">Add &amp; activate a watcher</span>
+                        @if (wizardWatcherDone()) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Done</span>
+                        } @else if (wizardActionsDone().watcherAdded) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Activate it</span>
+                        } @else if (wizardChainActiveStep() === 1) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">Next</span>
+                        }
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        @if (!wizardActionsDone().watcherAdded) {
+                          Open the rWatchers page and register your first agent.
+                        } @else if (!wizardActionsDone().watcherActivated) {
+                          Watcher created. Now click <strong>Start</strong> on the row to bring it online.
+                        } @else {
+                          Watcher is online and ready.
+                        }
+                      </p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                  </button>
+
+                  <!-- Step 2: Schedule -->
+                  <button (click)="wizardOpenStep('schedule')"
+                    [disabled]="!wizardWatcherDone()"
+                    class="group w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                    [ngClass]="wizardScheduleDone() ? 'border-emerald-200 bg-emerald-50' : wizardChainActiveStep() === 2 ? 'border-primary bg-primary/5 shadow-sm' : 'border-slate-200 hover:border-slate-300'">
+                    <div class="size-11 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="wizardScheduleDone() ? 'bg-emerald-500 text-white' : wizardChainActiveStep() === 2 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'">
+                      <span class="material-symbols-outlined">{{ wizardScheduleDone() ? 'check' : 'schedule' }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 2</span>
+                        <span class="font-semibold text-sm text-slate-900">Add a schedule</span>
+                        @if (wizardScheduleDone()) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Done</span>
+                        } @else if (wizardChainActiveStep() === 2) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">Next</span>
+                        }
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Click <strong>Schedules</strong> in the sidebar, then add a schedule.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                  </button>
+
+                  <!-- Step 3: Process Monitor -->
+                  <button (click)="wizardOpenStep('monitor')"
+                    [disabled]="!wizardScheduleDone()"
+                    class="group w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                    [ngClass]="wizardMonitorDone() ? 'border-emerald-200 bg-emerald-50' : wizardChainActiveStep() === 3 ? 'border-primary bg-primary/5 shadow-sm' : 'border-slate-200 hover:border-slate-300'">
+                    <div class="size-11 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="wizardMonitorDone() ? 'bg-emerald-500 text-white' : wizardChainActiveStep() === 3 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'">
+                      <span class="material-symbols-outlined">{{ wizardMonitorDone() ? 'check' : 'monitoring' }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 3</span>
+                        <span class="font-semibold text-sm text-slate-900">Create a process monitor</span>
+                        @if (wizardMonitorDone()) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Done</span>
+                        } @else if (wizardChainActiveStep() === 3) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">Next</span>
+                        }
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Click <strong>Process Monitors</strong> in the sidebar, then create one.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                  </button>
+
+                  <!-- Step 4: Run -->
+                  <button (click)="wizardGoToRun()"
+                    [disabled]="!wizardMonitorDone()"
+                    class="group w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                    [ngClass]="wizardRunDone() ? 'border-emerald-200 bg-emerald-50' : wizardChainActiveStep() === 4 ? 'border-primary bg-primary/5 shadow-sm' : 'border-slate-200 hover:border-slate-300'">
+                    <div class="size-11 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="wizardRunDone() ? 'bg-emerald-500 text-white' : wizardChainActiveStep() === 4 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'">
+                      <span class="material-symbols-outlined">{{ wizardRunDone() ? 'check' : 'play_arrow' }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Step 4</span>
+                        <span class="font-semibold text-sm text-slate-900">Run your monitor</span>
+                        @if (wizardRunDone()) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Done</span>
+                        } @else if (wizardChainActiveStep() === 4) {
+                          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">Next</span>
+                        }
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Click <strong>Run Now</strong> on your monitor row to see it execute.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                  </button>
+                </div>
+
+                <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100 gap-3">
+                  <button (click)="wizardStep.set(0)" class="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors">
+                    <span class="material-symbols-outlined text-base">arrow_back</span> Back to setup
+                  </button>
+                  <div class="flex items-center gap-2">
+                    <button (click)="wizardStartTour()"
+                      class="px-3 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 inline-flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-[14px]">route</span> Start full guided tour
+                    </button>
+                    <button (click)="wizardReset()" class="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
+                      Restart wizard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <!-- Monitor flow done -->
+              <div class="p-8 text-center">
+                <div class="size-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                  <span class="material-symbols-outlined text-3xl text-green-600">check_circle</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 mb-2">You're up and running!</h2>
+                <p class="text-sm text-slate-500 mb-6">Your watcher, schedule, and process monitor are configured — and your process is now running.</p>
+                <div class="flex items-center justify-center gap-3 flex-wrap">
+                  <button (click)="navigate('/process-monitors')" class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 inline-flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">monitoring</span> View process monitors
+                  </button>
+                  <button (click)="wizardReset()" class="px-5 py-2.5 bg-white border border-slate-300 text-sm font-medium text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                    Restart wizard
+                  </button>
+                </div>
+              </div>
+            }
 
           <!-- Step 1: Name / Test Plan -->
           } @else if (wizardStep() === 1) {
@@ -3602,8 +3980,8 @@
             </div>
           }
 
-          <!-- Footer navigation (not on confirmation step) -->
-          @if (wizardStep() < 6) {
+          <!-- Footer navigation (not on confirmation step, hidden during monitor guided chain) -->
+          @if (wizardStep() < 6 && !(wizardType() === 'monitor' && wizardStep() > 0)) {
             <div class="bg-slate-50 px-8 py-4 border-t border-slate-100 flex items-center justify-between">
               <div>
                 @if (wizardStep() > 0) {
@@ -3641,7 +4019,7 @@
         </div>
 
         <!-- Back to help link -->
-        @if (wizardStep() < 6) {
+        @if (wizardStep() < 6 && !(wizardType() === 'monitor' && wizardRunDone())) {
           <div class="mt-4 text-center">
             <button (click)="wizardReset(); navigate('/help')" class="text-xs text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center gap-1">
               <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Help Center
@@ -3883,7 +4261,7 @@
                             [class.hover:bg-slate-100]="plan.active"
                             [class.text-emerald-600]="!plan.active"
                             [class.hover:bg-emerald-50]="!plan.active">
-                      <span class="material-symbols-outlined text-[16px]">{{ plan.active ? 'power_off' : 'power' }}</span>
+                      <span class="material-symbols-outlined text-[16px]">{{ plan.active ? 'do_not_disturb_on' : 'power' }}</span>
                       {{ plan.active ? 'Deactivate' : 'Activate' }}
                     </button>
                     <button (click)="runTestPlan(plan.id); navigate('/test-runs')"
@@ -4565,7 +4943,7 @@
                 <p class="text-xs text-slate-500 mb-4">Accepted: <code class="font-mono bg-slate-100 px-1 rounded">.lic</code> · Max 1 MB</p>
                 <label class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-md cursor-pointer hover:bg-primary/90 transition-colors">
                   <span class="material-symbols-outlined text-[18px]">upload</span> Browse files
-                  <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                  <input type="file" class="hidden" (change)="onLicenseFile($event)" />
                 </label>
               </div>
             } @else if (licenseUploadStatus() === 'valid') {
@@ -4580,7 +4958,7 @@
                 </div>
                 <label class="text-xs text-emerald-700 underline cursor-pointer shrink-0 self-center">
                   Replace
-                  <input type="file" accept=".lic" class="hidden" (change)="onLicenseFile($event)" />
+                  <input type="file" class="hidden" (change)="onLicenseFile($event)" />
                 </label>
               </div>
             }
@@ -4721,6 +5099,182 @@
   </footer>
 </div>
 
+<!-- Guided tour: left-side persistent panel divided into 4 parts. -->
+@if (wizardChainActive()) {
+  <div class="fixed top-0 left-0 bottom-0 z-[90] w-[360px] max-w-[90vw] bg-white border-r border-slate-200 shadow-xl flex flex-col">
+    <div class="px-4 py-3 bg-primary/5 border-b border-primary/20 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="material-symbols-outlined text-primary text-[20px] shrink-0">route</span>
+        <div class="min-w-0">
+          <p class="text-[10px] font-bold text-primary uppercase tracking-wider">Guided tour</p>
+          <p class="text-[10px] text-slate-500 leading-tight">Last completed step {{ wizardRefreshLabel() }}</p>
+        </div>
+      </div>
+      <button (click)="openTourDocs()" title="Open documentation"
+        class="size-7 rounded-md flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+        <span class="material-symbols-outlined text-[18px]">menu_book</span>
+      </button>
+      <button (click)="wizardEndTour()" title="End tour"
+        class="size-7 rounded-md flex items-center justify-center text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <!-- Current instruction banner -->
+      <div class="rounded-lg border border-primary/20 bg-primary/5 p-3">
+        <p class="text-sm font-bold text-primary mb-1">{{ wizardChainHint().title }}</p>
+        <p class="text-xs text-slate-700 leading-relaxed" [innerHTML]="wizardChainHint().text"></p>
+        @if (wizardChainHint().targetPage && wizardChainHint().targetPage !== currentPath()) {
+          <button (click)="navigate(wizardChainHint().targetPage)"
+            class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-primary text-white text-[11px] font-semibold hover:bg-primary/90 transition-colors">
+            <span class="material-symbols-outlined text-[14px]">arrow_forward</span> Open page
+          </button>
+        }
+      </div>
+
+      <!-- Tour parts -->
+      @for (part of wizardTourParts(); track part.id; let i = $index) {
+        @let isPrereq = part.id === 'prereq';
+        @let isActive = wizardTourActivePart() === part.id;
+        @let isDone = allSubStepsDone(part.subSteps);
+        @let isCollapsed = isDone && !isActive;
+        <div class="rounded-lg border transition-colors"
+          [ngClass]="isPrereq ? (isActive ? 'border-amber-400 bg-amber-50' : isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-amber-200 bg-amber-50/40')
+                              : (isActive ? 'border-primary bg-primary/5' : isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-white')">
+          <div class="px-3 py-2 flex items-center gap-3">
+            <div class="size-7 rounded-md flex items-center justify-center shrink-0"
+              [ngClass]="isDone ? 'bg-emerald-500 text-white' : isActive ? (isPrereq ? 'bg-amber-500 text-white' : 'bg-primary text-white') : 'bg-slate-100 text-slate-500'">
+              <span class="material-symbols-outlined text-[16px]">{{ isDone ? 'check' : part.icon }}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-baseline gap-1.5 flex-wrap">
+                <span class="text-[9px] font-bold uppercase tracking-widest"
+                  [ngClass]="isPrereq ? 'text-amber-700' : 'text-slate-400'">{{ isPrereq ? 'Prereq' : 'Part ' + i }}</span>
+                <span class="text-xs font-semibold text-slate-900 leading-snug">{{ part.label }}</span>
+              </div>
+              @if (!isCollapsed) {
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">{{ part.description }}</p>
+              }
+            </div>
+          </div>
+          @if (!isCollapsed) {
+            <div class="px-3 pb-2.5 space-y-1">
+              @for (sub of part.subSteps; track sub.id) {
+                <div class="flex items-stretch gap-1">
+                  <button (click)="sub.action()"
+                    [disabled]="sub.done || wizardTourActiveSubId() !== sub.id"
+                    class="flex-1 flex items-start gap-2 px-2.5 py-1.5 rounded text-left transition-colors disabled:cursor-not-allowed"
+                    [ngClass]="sub.done ? 'bg-emerald-100 text-emerald-700 opacity-80' : wizardTourActiveSubId() === sub.id ? (isPrereq ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 ring-1 ring-amber-300' : 'bg-primary/10 text-primary hover:bg-primary/20 ring-1 ring-primary/30') : 'text-slate-400 bg-slate-50/60'">
+                    <span class="material-symbols-outlined text-[16px] mt-px shrink-0"
+                      [ngClass]="sub.done ? (isPrereq ? 'text-emerald-600' : 'text-emerald-600') : wizardTourActiveSubId() === sub.id ? '' : 'text-slate-300'">
+                      @if (isPrereq) {
+                        {{ sub.done ? 'check_box' : wizardTourActiveSubId() === sub.id ? 'check_box_outline_blank' : 'lock' }}
+                      } @else {
+                        {{ sub.done ? 'check_circle' : wizardTourActiveSubId() === sub.id ? 'radio_button_checked' : 'lock' }}
+                      }
+                    </span>
+                    <span class="text-[11px] font-medium flex-1 leading-snug break-words"
+                      [class.line-through]="sub.done">{{ sub.label }}</span>
+                    @if (sub.done) {
+                      <span class="text-[9px] font-bold uppercase tracking-widest text-emerald-700 shrink-0 mt-0.5">Done</span>
+                    } @else if (wizardTourActiveSubId() === sub.id) {
+                      <span class="text-[9px] font-bold uppercase tracking-widest shrink-0 mt-0.5">Now</span>
+                    } @else {
+                      <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 shrink-0 mt-0.5">Locked</span>
+                    }
+                  </button>
+                  @if (!isPrereq && sub.hint && sub.hint.length > 0) {
+                    <button type="button" title="How to do this step"
+                      (mouseenter)="showHint(sub.hint!, $event)"
+                      (focus)="showHint(sub.hint!, $event)"
+                      (mouseleave)="hideHint()"
+                      (blur)="hideHint()"
+                      class="size-7 rounded flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                      <span class="material-symbols-outlined text-[16px]">help</span>
+                    </button>
+                  }
+                  @if (sub.helpLink) {
+                    <button (click)="navigate(sub.helpLink)" title="Open the related help article"
+                      class="size-7 rounded flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                      <span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+                    </button>
+                  }
+                </div>
+                @if (isPrereq && wizardTourActiveSubId() === sub.id && sub.hint && sub.hint.length > 0) {
+                  <div class="ml-2 mr-1 mt-1 px-2.5 py-2 rounded border border-amber-200 bg-amber-50/70 text-amber-900 text-[10.5px] leading-snug">
+                    <div class="flex items-center gap-1 mb-1 text-amber-700">
+                      <span class="material-symbols-outlined text-[14px] text-amber-600">tips_and_updates</span>
+                      <span class="text-[9px] font-bold uppercase tracking-widest">How to do it</span>
+                    </div>
+                    <ol class="space-y-0.5 list-decimal list-inside marker:font-bold marker:text-amber-600">
+                      @for (line of sub.hint; track $index) {
+                        <li>{{ line }}</li>
+                      }
+                    </ol>
+                  </div>
+                }
+              }
+              @if (wizardTourActiveSubId() === 'license') {
+                <button (click)="wizardSkipLicenseForTrial()"
+                  class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors inline-flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-[14px]">skip_next</span>
+                  Skip — I'm on trial
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (wizardTourCompleted()) {
+        <div class="rounded-lg border-2 border-emerald-200 bg-emerald-50 p-3 text-center">
+          <span class="material-symbols-outlined text-emerald-600 text-2xl">check_circle</span>
+          <p class="text-sm font-bold text-emerald-800 mt-1">All set!</p>
+          <p class="text-[11px] text-emerald-700">Your platform is configured end-to-end.</p>
+          <button (click)="wizardEndTour()"
+            class="mt-2 px-3 py-1.5 rounded-md bg-emerald-600 text-white text-[11px] font-semibold hover:bg-emerald-700 transition-colors">
+            Close tour
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Floating tour coach bubble — single shell-level bubble pinned above the
+     active anchor via TourCoachDirective. Position-fixed + high z-index so it
+     escapes the panel and any overflow-hidden ancestor. -->
+@if (activeCoach(); as coach) {
+  <div class="fixed z-[200] pointer-events-none"
+    [style.top.px]="coach.rect.top - 52"
+    [style.left.px]="coach.rect.left + (coach.rect.width / 2) - 132">
+    <span class="tour-coach-bubble" style="position: static; transform: none; left: auto; bottom: auto; animation: coachFloat 1.8s ease-in-out infinite;">
+      <span class="material-symbols-outlined text-[14px]">touch_app</span>
+      <span [innerHTML]="coach.text"></span>
+    </span>
+  </div>
+}
+
+<!-- Floating tour hint tooltip — rendered at app shell level so it never gets
+     clipped by the tour panel's overflow-y-auto. -->
+@if (hoverHintPos(); as pos) {
+  @if (hoverHintLines().length > 0) {
+    <div class="fixed z-[200] w-64 px-3 py-2.5 rounded-lg border border-primary/20 bg-white text-slate-700 text-[10.5px] leading-snug shadow-2xl shadow-primary/30 pointer-events-none"
+      [style.top.px]="pos.top" [style.left.px]="pos.left">
+      <div class="flex items-center gap-1 mb-1.5 text-primary">
+        <span class="material-symbols-outlined text-[14px]">tips_and_updates</span>
+        <span class="text-[9px] font-bold uppercase tracking-widest">How to do it</span>
+      </div>
+      <ol class="space-y-0.5 list-decimal list-inside marker:font-bold marker:text-primary">
+        @for (line of hoverHintLines(); track $index) {
+          <li>{{ line }}</li>
+        }
+      </ol>
+    </div>
+  }
+}
+
 <!-- Drawers -->
 @if (activeDrawer() === 'watcher') {
   <app-add-watcher-drawer [mode]="drawerMode()" (closeDrawer)="closeDrawer()" (nextStep)="handleNextStep('watcher')"></app-add-watcher-drawer>
@@ -4729,15 +5283,274 @@
   <app-add-schedule-drawer [mode]="drawerMode()" (closeDrawer)="closeDrawer()" (nextStep)="handleNextStep('schedule')"></app-add-schedule-drawer>
 }
 @if (activeDrawer() === 'monitor') {
-  <app-create-process-monitor-drawer 
+  <app-create-process-monitor-drawer
     [mode]="drawerMode()"
     [isEditing]="editingMonitorId() !== null"
     [monitorName]="editingMonitorId() ? 'Process Monitor ' + editingMonitorId() : ''"
-    (closeDrawer)="closeDrawer()" 
+    [configuredEvents]="wizardConfiguredEvents()"
+    (closeDrawer)="closeDrawer()"
     (nextStep)="handleNextStep('monitor')"
     (openAddWatcher)="openDrawer('watcher', drawerMode())"
-    (openAddSchedule)="openDrawer('schedule', drawerMode())">
+    (openAddSchedule)="openDrawer('schedule', drawerMode())"
+    (openAddEvent)="wizardOpenEventPopup()"
+    (removeEvent)="wizardRemoveEvent($event)"
+    (fieldsChanged)="onMonitorFieldsChanged($event)">
   </app-create-process-monitor-drawer>
+}
+@if (activeDrawer() === 'botmanager') {
+  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-end z-50">
+    <div class="w-full max-w-[560px] bg-white h-full shadow-2xl flex flex-col drawer-slide-in">
+
+      @if (drawerMode() === 'onboarding') {
+        <div class="w-full bg-slate-50 border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">In progress (1/3)</span>
+          <div class="flex items-center gap-2 text-xs font-semibold tracking-wider">
+            <span class="text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">radio_button_checked</span> Step 1</span>
+            <span class="text-slate-300 material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span> Step 2</span>
+            <span class="text-slate-300 material-symbols-outlined text-[14px]">chevron_right</span>
+            <span class="text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span> Step 3</span>
+          </div>
+        </div>
+      }
+
+      <header class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
+        <div class="flex items-center gap-3">
+          <div class="size-9 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center">
+            <span class="material-symbols-outlined">dns</span>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Configure BotManager</h2>
+            <p class="text-[11px] text-slate-500">Launcher credentials &amp; advanced settings.</p>
+          </div>
+        </div>
+        <button (click)="closeDrawer()" class="flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full h-8 w-8 transition-colors">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
+      <!-- Identity summary -->
+      <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex items-center gap-4 text-[11px]">
+        <span class="inline-flex items-center gap-1 text-slate-600"><span class="material-symbols-outlined text-[14px] text-slate-400">badge</span>{{ wizardBmName() }}</span>
+        <span class="inline-flex items-center gap-1 text-slate-600"><span class="material-symbols-outlined text-[14px] text-slate-400">computer</span>{{ wizardBmHostname() }}</span>
+        <span class="inline-flex items-center gap-1 text-slate-600"><span class="material-symbols-outlined text-[14px] text-slate-400">tag</span>v{{ wizardBmVersion() }}</span>
+      </div>
+
+      <!-- Launcher credentials -->
+      <div class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 mb-1.5">Launcher username <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">person</span>
+            <input type="text" [value]="wizardBmLauncherUsername()" (input)="wizardBmLauncherUsername.set($any($event.target).value)"
+              placeholder="Administrator"
+              class="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 mb-1.5">Launcher password <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">key</span>
+            <input [type]="wizardBmShowPassword() ? 'text' : 'password'" [value]="wizardBmLauncherPassword()" (input)="wizardBmLauncherPassword.set($any($event.target).value)"
+              placeholder="Enter password"
+              class="w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button type="button" (click)="wizardBmShowPassword.update(v => !v)"
+              class="absolute right-2 top-1/2 -translate-y-1/2 size-7 rounded-md hover:bg-slate-100 text-slate-500 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[16px]">{{ wizardBmShowPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced settings -->
+      <div class="border border-slate-200 rounded-lg overflow-hidden">
+        <button type="button" (click)="wizardBmAdvancedOpen.update(v => !v)"
+          class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 hover:bg-slate-100 transition-colors">
+          <span class="text-[12px] font-semibold text-slate-700 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-slate-500">tune</span>
+            Advanced settings
+          </span>
+          <span class="material-symbols-outlined text-slate-500 text-[18px] transition-transform"
+            [ngClass]="wizardBmAdvancedOpen() ? 'rotate-180' : ''">expand_more</span>
+        </button>
+        @if (wizardBmAdvancedOpen()) {
+          <div class="p-4 space-y-4 border-t border-slate-200 bg-white">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">Name</label>
+                <input type="text" [value]="wizardBmName()" (input)="wizardBmName.set($any($event.target).value)"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">Hostname</label>
+                <input type="text" [value]="wizardBmHostname()" (input)="wizardBmHostname.set($any($event.target).value)"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">Version</label>
+                <input type="text" [value]="wizardBmVersion()" (input)="wizardBmVersion.set($any($event.target).value)"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">Operating system</label>
+                <input type="text" [value]="wizardBmOS()" (input)="wizardBmOS.set($any($event.target).value)"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">RDP IP</label>
+                <input type="text" [value]="wizardBmRdpIp()" (input)="wizardBmRdpIp.set($any($event.target).value)"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">RDP timeout (s)</label>
+                <input type="number" min="1" [value]="wizardBmRdpTimeout()" (input)="wizardBmRdpTimeout.set(+$any($event.target).value)"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Use this BotManager with</p>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-[11px] text-slate-700">
+                  <input type="checkbox" [checked]="wizardBmUseLoader()" (change)="wizardBmUseLoader.update(v => !v)"
+                    class="rounded border-slate-300 text-primary focus:ring-primary/20" />
+                  Automai Loader
+                </label>
+                <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-[11px] text-slate-700">
+                  <input type="checkbox" [checked]="wizardBmUseWatcher()" (change)="wizardBmUseWatcher.update(v => !v)"
+                    class="rounded border-slate-300 text-primary focus:ring-primary/20" />
+                  Automai Watcher
+                </label>
+                <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-[11px] text-slate-700">
+                  <input type="checkbox" [checked]="wizardBmUseWorker()" (change)="wizardBmUseWorker.update(v => !v)"
+                    class="rounded border-slate-300 text-primary focus:ring-primary/20" />
+                  Automai Worker
+                </label>
+                <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-[11px] text-slate-700">
+                  <input type="checkbox" [checked]="wizardBmUseTester()" (change)="wizardBmUseTester.update(v => !v)"
+                    class="rounded border-slate-300 text-primary focus:ring-primary/20" />
+                  Automai Tester
+                </label>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+      <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-end gap-3">
+        <button (click)="closeDrawer()" class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">Cancel</button>
+        <button (click)="wizardSaveBotManager()" [disabled]="!wizardBmConfigured()"
+          class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-[16px]">{{ drawerMode() === 'onboarding' ? 'east' : 'save' }}</span>
+          {{ drawerMode() === 'onboarding' ? 'Next Step' : 'Save BotManager' }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}
+
+<!-- Project detail slide-in panel -->
+@if (selectedProject(); as proj) {
+  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-end z-[80]" (click)="closeProjectDetail()"></div>
+  <aside class="fixed top-0 right-0 bottom-0 w-full max-w-[560px] bg-white shadow-2xl flex flex-col z-[81] drawer-slide-in" (click)="$event.stopPropagation()">
+    <header class="flex items-start justify-between px-6 py-4 border-b border-slate-100 bg-white">
+      <div class="flex items-start gap-3 min-w-0">
+        <div class="size-9 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined">history</span>
+        </div>
+        <div class="min-w-0">
+          <h2 class="text-lg font-bold text-slate-900 truncate">{{ proj.name }}</h2>
+          <p class="text-[11px] text-slate-500">{{ proj.description || 'No description added for this process' }}</p>
+        </div>
+      </div>
+      <button (click)="closeProjectDetail()" class="text-rose-500 hover:bg-rose-50 size-8 rounded-md flex items-center justify-center transition-colors shrink-0 ml-2">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+      <!-- Versions -->
+      <section class="px-6 py-5">
+        <div class="bg-slate-700 text-white px-4 py-2 rounded-md mb-3">
+          <p class="text-sm font-semibold">{{ proj.name }} available versions</p>
+        </div>
+        <div class="relative mb-3">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+          <input type="text" [value]="projectVersionFilter()" (input)="projectVersionFilter.set($any($event.target).value)"
+            placeholder="Filter by version or comment"
+            class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+        </div>
+        <div class="grid grid-cols-[1fr_80px_1fr] gap-x-3 px-2 py-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <div>Date</div>
+          <div>Version</div>
+          <div>Comment</div>
+        </div>
+        @if (filteredProjectVersions(proj).length === 0) {
+          <div class="text-center py-6 text-xs text-slate-400">No versions match.</div>
+        } @else {
+          @for (v of filteredProjectVersions(proj); track v.version) {
+            <div class="grid grid-cols-[1fr_80px_1fr] gap-x-3 px-2 py-2.5 items-center hover:bg-slate-50 rounded-md transition-colors">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="material-symbols-outlined text-[18px] text-blue-400">cloud_download</span>
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-700 truncate">{{ v.date.split(' ')[0] + ' ' + v.date.split(' ')[1] + ' ' + v.date.split(' ')[2] }}</p>
+                  <p class="text-[10px] text-slate-500">{{ v.date.split(' ').slice(3).join(' ') }}</p>
+                </div>
+              </div>
+              <div class="text-xs font-semibold text-blue-600">{{ v.version }}</div>
+              <div class="text-xs text-slate-700 truncate">{{ v.comment }}</div>
+            </div>
+          }
+        }
+      </section>
+
+      <!-- Sub-processes / Parent processes -->
+      <section class="px-6 pb-6">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div class="bg-slate-700 text-white px-4 py-2 rounded-md">
+            <p class="text-sm font-semibold">Sub-processes</p>
+          </div>
+          <div class="bg-slate-700 text-white px-4 py-2 rounded-md">
+            <p class="text-sm font-semibold">Parent processes</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <div class="relative mb-2">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+              <input type="text" [value]="projectSubFilter()" (input)="projectSubFilter.set($any($event.target).value)"
+                placeholder="Filter by process"
+                class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            </div>
+            @if (filteredProjectSubProcesses(proj).length === 0) {
+              <p class="text-xs text-slate-400 px-2">No sub-processes</p>
+            } @else {
+              @for (s of filteredProjectSubProcesses(proj); track s) {
+                <div class="flex items-center gap-2 px-2 py-1.5 text-xs text-slate-700">
+                  <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+                  {{ s }}
+                </div>
+              }
+            }
+          </div>
+          <div>
+            @if (proj.parentProcesses.length === 0) {
+              <p class="text-xs text-slate-400 px-2 mt-9">No parent processes available</p>
+            } @else {
+              @for (p of proj.parentProcesses; track p) {
+                <div class="flex items-center gap-2 px-2 py-1.5 text-xs text-slate-700 mt-9">
+                  <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+                  {{ p }}
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  </aside>
 }
 
 <!-- Delete rWatcher Confirmation Modal -->

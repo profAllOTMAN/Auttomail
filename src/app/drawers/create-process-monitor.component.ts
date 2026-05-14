@@ -34,6 +34,45 @@ import { CommonModule } from '@angular/common';
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
 
+          @if (mode === 'onboarding') {
+            <!-- Onboarding hint: required steps inside this drawer -->
+            <section class="px-6 py-4 bg-primary/5 border-y border-primary/20">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Fill these to create a monitor</p>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+                <li class="flex items-center gap-1.5"
+                    [class.text-emerald-700]="name().trim().length > 0"
+                    [class.text-slate-600]="name().trim().length === 0">
+                  <span class="material-symbols-outlined text-[14px]">{{ name().trim().length > 0 ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span [class.line-through]="name().trim().length > 0">Name the monitor</span>
+                </li>
+                <li class="flex items-center gap-1.5"
+                    [class.text-emerald-700]="project().trim().length > 0"
+                    [class.text-slate-600]="project().trim().length === 0">
+                  <span class="material-symbols-outlined text-[14px]">{{ project().trim().length > 0 ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span [class.line-through]="project().trim().length > 0">Pick a project</span>
+                </li>
+                <li class="flex items-center gap-1.5"
+                    [class.text-emerald-700]="scenario().trim().length > 0"
+                    [class.text-slate-600]="scenario().trim().length === 0">
+                  <span class="material-symbols-outlined text-[14px]">{{ scenario().trim().length > 0 ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span [class.line-through]="scenario().trim().length > 0">Assign a scenario</span>
+                </li>
+                <li class="flex items-center gap-1.5"
+                    [class.text-emerald-700]="scheduleSel().trim().length > 0"
+                    [class.text-slate-600]="scheduleSel().trim().length === 0">
+                  <span class="material-symbols-outlined text-[14px]">{{ scheduleSel().trim().length > 0 ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span [class.line-through]="scheduleSel().trim().length > 0">Assign a schedule</span>
+                </li>
+                <li class="flex items-center gap-1.5 sm:col-span-2"
+                    [class.text-emerald-700]="configuredEvents.length > 0"
+                    [class.text-slate-600]="configuredEvents.length === 0">
+                  <span class="material-symbols-outlined text-[14px]">{{ configuredEvents.length > 0 ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span [class.line-through]="configuredEvents.length > 0">Add at least one event rule, then submit</span>
+                </li>
+              </ul>
+            </section>
+          }
+
           <!-- BASIC INFORMATION -->
           <section class="px-6 py-5">
             <div class="mb-4">
@@ -42,20 +81,24 @@ import { CommonModule } from '@angular/common';
             </div>
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium text-slate-700">Monitor Name</label>
+                <label class="text-sm font-medium text-slate-700">Monitor Name <span class="text-red-500">*</span></label>
                 <input
                   type="text"
+                  required
+                  [value]="name()"
+                  (input)="name.set($any($event.target).value)"
                   placeholder="e.g. ERP Synchronization Check"
                   class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400"
                 />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-sm font-medium text-slate-700">Project</label>
+                  <label class="text-sm font-medium text-slate-700">Project <span class="text-red-500">*</span></label>
                   <div class="relative">
-                    <select class="block px-3 py-2.5 w-full text-sm text-slate-500 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                      <option value="" disabled selected>Select project...</option>
-                      <option>myproject</option>
+                    <select required [value]="project()" (change)="project.set($any($event.target).value); emitFields()"
+                      class="block px-3 py-2.5 w-full text-sm text-slate-500 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                      <option value="">Select project...</option>
+                      <option value="myproject">myproject</option>
                     </select>
                     <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
                       <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
@@ -63,11 +106,12 @@ import { CommonModule } from '@angular/common';
                   </div>
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-sm font-medium text-slate-700">Process / Scenario</label>
+                  <label class="text-sm font-medium text-slate-700">Process / Scenario <span class="text-red-500">*</span></label>
                   <div class="relative">
-                    <select class="block px-3 py-2.5 w-full text-sm text-slate-500 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                      <option value="" disabled selected>Select process...</option>
-                      <option>scenario2</option>
+                    <select required [value]="scenario()" (change)="scenario.set($any($event.target).value); emitFields()"
+                      class="block px-3 py-2.5 w-full text-sm text-slate-500 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                      <option value="">Select process...</option>
+                      <option value="scenario2">scenario2</option>
                     </select>
                     <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
                       <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
@@ -93,12 +137,13 @@ import { CommonModule } from '@angular/common';
                   <div class="absolute left-3 top-0 bottom-0 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-[18px]">schedule</span>
                   </div>
-                  <select class="block pl-9 pr-10 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                    <option value="" disabled selected>Select schedule...</option>
-                    <option>Every 15 minutes</option>
-                    <option>Hourly</option>
-                    <option>Daily at 09:00</option>
-                    <option>Weekly on Monday</option>
+                  <select required [value]="scheduleSel()" (change)="scheduleSel.set($any($event.target).value); emitFields()"
+                    class="block pl-9 pr-10 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                    <option value="">Select schedule...</option>
+                    <option value="Every 15 minutes">Every 15 minutes</option>
+                    <option value="Hourly">Hourly</option>
+                    <option value="Daily at 09:00">Daily at 09:00</option>
+                    <option value="Weekly on Monday">Weekly on Monday</option>
                   </select>
                   <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
@@ -182,16 +227,36 @@ import { CommonModule } from '@angular/common';
           <section class="px-6 py-5">
             <div class="flex items-start justify-between mb-4">
               <div>
-                <span class="text-[11px] font-bold tracking-widest text-primary uppercase">Event Triggers</span>
-                <p class="text-slate-500 text-xs mt-0.5">Define rules and automated responses.</p>
+                <span class="text-[11px] font-bold tracking-widest text-primary uppercase">Event Triggers <span class="text-rose-500">*</span></span>
+                <p class="text-slate-500 text-xs mt-0.5">Define rules and notification responses. At least one is required.</p>
               </div>
-              <button class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors">
+              <button (click)="openAddEvent.emit()" class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors">
                 <span class="material-symbols-outlined text-[14px]">add</span> Add Rule
               </button>
             </div>
-            <div class="text-center py-8 text-slate-400 text-sm border border-dashed border-slate-200 rounded-lg">
-              No rules configured yet.
-            </div>
+            @if (configuredEvents.length === 0) {
+              <div class="text-center py-8 text-slate-400 text-sm border border-dashed border-slate-200 rounded-lg">
+                No rules configured yet.
+              </div>
+            } @else {
+              <div class="space-y-2">
+                @for (evt of configuredEvents; track $index; let i = $index) {
+                  <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50">
+                    <div class="size-8 rounded-lg flex items-center justify-center shrink-0"
+                      [ngClass]="evt.level === 'critical' ? 'bg-red-100 text-red-600' : evt.level === 'warning' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'">
+                      <span class="material-symbols-outlined text-sm">{{ evt.level === 'critical' ? 'error' : evt.level === 'warning' ? 'warning' : 'info' }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <span class="text-sm font-medium text-slate-800">{{ evt.metric }} {{ evt.condition }} {{ evt.threshold }}</span>
+                      <p class="text-xs text-slate-500 truncate">{{ evt.action }} → {{ evt.recipients || 'No recipients' }}</p>
+                    </div>
+                    <button (click)="removeEvent.emit(i)" class="size-7 rounded-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                      <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
           </section>
 
           <!-- Error Message Option -->
@@ -210,7 +275,9 @@ import { CommonModule } from '@angular/common';
             Cancel
           </button>
           <div class="relative inline-block">
-            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
+            <button (click)="nextStep.emit()"
+              [disabled]="!canSave()"
+              class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10 disabled:opacity-40 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-[16px]">rocket_launch</span>
               {{ isEditing ? 'Save Changes' : 'Create Monitor' }}
             </button>
@@ -241,10 +308,37 @@ export class CreateProcessMonitorDrawerComponent {
   @Input() mode: 'onboarding' | 'standalone' = 'standalone';
   @Input() isEditing = false;
   @Input() monitorName = '';
+  @Input() configuredEvents: {metric: string; condition: string; threshold: string; level: string; action: string; recipients: string}[] = [];
   @Output() closeDrawer = new EventEmitter<void>();
   @Output() nextStep = new EventEmitter<void>();
   @Output() openAddWatcher = new EventEmitter<void>();
   @Output() openAddSchedule = new EventEmitter<void>();
+  @Output() openAddEvent = new EventEmitter<void>();
+  @Output() removeEvent = new EventEmitter<number>();
+  @Output() fieldsChanged = new EventEmitter<{project: string; scenario: string; scheduleSel: string}>();
+
+  emitFields() {
+    this.fieldsChanged.emit({
+      project: this.project(),
+      scenario: this.scenario(),
+      scheduleSel: this.scheduleSel()
+    });
+  }
 
   distributionType = signal<'individual' | 'group'>('individual');
+  name = signal<string>('');
+  project = signal<string>('');
+  scenario = signal<string>('');
+  scheduleSel = signal<string>('');
+
+  canSave() {
+    const baseFilled = this.name().trim().length > 0
+      && this.project().trim().length > 0
+      && this.scenario().trim().length > 0
+      && this.scheduleSel().trim().length > 0;
+    if (this.mode === 'onboarding') {
+      return baseFilled && this.configuredEvents.length > 0;
+    }
+    return baseFilled;
+  }
 }

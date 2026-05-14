@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { Component, EventEmitter, Output, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -49,6 +49,9 @@ import { CommonModule } from '@angular/common';
                 </div>
                 <input
                   type="text"
+                  required
+                  [value]="alias()"
+                  (input)="alias.set($any($event.target).value)"
                   placeholder="e.g. rWatcher-NYC-01"
                   class="block px-3 py-3 w-full text-sm font-medium text-slate-900 bg-white rounded-lg border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400 transition-colors"
                 />
@@ -74,10 +77,11 @@ import { CommonModule } from '@angular/common';
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium text-slate-700">BotManager <span class="text-red-500">*</span></label>
               <div class="relative">
-                <select class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                  <option value="" disabled selected>Select a BotManager...</option>
-                  <option>BotManager-1 (Online)</option>
-                  <option>BotManager-2 (Offline)</option>
+                <select required [value]="botManager()" (change)="botManager.set($any($event.target).value)"
+                  class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                  <option value="">Select a BotManager...</option>
+                  <option value="BotManager-1">BotManager-1 (Online)</option>
+                  <option value="BotManager-2">BotManager-2 (Offline)</option>
                 </select>
                 <div class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none">
                   <span class="material-symbols-outlined text-slate-400 text-[20px]">expand_more</span>
@@ -96,12 +100,12 @@ import { CommonModule } from '@angular/common';
               <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-sm font-medium text-slate-700">Username <span class="text-red-500">*</span></label>
-                  <input type="text" placeholder="e.g. DOMAIN\\user" class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400" />
+                  <input type="text" required [value]="username()" (input)="username.set($any($event.target).value)" placeholder="e.g. DOMAIN\\user" class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <label class="text-sm font-medium text-slate-700">Password <span class="text-red-500">*</span></label>
                   <div class="relative">
-                    <input type="password" class="block px-3 py-2.5 pr-10 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                    <input type="password" required [value]="password()" (input)="password.set($any($event.target).value)" class="block px-3 py-2.5 pr-10 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
                     <button class="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-center text-slate-400 hover:text-primary transition-colors" title="Toggle visibility">
                       <span class="material-symbols-outlined text-[18px]">visibility</span>
                     </button>
@@ -188,7 +192,7 @@ import { CommonModule } from '@angular/common';
             Cancel
           </button>
           <div class="relative inline-block">
-            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
+            <button (click)="nextStep.emit()" [disabled]="!canSave()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10 disabled:opacity-40 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
               {{ mode === 'onboarding' ? 'Next Step' : 'Add rWatcher' }}
             </button>
@@ -219,4 +223,16 @@ export class AddWatcherDrawerComponent {
   @Input() mode: 'onboarding' | 'standalone' = 'standalone';
   @Output() closeDrawer = new EventEmitter<void>();
   @Output() nextStep = new EventEmitter<void>();
+
+  alias = signal<string>('');
+  botManager = signal<string>('');
+  username = signal<string>('');
+  password = signal<string>('');
+
+  canSave() {
+    return this.alias().trim().length > 0
+      && this.botManager().trim().length > 0
+      && this.username().trim().length > 0
+      && this.password().length >= 6;
+  }
 }

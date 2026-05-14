@@ -43,7 +43,7 @@ import { CommonModule } from '@angular/common';
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="text-sm font-medium text-slate-700">Schedule Name <span class="text-red-400">*</span></label>
-                <input type="text" placeholder="e.g. Business Hours – Every 15 min" class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400" />
+                <input type="text" required [value]="scheduleName()" (input)="scheduleName.set($any($event.target).value)" placeholder="e.g. Business Hours – Every 15 min" class="block px-3 py-2.5 w-full text-sm text-slate-900 bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400" />
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="text-sm font-medium text-slate-700">Description <span class="text-slate-400 font-normal">(optional)</span></label>
@@ -144,7 +144,7 @@ import { CommonModule } from '@angular/common';
             Cancel
           </button>
           <div class="relative inline-block">
-            <button (click)="nextStep.emit()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10">
+            <button (click)="nextStep.emit()" [disabled]="!canSave()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10 disabled:opacity-40 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-[16px]">schedule</span>
               {{ mode === 'onboarding' ? 'Next Step' : 'Save Schedule' }}
             </button>
@@ -177,6 +177,11 @@ export class AddScheduleDrawerComponent {
   @Output() nextStep = new EventEmitter<void>();
 
   selectedFrequency = signal<string>('every15');
+  scheduleName = signal<string>('');
+
+  canSave() {
+    return this.scheduleName().trim().length > 0;
+  }
 
   frequencyOptions = [
     { value: 'every15', label: 'Every 15 min', desc: 'High frequency checks', icon: 'speed' },
