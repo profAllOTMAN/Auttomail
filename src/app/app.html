@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900 transition-[padding] duration-200" [attr.data-app-mode]="appMode()" [style.paddingLeft.px]="wizardChainActive() ? 360 : 0" [class.tour-hint-active]="hoverHintLines().length > 0">
+<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900 transition-[padding] duration-200" [attr.data-app-mode]="appMode()" [style.paddingLeft.px]="wizardChainActive() ? 360 : 0" [class.tour-hint-active]="hoverHintLines().length > 0" [class.tour-coach-active]="activeCoach() !== null">
   <!-- Header -->
   <header class="header-gradient px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
     <div class="flex items-center gap-3 sm:gap-5">
@@ -426,7 +426,7 @@
         </div>
       </div>
     } @else if (activeTab() === 'dashboard') {
-      @if (!licenseAlreadyValid()) {
+      @if (!licenseAlreadyValid() || appMode() === 'loader') {
         <!-- First-time empty state: no license, no real data, prompt user to start the tour -->
         <div class="mt-12 max-w-2xl mx-auto text-center">
           <div class="inline-flex size-20 rounded-full bg-primary/10 text-primary items-center justify-center mb-6">
@@ -5610,11 +5610,13 @@
   </div>
 }
 
-<!-- Spotlight overlay: dims/blurs everything when the help hint is open. The
-     active target on the page (with .tour-pulse) is popped above this layer in
-     styles.css via .tour-hint-active. -->
+<!-- Spotlight overlay: dims/blurs everything when the help hint is open OR
+     while a coach bubble is anchored on a page target. The active target on
+     the page (with .tour-pulse) is popped above this layer in styles.css. -->
 @if (hoverHintLines().length > 0) {
   <div class="tour-spotlight-overlay"></div>
+} @else if (activeCoach() !== null) {
+  <div class="tour-spotlight-overlay tour-spotlight-soft"></div>
 }
 
 <!-- Floating tour hint tooltip — rendered at app shell level so it never gets
