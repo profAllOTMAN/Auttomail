@@ -2108,6 +2108,31 @@ export class App implements OnInit {
     this.editingMonitorId.set(null);
   }
 
+  scheduleSkippedDefault = signal<boolean>(false);
+  /**
+   * Onboarding "Skip — use default" for the schedule step.
+   * Marks the step complete without creating a custom schedule; the system
+   * default applies to any monitor that doesn't choose one explicitly.
+   */
+  handleSkipSchedule() {
+    this.scheduleSkippedDefault.set(true);
+    this.gsMarkComplete('schedule');
+    if (this.wizardChainActive()) {
+      this.markTourActionDone('scheduleAdded');
+    }
+    this.completedSteps.update(steps => steps.includes('schedule') ? steps : [...steps, 'schedule']);
+    // Advance: first-time chains go to the monitor drawer; otherwise close.
+    if (this.drawerMode() === 'onboarding') {
+      if (!this.completedSteps().includes('monitor')) {
+        this.activeDrawer.set('monitor');
+      } else {
+        this.activeDrawer.set(null);
+      }
+    } else {
+      this.closeDrawer();
+    }
+  }
+
   handleNextStep(currentStep: 'watcher' | 'schedule' | 'monitor') {
     // Auto-complete corresponding Getting Started step
     const gsMap: Record<string, string> = {watcher: 'rwatcher', schedule: 'schedule', monitor: 'monitor'};

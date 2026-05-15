@@ -5537,7 +5537,7 @@
   <app-add-watcher-drawer [mode]="drawerMode()" (closeDrawer)="closeDrawer()" (nextStep)="handleNextStep('watcher')"></app-add-watcher-drawer>
 }
 @if (activeDrawer() === 'schedule') {
-  <app-add-schedule-drawer [mode]="drawerMode()" (closeDrawer)="closeDrawer()" (nextStep)="handleNextStep('schedule')"></app-add-schedule-drawer>
+  <app-add-schedule-drawer [mode]="drawerMode()" (closeDrawer)="closeDrawer()" (nextStep)="handleNextStep('schedule')" (skipDefault)="handleSkipSchedule()"></app-add-schedule-drawer>
 }
 @if (activeDrawer() === 'monitor') {
   <app-create-process-monitor-drawer

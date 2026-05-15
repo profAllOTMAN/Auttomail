@@ -34,6 +34,26 @@ import { CommonModule } from '@angular/common';
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
 
+          @if (mode === 'onboarding') {
+            <!-- Default-schedule hint: lets the user skip without configuring now -->
+            <section class="px-6 py-4 bg-primary/5 border-b border-primary/10">
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-[20px] mt-0.5">bolt</span>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold text-slate-800">In a hurry? Keep the default schedule</p>
+                  <p class="text-[12px] text-slate-600 mt-0.5">
+                    Default: <span class="font-semibold">every 15 minutes, Mon–Fri, UTC</span>. You can change it later from the Schedules page.
+                  </p>
+                </div>
+                <button (click)="skipDefault.emit()" type="button"
+                  class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-primary/30 text-primary text-xs font-semibold hover:bg-primary/10 transition-colors">
+                  Skip
+                  <span class="material-symbols-outlined text-[14px]">skip_next</span>
+                </button>
+              </div>
+            </section>
+          }
+
           <!-- BASIC INFORMATION -->
           <section class="px-6 py-5">
             <div class="mb-4">
@@ -139,10 +159,20 @@ import { CommonModule } from '@angular/common';
         </div>
 
         <!-- Footer -->
-        <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-end gap-3">
-          <button (click)="closeDrawer.emit()" class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-            Cancel
-          </button>
+        <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <button (click)="closeDrawer.emit()" class="px-5 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+              Cancel
+            </button>
+            @if (mode === 'onboarding') {
+              <button (click)="skipDefault.emit()" type="button"
+                class="px-4 py-2 rounded-full text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/5 transition-colors flex items-center gap-2"
+                title="Skip this step and keep the default schedule">
+                <span class="material-symbols-outlined text-[16px]">skip_next</span>
+                Skip — use default
+              </button>
+            }
+          </div>
           <div class="relative inline-block">
             <button (click)="nextStep.emit()" [disabled]="!canSave()" class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20 relative z-10 disabled:opacity-40 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-[16px]">schedule</span>
@@ -150,7 +180,7 @@ import { CommonModule } from '@angular/common';
             </button>
             @if (mode === 'onboarding') {
               <div class="absolute bottom-full mb-4 right-0 bg-slate-800 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-xl w-max max-w-[260px] text-center animate-bounce z-20 whitespace-normal leading-relaxed">
-                ⏱️ Choose when your tasks should run automatically. Click Next to continue!
+                ⏱️ Choose when your tasks should run automatically — or skip to keep the default.
                 <div class="absolute -bottom-1.5 right-8 w-3 h-3 bg-slate-800 rotate-45"></div>
               </div>
               <div class="absolute inset-0 rounded-full bg-primary/40 animate-ping z-0"></div>
@@ -175,6 +205,7 @@ export class AddScheduleDrawerComponent {
   @Input() mode: 'onboarding' | 'standalone' = 'standalone';
   @Output() closeDrawer = new EventEmitter<void>();
   @Output() nextStep = new EventEmitter<void>();
+  @Output() skipDefault = new EventEmitter<void>();
 
   selectedFrequency = signal<string>('every15');
   scheduleName = signal<string>('');
