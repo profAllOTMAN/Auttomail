@@ -318,11 +318,11 @@ export class App implements OnInit {
     if (id !== 'watcher' && id !== 'loader') return;
     if (this.appMode() === id) return;
     this.appMode.set(id);
-    if (id === 'loader') {
-      this.navigate('/test-runs');
-    } else {
-      this.navigate('/dashboard');
-    }
+    // Both products land on /dashboard. The dashboard renders a welcome empty
+    // state until the user finishes setup (watcher: no license; loader: no test
+    // plans), so first-time users in either product see the same kind of guided
+    // welcome screen before they have any real data.
+    this.navigate('/dashboard');
   }
 
   setAppMode(mode: 'watcher' | 'loader') {
