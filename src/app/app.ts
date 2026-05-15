@@ -2775,6 +2775,39 @@ export class App implements OnInit {
     }
   }
 
+  // When non-null, the Guided Tour panel renders this part instead of the
+  // auto-detected active one — used by the horizontal stepper to peek at
+  // done/locked parts without breaking the "current step" indicator.
+  tourPeekPartId = signal<string | null>(null);
+  tourVisiblePartId(): string {
+    return this.tourPeekPartId() ?? this.wizardTourActivePart();
+  }
+  tourPeekPart(id: string) {
+    this.tourPeekPartId.set(id === this.wizardTourActivePart() ? null : id);
+  }
+  tourPeekNext() {
+    const parts = this.wizardTourParts();
+    const curr = this.tourVisiblePartId();
+    const idx = parts.findIndex(p => p.id === curr);
+    if (idx >= 0 && idx < parts.length - 1) this.tourPeekPart(parts[idx + 1].id);
+  }
+  tourPeekPrev() {
+    const parts = this.wizardTourParts();
+    const curr = this.tourVisiblePartId();
+    const idx = parts.findIndex(p => p.id === curr);
+    if (idx > 0) this.tourPeekPart(parts[idx - 1].id);
+  }
+  tourBackToActive() {
+    this.tourPeekPartId.set(null);
+  }
+  tourVisibleEntry() {
+    const parts = this.wizardTourParts();
+    const id = this.tourVisiblePartId();
+    const idx = parts.findIndex(p => p.id === id);
+    if (idx < 0) return null;
+    return { part: parts[idx], index: idx, isLast: idx === parts.length - 1 };
+  }
+
   /**
    * Skip the Part 3 (Schedule) tour part and keep the system default schedule
    * (every 15 min, Mon–Fri, UTC). Used from the Guided Tour left panel.

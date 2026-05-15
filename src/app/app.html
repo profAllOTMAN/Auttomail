@@ -5390,105 +5390,154 @@
         }
       </div>
 
-      <!-- Tour parts -->
-      @for (part of wizardTourParts(); track part.id; let i = $index) {
-        @let isPrereq = part.id === 'prereq';
-        @let isActive = wizardTourActivePart() === part.id;
-        @let isDone = allSubStepsDone(part.subSteps);
-        @let isCollapsed = isDone && !isActive;
+      <!-- Horizontal stepper: compact, scrollable; each pip can be tapped to peek -->
+      <div class="-mx-1">
+        <div class="flex items-center gap-1 overflow-x-auto custom-scrollbar px-1 py-1 snap-x snap-mandatory">
+          @for (part of wizardTourParts(); track part.id; let i = $index; let isLast = $last) {
+            @let pIsPrereq = part.id === 'prereq';
+            @let pIsActive = wizardTourActivePart() === part.id;
+            @let pIsViewed = tourVisiblePartId() === part.id;
+            @let pIsDone = allSubStepsDone(part.subSteps);
+            <button (click)="tourPeekPart(part.id)" type="button"
+              class="snap-start flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-1 border transition-colors shrink-0"
+              [ngClass]="pIsViewed ? (pIsPrereq ? 'border-amber-400 bg-amber-50' : 'border-primary bg-primary/10') : pIsDone ? 'border-emerald-200 bg-emerald-50/60' : pIsActive ? 'border-primary/40 bg-white' : 'border-slate-200 bg-white'"
+              [title]="(pIsPrereq ? 'Prerequisites' : 'Part ' + i) + ' — ' + part.label">
+              <span class="size-6 rounded-full inline-flex items-center justify-center shrink-0 text-[11px] font-bold"
+                [ngClass]="pIsDone ? 'bg-emerald-500 text-white' : pIsViewed ? (pIsPrereq ? 'bg-amber-500 text-white' : 'bg-primary text-white') : 'bg-slate-200 text-slate-600'">
+                @if (pIsDone) {
+                  <span class="material-symbols-outlined text-[14px]">check</span>
+                } @else if (pIsPrereq) {
+                  <span class="material-symbols-outlined text-[14px]">fact_check</span>
+                } @else {
+                  {{ i }}
+                }
+              </span>
+              <span class="text-[10.5px] font-semibold leading-none"
+                [ngClass]="pIsViewed ? (pIsPrereq ? 'text-amber-800' : 'text-primary') : pIsDone ? 'text-emerald-700' : 'text-slate-600'">
+                {{ pIsPrereq ? 'Prereq' : 'Part ' + i }}
+              </span>
+            </button>
+            @if (!isLast) {
+              <span class="h-px w-3 shrink-0"
+                [ngClass]="pIsDone ? 'bg-emerald-300' : 'bg-slate-200'"></span>
+            }
+          }
+        </div>
+        <p class="px-1 mt-1 text-[10px] text-slate-400 leading-snug">
+          Tap a pip to peek at any part. The tour resumes the live step automatically.
+          @if (tourPeekPartId()) {
+            <button (click)="tourBackToActive()" class="ml-1 text-primary font-semibold hover:underline">Back to current step</button>
+          }
+        </p>
+      </div>
+
+      <!-- Active part body — only one part visible at a time, no vertical stack -->
+      @if (tourVisibleEntry(); as visible) {
+        @let isPrereq = visible.part.id === 'prereq';
+        @let isViewed = wizardTourActivePart() === visible.part.id;
+        @let isDone = allSubStepsDone(visible.part.subSteps);
         <div class="rounded-lg border transition-colors"
-          [ngClass]="isPrereq ? (isActive ? 'border-amber-400 bg-amber-50' : isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-amber-200 bg-amber-50/40')
-                              : (isActive ? 'border-primary bg-primary/5' : isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-white')">
+          [ngClass]="isPrereq ? (isViewed ? 'border-amber-400 bg-amber-50' : isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-amber-200 bg-amber-50/40')
+                              : (isViewed ? 'border-primary bg-primary/5' : isDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-white')">
           <div class="px-3 py-2 flex items-center gap-3">
-            <div class="size-7 rounded-md flex items-center justify-center shrink-0"
-              [ngClass]="isDone ? 'bg-emerald-500 text-white' : isActive ? (isPrereq ? 'bg-amber-500 text-white' : 'bg-primary text-white') : 'bg-slate-100 text-slate-500'">
-              <span class="material-symbols-outlined text-[16px]">{{ isDone ? 'check' : part.icon }}</span>
+            <div class="size-8 rounded-md flex items-center justify-center shrink-0"
+              [ngClass]="isDone ? 'bg-emerald-500 text-white' : isViewed ? (isPrereq ? 'bg-amber-500 text-white' : 'bg-primary text-white') : 'bg-slate-100 text-slate-500'">
+              <span class="material-symbols-outlined text-[18px]">{{ isDone ? 'check' : visible.part.icon }}</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-baseline gap-1.5 flex-wrap">
                 <span class="text-[9px] font-bold uppercase tracking-widest"
-                  [ngClass]="isPrereq ? 'text-amber-700' : 'text-slate-400'">{{ isPrereq ? 'Prereq' : 'Part ' + i }}</span>
-                <span class="text-xs font-semibold text-slate-900 leading-snug">{{ part.label }}</span>
+                  [ngClass]="isPrereq ? 'text-amber-700' : 'text-slate-400'">{{ isPrereq ? 'Prereq' : 'Part ' + visible.index }}</span>
+                <span class="text-sm font-semibold text-slate-900 leading-snug">{{ visible.part.label }}</span>
+                @if (!isViewed && !isDone) {
+                  <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Locked preview</span>
+                }
               </div>
-              @if (!isCollapsed) {
-                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">{{ part.description }}</p>
-              }
+              <p class="text-[11px] text-slate-500 leading-snug mt-0.5">{{ visible.part.description }}</p>
+            </div>
+            <div class="flex items-center gap-0.5 shrink-0">
+              <button (click)="tourPeekPrev()" [disabled]="visible.index === 0 && isPrereq" title="Previous part"
+                class="size-7 rounded-md flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+              <button (click)="tourPeekNext()" [disabled]="visible.isLast" title="Next part"
+                class="size-7 rounded-md flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
             </div>
           </div>
-          @if (!isCollapsed) {
-            <div class="px-3 pb-2.5 space-y-1">
-              @for (sub of part.subSteps; track sub.id) {
-                <div class="flex items-stretch gap-1">
-                  <button (click)="sub.action()"
-                    [disabled]="sub.done || wizardTourActiveSubId() !== sub.id"
-                    class="flex-1 flex items-start gap-2 px-2.5 py-1.5 rounded text-left transition-colors disabled:cursor-not-allowed"
-                    [ngClass]="sub.done ? 'bg-emerald-100 text-emerald-700 opacity-80' : wizardTourActiveSubId() === sub.id ? (isPrereq ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 ring-1 ring-amber-300' : 'bg-primary/10 text-primary hover:bg-primary/20 ring-1 ring-primary/30') : 'text-slate-400 bg-slate-50/60'">
-                    <span class="material-symbols-outlined text-[16px] mt-px shrink-0"
-                      [ngClass]="sub.done ? (isPrereq ? 'text-emerald-600' : 'text-emerald-600') : wizardTourActiveSubId() === sub.id ? '' : 'text-slate-300'">
-                      @if (isPrereq) {
-                        {{ sub.done ? 'check_box' : wizardTourActiveSubId() === sub.id ? 'check_box_outline_blank' : 'lock' }}
-                      } @else {
-                        {{ sub.done ? 'check_circle' : wizardTourActiveSubId() === sub.id ? 'radio_button_checked' : 'lock' }}
-                      }
-                    </span>
-                    <span class="text-[11px] font-medium flex-1 leading-snug break-words"
-                      [class.line-through]="sub.done">{{ sub.label }}</span>
-                    @if (sub.done) {
-                      <span class="text-[9px] font-bold uppercase tracking-widest text-emerald-700 shrink-0 mt-0.5">Done</span>
-                    } @else if (wizardTourActiveSubId() === sub.id) {
-                      <span class="text-[9px] font-bold uppercase tracking-widest shrink-0 mt-0.5">Now</span>
+          <div class="px-3 pb-2.5 space-y-1">
+            @for (sub of visible.part.subSteps; track sub.id) {
+              <div class="flex items-stretch gap-1">
+                <button (click)="sub.action()"
+                  [disabled]="sub.done || wizardTourActiveSubId() !== sub.id"
+                  class="flex-1 flex items-start gap-2 px-2.5 py-1.5 rounded text-left transition-colors disabled:cursor-not-allowed"
+                  [ngClass]="sub.done ? 'bg-emerald-100 text-emerald-700 opacity-80' : wizardTourActiveSubId() === sub.id ? (isPrereq ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 ring-1 ring-amber-300' : 'bg-primary/10 text-primary hover:bg-primary/20 ring-1 ring-primary/30') : 'text-slate-400 bg-slate-50/60'">
+                  <span class="material-symbols-outlined text-[16px] mt-px shrink-0"
+                    [ngClass]="sub.done ? 'text-emerald-600' : wizardTourActiveSubId() === sub.id ? '' : 'text-slate-300'">
+                    @if (isPrereq) {
+                      {{ sub.done ? 'check_box' : wizardTourActiveSubId() === sub.id ? 'check_box_outline_blank' : 'lock' }}
                     } @else {
-                      <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 shrink-0 mt-0.5">Locked</span>
+                      {{ sub.done ? 'check_circle' : wizardTourActiveSubId() === sub.id ? 'radio_button_checked' : 'lock' }}
                     }
+                  </span>
+                  <span class="text-[11px] font-medium flex-1 leading-snug break-words"
+                    [class.line-through]="sub.done">{{ sub.label }}</span>
+                  @if (sub.done) {
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-emerald-700 shrink-0 mt-0.5">Done</span>
+                  } @else if (wizardTourActiveSubId() === sub.id) {
+                    <span class="text-[9px] font-bold uppercase tracking-widest shrink-0 mt-0.5">Now</span>
+                  } @else {
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 shrink-0 mt-0.5">Locked</span>
+                  }
+                </button>
+                @if (!isPrereq && sub.hint && sub.hint.length > 0) {
+                  <button type="button" title="How to do this step"
+                    (mouseenter)="showHint(sub.hint!, $event)"
+                    (focus)="showHint(sub.hint!, $event)"
+                    (mouseleave)="hideHint()"
+                    (blur)="hideHint()"
+                    class="size-7 rounded flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">help</span>
                   </button>
-                  @if (!isPrereq && sub.hint && sub.hint.length > 0) {
-                    <button type="button" title="How to do this step"
-                      (mouseenter)="showHint(sub.hint!, $event)"
-                      (focus)="showHint(sub.hint!, $event)"
-                      (mouseleave)="hideHint()"
-                      (blur)="hideHint()"
-                      class="size-7 rounded flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">help</span>
-                    </button>
-                  }
-                  @if (sub.helpLink) {
-                    <button (click)="navigate(sub.helpLink)" title="Open the related help article"
-                      class="size-7 rounded flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">arrow_outward</span>
-                    </button>
-                  }
-                </div>
-                @if (isPrereq && wizardTourActiveSubId() === sub.id && sub.hint && sub.hint.length > 0) {
-                  <div class="ml-2 mr-1 mt-1 px-2.5 py-2 rounded border border-amber-200 bg-amber-50/70 text-amber-900 text-[10.5px] leading-snug">
-                    <div class="flex items-center gap-1 mb-1 text-amber-700">
-                      <span class="material-symbols-outlined text-[14px] text-amber-600">tips_and_updates</span>
-                      <span class="text-[9px] font-bold uppercase tracking-widest">How to do it</span>
-                    </div>
-                    <ol class="space-y-0.5 list-decimal list-inside marker:font-bold marker:text-amber-600">
-                      @for (line of sub.hint; track $index) {
-                        <li>{{ line }}</li>
-                      }
-                    </ol>
-                  </div>
                 }
+                @if (sub.helpLink) {
+                  <button (click)="navigate(sub.helpLink)" title="Open the related help article"
+                    class="size-7 rounded flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+                  </button>
+                }
+              </div>
+              @if (isPrereq && wizardTourActiveSubId() === sub.id && sub.hint && sub.hint.length > 0) {
+                <div class="ml-2 mr-1 mt-1 px-2.5 py-2 rounded border border-amber-200 bg-amber-50/70 text-amber-900 text-[10.5px] leading-snug">
+                  <div class="flex items-center gap-1 mb-1 text-amber-700">
+                    <span class="material-symbols-outlined text-[14px] text-amber-600">tips_and_updates</span>
+                    <span class="text-[9px] font-bold uppercase tracking-widest">How to do it</span>
+                  </div>
+                  <ol class="space-y-0.5 list-decimal list-inside marker:font-bold marker:text-amber-600">
+                    @for (line of sub.hint; track $index) {
+                      <li>{{ line }}</li>
+                    }
+                  </ol>
+                </div>
               }
-              @if (wizardTourActiveSubId() === 'license') {
-                <button (click)="wizardSkipLicenseForTrial()"
-                  class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors inline-flex items-center justify-center gap-1.5">
-                  <span class="material-symbols-outlined text-[14px]">skip_next</span>
-                  Skip — I'm on trial
-                </button>
-              }
-              @if (part.id === 'schedule' && !isDone) {
-                <button (click)="wizardSkipScheduleTourPart()"
-                  class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/30 transition-colors inline-flex items-center justify-center gap-1.5"
-                  title="Skip this part and keep the default schedule (every 15 min, Mon–Fri, UTC)">
-                  <span class="material-symbols-outlined text-[14px]">skip_next</span>
-                  Skip — use default schedule
-                </button>
-              }
-            </div>
-          }
+            }
+            @if (visible.part.id === 'setup' && wizardTourActiveSubId() === 'license') {
+              <button (click)="wizardSkipLicenseForTrial()"
+                class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors inline-flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[14px]">skip_next</span>
+                Skip — I'm on trial
+              </button>
+            }
+            @if (visible.part.id === 'schedule' && !isDone) {
+              <button (click)="wizardSkipScheduleTourPart()"
+                class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/30 transition-colors inline-flex items-center justify-center gap-1.5"
+                title="Skip this part and keep the default schedule (every 15 min, Mon–Fri, UTC)">
+                <span class="material-symbols-outlined text-[14px]">skip_next</span>
+                Skip — use default schedule
+              </button>
+            }
+          </div>
         </div>
       }
 
