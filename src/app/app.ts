@@ -2625,6 +2625,22 @@ export class App implements OnInit {
     this.openDrawer(step, 'onboarding');
   }
 
+  /**
+   * Skip the schedule step from the wizard chain panel without ever opening
+   * the drawer. Marks the step as complete and keeps the system default
+   * schedule (every 15 min, Mon–Fri, UTC).
+   */
+  wizardSkipSchedule() {
+    this.wizardChainActive.set(true);
+    if (this.activeDrawer() === 'schedule') {
+      this.activeDrawer.set(null);
+    }
+    this.scheduleSkippedDefault.set(true);
+    this.gsMarkComplete('schedule');
+    this.markTourActionDone('scheduleAdded');
+    this.completedSteps.update(steps => steps.includes('schedule') ? steps : [...steps, 'schedule']);
+  }
+
   // From /help/new "Run It" tile: navigate to monitors page so user can click Run on a row.
   wizardGoToRun() {
     this.wizardChainActive.set(true);
