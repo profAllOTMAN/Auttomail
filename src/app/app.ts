@@ -2531,21 +2531,6 @@ export class App implements OnInit {
     }
   }
 
-  /**
-   * Skip the in-wizard "Set a Schedule" step and keep the default option.
-   * Used on /help/new at the Schedule step (label "Schedule" / Step 3 of the
-   * Watcher tour). Records the choice and advances to the next wizard step.
-   */
-  wizardSkipScheduleStep() {
-    this.wizardSchedule.set('default');
-    this.scheduleSkippedDefault.set(true);
-    this.markTourActionDone('scheduleAdded');
-    this.gsMarkComplete('schedule');
-    this.completedSteps.update(steps => steps.includes('schedule') ? steps : [...steps, 'schedule']);
-    if (this.wizardStep() < 5) {
-      this.wizardStep.update(s => s + 1);
-    }
-  }
 
   wizardBack() {
     if (this.wizardStep() > 0) {
@@ -2641,21 +2626,6 @@ export class App implements OnInit {
     this.openDrawer(step, 'onboarding');
   }
 
-  /**
-   * Skip the schedule step from the wizard chain panel without ever opening
-   * the drawer. Marks the step as complete and keeps the system default
-   * schedule (every 15 min, Mon–Fri, UTC).
-   */
-  wizardSkipSchedule() {
-    this.wizardChainActive.set(true);
-    if (this.activeDrawer() === 'schedule') {
-      this.activeDrawer.set(null);
-    }
-    this.scheduleSkippedDefault.set(true);
-    this.gsMarkComplete('schedule');
-    this.markTourActionDone('scheduleAdded');
-    this.completedSteps.update(steps => steps.includes('schedule') ? steps : [...steps, 'schedule']);
-  }
 
   // From /help/new "Run It" tile: navigate to monitors page so user can click Run on a row.
   wizardGoToRun() {
@@ -2803,6 +2773,21 @@ export class App implements OnInit {
     if (this.markTourActionDone('licenseUploaded')) {
       this.openDrawer('botmanager', 'onboarding');
     }
+  }
+
+  /**
+   * Skip the Part 3 (Schedule) tour part and keep the system default schedule
+   * (every 15 min, Mon–Fri, UTC). Used from the Guided Tour left panel.
+   */
+  wizardSkipScheduleTourPart() {
+    this.scheduleSkippedDefault.set(true);
+    if (this.activeDrawer() === 'schedule') {
+      this.activeDrawer.set(null);
+    }
+    this.markTourActionDone('scheduleAdded');
+    this.markTourActionDone('scheduleActivated');
+    this.gsMarkComplete('schedule');
+    this.completedSteps.update(steps => steps.includes('schedule') ? steps : [...steps, 'schedule']);
   }
 
   wizardSaveBotManager() {
