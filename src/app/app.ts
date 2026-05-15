@@ -5,6 +5,7 @@ import {filter} from 'rxjs/operators';
 import {AddWatcherDrawerComponent} from './drawers/add-watcher.component';
 import {AddScheduleDrawerComponent} from './drawers/add-schedule.component';
 import {CreateProcessMonitorDrawerComponent} from './drawers/create-process-monitor.component';
+import {AddTestPlanProcessDrawerComponent} from './drawers/add-test-plan-process.component';
 import {DocumentationComponent} from './documentation/documentation.component';
 import {Documentation2Component} from './documentation/documentation2.component';
 
@@ -148,10 +149,15 @@ export interface TestRun {
 
 export interface TestPlanProcessRow {
   name: string;
+  scenarioId: string;
   distributeBy: 'percentage' | 'rLoaders';
   rLoaders: number;
   pacing: number;
+  pacingRandomize: boolean;
   halt: 'first-error' | 'continue';
+  rdvFile: string;
+  dataFile: string;
+  description: string;
 }
 
 export interface TestPlanNotificationRule {
@@ -262,6 +268,7 @@ export class TourCoachDirective implements AfterViewChecked, OnDestroy {
     AddWatcherDrawerComponent,
     AddScheduleDrawerComponent,
     CreateProcessMonitorDrawerComponent,
+    AddTestPlanProcessDrawerComponent,
     DocumentationComponent,
     Documentation2Component,
     TourCoachDirective
@@ -852,14 +859,47 @@ export class App implements OnInit {
     this.planFormEmail.set('');
     this.planFormEvents.set([]);
   }
-  addPlanProcess() {
-    this.planDraft.update(d => ({
-      ...d,
-      processes: [...d.processes, { name: 'notepad', distributeBy: 'percentage', rLoaders: 100, pacing: 0, halt: 'continue' }]
-    }));
+  // Process drawer (Add / Edit) for the test-plan create form
+  processDrawerOpen = signal<boolean>(false);
+  processDrawerEditingIndex = signal<number | null>(null);
+  processDrawerInitial = signal<TestPlanProcessRow | null>(null);
+
+  openAddProcessDrawer() {
+    this.processDrawerEditingIndex.set(null);
+    this.processDrawerInitial.set(null);
+    this.processDrawerOpen.set(true);
+  }
+  openEditProcessDrawer(i: number) {
+    const proc = this.planDraft().processes[i];
+    if (!proc) return;
+    this.processDrawerEditingIndex.set(i);
+    this.processDrawerInitial.set({ ...proc });
+    this.processDrawerOpen.set(true);
+  }
+  closeProcessDrawer() {
+    this.processDrawerOpen.set(false);
+    this.processDrawerEditingIndex.set(null);
+    this.processDrawerInitial.set(null);
+  }
+  savePlanProcess(row: TestPlanProcessRow) {
+    const idx = this.processDrawerEditingIndex();
+    this.planDraft.update(d => {
+      if (idx === null) {
+        return { ...d, processes: [...d.processes, row] };
+      }
+      const next = [...d.processes];
+      next[idx] = row;
+      return { ...d, processes: next };
+    });
+    this.closeProcessDrawer();
   }
   removePlanProcess(i: number) {
     this.planDraft.update(d => ({ ...d, processes: d.processes.filter((_, idx) => idx !== i) }));
+  }
+  planProjectScenarios(): string[] {
+    const projectName = this.planDraft().project;
+    const project = this.projects().find(p => p.name === projectName);
+    return project?.subProcesses ?? ['notpad', 'scenario2'];
   }
   togglePlanEvent(event: string) {
     this.planFormEvents.update(list => list.includes(event) ? list.filter(e => e !== event) : [...list, event]);

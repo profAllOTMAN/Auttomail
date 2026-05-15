@@ -4644,7 +4644,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Manager process settings, data files, and rendezvous points</p>
           </header>
           <div class="px-4 py-3 flex items-center gap-2">
-            <button (click)="addPlanProcess()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
+            <button (click)="openAddProcessDrawer()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
               <span class="material-symbols-outlined text-[16px]">code</span> Add new
             </button>
             <button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white text-xs font-semibold rounded-full hover:bg-rose-600 transition-colors shadow-sm">
@@ -4677,16 +4677,26 @@
               </thead>
               <tbody>
                 @for (proc of planDraft().processes; track $index; let i = $index) {
-                  <tr class="border-b border-slate-100">
-                    <td class="px-3 py-2 text-slate-700">{{ proc.name }}</td>
+                  <tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <td class="px-3 py-2">
+                      <button (click)="openEditProcessDrawer(i)" class="text-emerald-700 underline underline-offset-2 hover:text-emerald-800">{{ proc.name }}</button>
+                      @if (proc.description) {
+                        <p class="text-[11px] text-slate-500 mt-0.5 truncate max-w-[260px]">{{ proc.description }}</p>
+                      }
+                    </td>
                     <td class="px-3 py-2 text-slate-700">{{ proc.distributeBy === 'percentage' ? 'Percentage (%)' : 'rLoaders' }}</td>
-                    <td class="px-3 py-2 text-slate-700">{{ proc.rLoaders }}</td>
-                    <td class="px-3 py-2 text-slate-700">{{ proc.pacing }} s</td>
+                    <td class="px-3 py-2 text-slate-700">{{ proc.rLoaders }}{{ proc.distributeBy === 'percentage' ? '%' : '' }}</td>
+                    <td class="px-3 py-2 text-slate-700">{{ proc.pacing }} s @if (proc.pacingRandomize) { <span class="text-[11px] text-slate-500">(±25%)</span> }</td>
                     <td class="px-3 py-2 text-slate-700">{{ proc.halt === 'first-error' ? 'Stop on error' : 'Continue' }}</td>
                     <td class="px-3 py-2">
-                      <button (click)="removePlanProcess(i)" class="text-rose-500 hover:text-rose-700">
-                        <span class="material-symbols-outlined text-[18px]">close</span>
-                      </button>
+                      <div class="flex items-center gap-1">
+                        <button (click)="openEditProcessDrawer(i)" class="text-slate-500 hover:text-emerald-600" title="Edit">
+                          <span class="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button (click)="removePlanProcess(i)" class="text-rose-500 hover:text-rose-700" title="Remove">
+                          <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 } @empty {
@@ -5543,6 +5553,16 @@
     (removeEvent)="wizardRemoveEvent($event)"
     (fieldsChanged)="onMonitorFieldsChanged($event)">
   </app-create-process-monitor-drawer>
+}
+@if (processDrawerOpen()) {
+  <app-add-test-plan-process-drawer
+    [project]="planDraft().project"
+    [scenarioOptions]="planProjectScenarios()"
+    [editing]="processDrawerEditingIndex() !== null"
+    [initial]="processDrawerInitial()"
+    (closeDrawer)="closeProcessDrawer()"
+    (save)="savePlanProcess($event)">
+  </app-add-test-plan-process-drawer>
 }
 @if (activeDrawer() === 'botmanager') {
   <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-end z-50">
