@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900 transition-[padding] duration-200" [attr.data-app-mode]="appMode()" [style.paddingLeft.px]="wizardChainActive() ? 360 : 0">
+<div class="flex flex-col h-full min-h-screen bg-background-light text-slate-900 transition-[padding] duration-200" [attr.data-app-mode]="appMode()" [style.paddingLeft.px]="wizardChainActive() ? 360 : 0" [class.tour-hint-active]="hoverHintLines().length > 0">
   <!-- Header -->
   <header class="header-gradient px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
     <div class="flex items-center gap-3 sm:gap-5">
@@ -5390,37 +5390,37 @@
         }
       </div>
 
-      <!-- Horizontal stepper: compact, scrollable; each pip can be tapped to peek -->
+      <!-- Vertical-stacked stepper: each pip shows number on top, "Part N" + title below -->
       <div class="-mx-1">
-        <div class="flex items-center gap-1 overflow-x-auto custom-scrollbar px-1 py-1 snap-x snap-mandatory">
+        <div class="flex items-stretch gap-1 overflow-x-auto custom-scrollbar px-1 py-1 snap-x">
           @for (part of wizardTourParts(); track part.id; let i = $index; let isLast = $last) {
             @let pIsPrereq = part.id === 'prereq';
             @let pIsActive = wizardTourActivePart() === part.id;
             @let pIsViewed = tourVisiblePartId() === part.id;
             @let pIsDone = allSubStepsDone(part.subSteps);
             <button (click)="tourPeekPart(part.id)" type="button"
-              class="snap-start flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-1 border transition-colors shrink-0"
-              [ngClass]="pIsViewed ? (pIsPrereq ? 'border-amber-400 bg-amber-50' : 'border-primary bg-primary/10') : pIsDone ? 'border-emerald-200 bg-emerald-50/60' : pIsActive ? 'border-primary/40 bg-white' : 'border-slate-200 bg-white'"
+              class="snap-start shrink-0 w-[78px] flex flex-col items-center justify-start gap-1 rounded-lg py-2 px-1 border transition-colors text-center"
+              [ngClass]="pIsViewed ? (pIsPrereq ? 'border-amber-400 bg-amber-50 ring-1 ring-amber-300' : 'border-primary bg-primary/10 ring-1 ring-primary/30') : pIsDone ? 'border-emerald-200 bg-emerald-50/60' : pIsActive ? 'border-primary/40 bg-white' : 'border-slate-200 bg-white hover:border-slate-300'"
               [title]="(pIsPrereq ? 'Prerequisites' : 'Part ' + i) + ' — ' + part.label">
-              <span class="size-6 rounded-full inline-flex items-center justify-center shrink-0 text-[11px] font-bold"
+              <span class="size-7 rounded-full inline-flex items-center justify-center shrink-0 text-[12px] font-bold"
                 [ngClass]="pIsDone ? 'bg-emerald-500 text-white' : pIsViewed ? (pIsPrereq ? 'bg-amber-500 text-white' : 'bg-primary text-white') : 'bg-slate-200 text-slate-600'">
                 @if (pIsDone) {
-                  <span class="material-symbols-outlined text-[14px]">check</span>
+                  <span class="material-symbols-outlined text-[15px]">check</span>
                 } @else if (pIsPrereq) {
-                  <span class="material-symbols-outlined text-[14px]">fact_check</span>
+                  <span class="material-symbols-outlined text-[15px]">fact_check</span>
                 } @else {
                   {{ i }}
                 }
               </span>
-              <span class="text-[10.5px] font-semibold leading-none"
-                [ngClass]="pIsViewed ? (pIsPrereq ? 'text-amber-800' : 'text-primary') : pIsDone ? 'text-emerald-700' : 'text-slate-600'">
+              <span class="text-[9.5px] font-bold uppercase tracking-wider leading-tight"
+                [ngClass]="pIsViewed ? (pIsPrereq ? 'text-amber-800' : 'text-primary') : pIsDone ? 'text-emerald-700' : 'text-slate-500'">
                 {{ pIsPrereq ? 'Prereq' : 'Part ' + i }}
               </span>
+              <span class="text-[10px] font-medium leading-tight line-clamp-2"
+                [ngClass]="pIsViewed ? 'text-slate-900' : pIsDone ? 'text-emerald-700' : 'text-slate-500'">
+                {{ part.label }}
+              </span>
             </button>
-            @if (!isLast) {
-              <span class="h-px w-3 shrink-0"
-                [ngClass]="pIsDone ? 'bg-emerald-300' : 'bg-slate-200'"></span>
-            }
           }
         </div>
         <p class="px-1 mt-1 text-[10px] text-slate-400 leading-snug">
@@ -5568,6 +5568,13 @@
       <span [innerHTML]="coach.text"></span>
     </span>
   </div>
+}
+
+<!-- Spotlight overlay: dims/blurs everything when the help hint is open. The
+     active target on the page (with .tour-pulse) is popped above this layer in
+     styles.css via .tour-hint-active. -->
+@if (hoverHintLines().length > 0) {
+  <div class="tour-spotlight-overlay"></div>
 }
 
 <!-- Floating tour hint tooltip — rendered at app shell level so it never gets

@@ -335,13 +335,15 @@ export class App implements OnInit {
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
-      // First-time-user redirect: if no license is set, send them to /admin/license
-      // and start the guided tour automatically.
+      // First-time-user: start the guided tour on the dashboard. The tour panel
+      // stays open and the user clicks the License sub-step to navigate to
+      // /admin/license when they're ready. We do NOT auto-redirect to admin.
       if (!this.firstNavHandled) {
         this.firstNavHandled = true;
         if (!this.licenseAlreadyValid()) {
-          this.wizardStartTour();
-          return; // wizardStartTour navigates to /admin/license
+          this.wizardStartTour('watcher', { land: 'dashboard' });
+          this.navigate('/dashboard');
+          return;
         }
       }
       // Check for multi-segment paths first
@@ -2104,8 +2106,21 @@ export class App implements OnInit {
   }
 
   closeDrawer() {
+    const wasBotManager = this.activeDrawer() === 'botmanager';
     this.activeDrawer.set(null);
     this.editingMonitorId.set(null);
+    // After closing the BotManager drawer during the guided tour, auto-advance:
+    // mark the step done (if the user typed valid credentials) and navigate to
+    // the next page so the panel keeps moving without the user clicking again.
+    if (wasBotManager && this.wizardChainActive()) {
+      if (this.wizardBmConfigured()) {
+        this.markTourActionDone('botManagerConfigured');
+      }
+      if (this.wizardActionsDone().botManagerConfigured) {
+        const next = this.wizardTourType() === 'loader' ? '/botmanagers' : '/projects';
+        this.navigate(next);
+      }
+    }
   }
 
   scheduleSkippedDefault = signal<boolean>(false);
@@ -2643,10 +2658,17 @@ export class App implements OnInit {
 
   // Kick off the full guided tour. If the license is already valid, skip step 1
   // and start at BotManager configuration.
-  wizardStartTour(type: 'watcher' | 'loader' = 'watcher') {
+  //
+  // `opts.land`:
+  //   - 'auto' (default): navigate to /admin/license when no license, else open the BotManager drawer.
+  //   - 'dashboard': stay on /dashboard with the panel visible — the user clicks the License sub-step
+  //                  to navigate when they're ready. Used by the first-time auto-launch so we don't
+  //                  drop the user into /admin/license out of the blue.
+  wizardStartTour(type: 'watcher' | 'loader' = 'watcher', opts: { land?: 'auto' | 'dashboard' } = {}) {
     this.wizardChainActive.set(true);
     this.wizardTourType.set(type);
     if (type === 'loader') this.setAppMode('loader');
+    else this.setAppMode('watcher');
     const licensePreDone = this.licenseAlreadyValid();
     this.wizardActionsDone.set({
       scenarioSent: false, directorLicensed: false, scenarioBuilderLicensed: false,
@@ -2664,6 +2686,7 @@ export class App implements OnInit {
       testRunGenerated: false
     });
     this.wizardLastRefresh.set(new Date());
+    if (opts.land === 'dashboard') return;
     if (licensePreDone) {
       // Open BotManager drawer directly on the current page.
       this.openDrawer('botmanager', 'onboarding');
@@ -2696,6 +2719,14 @@ export class App implements OnInit {
   // Save BotManager step (called from new BotManager drawer's save button)
   wizardAckPrereq(key: 'scenarioSent' | 'directorLicensed' | 'scenarioBuilderLicensed') {
     this.markTourActionDone(key);
+    // When all three prereqs are checked off, jump the user to Part 1
+    // (License upload) automatically so they don't have to hunt for it.
+    const a = this.wizardActionsDone();
+    if (a.scenarioBuilderLicensed && a.directorLicensed && a.scenarioSent
+        && !a.licenseUploaded && this.wizardChainActive()) {
+      this.tourPeekPartId.set(null);
+      this.navigate('/admin/license');
+    }
   }
 
   // Loader sub-step acknowledgments. Each one stamps the loaderActions signal
