@@ -2531,6 +2531,22 @@ export class App implements OnInit {
     }
   }
 
+  /**
+   * Skip the in-wizard "Set a Schedule" step and keep the default option.
+   * Used on /help/new at the Schedule step (label "Schedule" / Step 3 of the
+   * Watcher tour). Records the choice and advances to the next wizard step.
+   */
+  wizardSkipScheduleStep() {
+    this.wizardSchedule.set('default');
+    this.scheduleSkippedDefault.set(true);
+    this.markTourActionDone('scheduleAdded');
+    this.gsMarkComplete('schedule');
+    this.completedSteps.update(steps => steps.includes('schedule') ? steps : [...steps, 'schedule']);
+    if (this.wizardStep() < 5) {
+      this.wizardStep.update(s => s + 1);
+    }
+  }
+
   wizardBack() {
     if (this.wizardStep() > 0) {
       this.wizardStep.update(s => s - 1);
