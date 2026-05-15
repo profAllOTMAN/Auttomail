@@ -133,6 +133,47 @@ export interface TestRun {
   errors: number;
   startedAt: string;
   processes: string[];
+  // Loader-style table fields
+  planId?: string;          // links a run to its TestPlan
+  runNumber?: number;       // Run #1, #2 …
+  runDate?: string;         // formatted e.g. 03/13/26 12:55 AM
+  rampUpTime?: string;      // 00:00:09
+  steadyTime?: string;      // 00:01:00
+  totalDuration?: string;   // 00:03:00
+  succeeded?: number;       // 8
+  failed?: number;          // 0
+  totalIterations?: number; // 8
+  notes?: string;           // free-form
+}
+
+export interface TestPlanProcessRow {
+  name: string;
+  distributeBy: 'percentage' | 'rLoaders';
+  rLoaders: number;
+  pacing: number;
+  halt: 'first-error' | 'continue';
+}
+
+export interface TestPlanNotificationRule {
+  type: 'webhook' | 'email';
+  target: string;
+  events: string[];
+}
+
+export interface TestPlanDraft {
+  name: string;
+  project: string;
+  description: string;
+  distributionMethod: string;
+  totalRLoaders: number;
+  rampUpStart: number;
+  rampUpEvery: number;
+  durationType: 'fixed' | 'iterations';
+  durationMinutes: number;
+  iterations: number;
+  stopOnFirstError: boolean;
+  processes: TestPlanProcessRow[];
+  notificationRules: TestPlanNotificationRule[];
 }
 
 export interface TestPlan {
@@ -143,6 +184,17 @@ export interface TestPlan {
   modifiedDate: string;
   modifiedBy: string;
   active: boolean;       // toggle
+  // Loader create-form fields
+  distributionMethod?: string;
+  totalRLoaders?: number;
+  rampUpStart?: number;
+  rampUpEvery?: number;
+  durationType?: 'fixed' | 'iterations';
+  durationMinutes?: number;
+  iterations?: number;
+  stopOnFirstError?: boolean;
+  processes?: TestPlanProcessRow[];
+  notificationRules?: TestPlanNotificationRule[];
 }
 
 export interface Report {
@@ -288,6 +340,19 @@ export class App implements OnInit {
       // Check for multi-segment paths first
       if (url.startsWith('/admin/license')) {
         this.activeTab.set('admin-license');
+        return;
+      }
+      if (url.startsWith('/test-plans/new')) {
+        this.appMode.set('loader');
+        this.activeTab.set('test-plan-create');
+        this.beginNewPlan();
+        return;
+      }
+      if (url.startsWith('/test-plans/edit/')) {
+        this.appMode.set('loader');
+        this.activeTab.set('test-plan-create');
+        const id = url.split('/test-plans/edit/')[1].split('?')[0];
+        this.beginEditPlan(id);
         return;
       }
       if (url.startsWith('/help/documentation2')) {
@@ -495,6 +560,33 @@ export class App implements OnInit {
   getDemoTestRuns(): TestRun[] {
     return [
       {
+        id: 'tr-plan-5284-2', planId: 'AL-5284', runNumber: 2, runDate: '03/13/26 12:55 AM',
+        rampUpTime: '00:00:09', steadyTime: '00:01:00', totalDuration: '00:03:00',
+        succeeded: 8, failed: 0, totalIterations: 8, notes: '',
+        name: 'test', project: 'myproject', status: 'completed',
+        rLoadersActive: 0, rLoadersTotal: 1, vUsers: 1, duration: '3m', elapsed: '00:03:00',
+        progress: 100, responseTime: 145, successRate: 100, iterations: 8, errors: 0,
+        startedAt: '03/13/26 12:55 AM', processes: ['notepad']
+      },
+      {
+        id: 'tr-plan-5284-1', planId: 'AL-5284', runNumber: 1, runDate: '03/13/26 12:41 AM',
+        rampUpTime: '00:00:10', steadyTime: '00:01:00', totalDuration: '00:02:00',
+        succeeded: 8, failed: 0, totalIterations: 8, notes: '',
+        name: 'test', project: 'myproject', status: 'completed',
+        rLoadersActive: 0, rLoadersTotal: 1, vUsers: 1, duration: '2m', elapsed: '00:02:00',
+        progress: 100, responseTime: 132, successRate: 100, iterations: 8, errors: 0,
+        startedAt: '03/13/26 12:41 AM', processes: ['notepad']
+      },
+      {
+        id: 'tr-plan-4917-1', planId: 'AL-4917', runNumber: 1, runDate: '03/13/26 12:50 AM',
+        rampUpTime: '00:00:15', steadyTime: '00:02:00', totalDuration: '00:05:00',
+        succeeded: 14, failed: 2, totalIterations: 16, notes: 'spike at minute 3',
+        name: 'test22', project: 'myproject', status: 'completed',
+        rLoadersActive: 0, rLoadersTotal: 5, vUsers: 5, duration: '5m', elapsed: '00:05:00',
+        progress: 100, responseTime: 312, successRate: 87, iterations: 16, errors: 2,
+        startedAt: '03/13/26 12:50 AM', processes: ['notepad']
+      },
+      {
         id: 'tr-1',
         name: 'Peak Hour Login Load',
         project: 'Customer Portal',
@@ -607,20 +699,51 @@ export class App implements OnInit {
 
   // --- Test Plans (Loader mode) ---
   testPlans = signal<TestPlan[]>([
-    { id: 'AL-4857', name: 'test$', description: '', project: 'myproject', modifiedDate: '2026-04-29 01:15', modifiedBy: 'admin', active: true },
-    { id: 'AL-4917', name: 'test22', description: 'Spike test for checkout', project: 'myproject', modifiedDate: '2026-04-29 00:50', modifiedBy: 'admin', active: true },
-    { id: 'AL-5284', name: 'test', description: 'Baseline regression run', project: 'myproject', modifiedDate: '2026-04-29 00:41', modifiedBy: 'admin', active: true }
+    { id: 'AL-4857', name: 'test$', description: '', project: 'myproject', modifiedDate: '03/13/26 01:15 AM', modifiedBy: 'admin', active: true,
+      distributionMethod: 'All Available BotManagers', totalRLoaders: 5, rampUpStart: 1, rampUpEvery: 15,
+      durationType: 'fixed', durationMinutes: 3, iterations: 1, stopOnFirstError: false,
+      processes: [], notificationRules: [] },
+    { id: 'AL-4917', name: 'test22', description: 'Spike test for checkout', project: 'myproject', modifiedDate: '03/13/26 12:50 AM', modifiedBy: 'admin', active: true,
+      distributionMethod: 'All Available BotManagers', totalRLoaders: 5, rampUpStart: 1, rampUpEvery: 15,
+      durationType: 'fixed', durationMinutes: 5, iterations: 1, stopOnFirstError: false,
+      processes: [], notificationRules: [] },
+    { id: 'AL-5284', name: 'test', description: 'Baseline regression run', project: 'myproject', modifiedDate: '03/13/26 12:41 AM', modifiedBy: 'admin', active: true,
+      distributionMethod: 'All Available BotManagers', totalRLoaders: 5, rampUpStart: 1, rampUpEvery: 15,
+      durationType: 'fixed', durationMinutes: 3, iterations: 1, stopOnFirstError: false,
+      processes: [], notificationRules: [] }
   ]);
   testPlanSearch = signal<string>('');
+  testPlanSort = signal<{ col: string; dir: 'asc' | 'desc' } | null>(null);
+  sortTestPlans(col: string) {
+    this.testPlanSort.update(curr => {
+      if (curr?.col === col) {
+        return curr.dir === 'asc' ? { col, dir: 'desc' } : null;
+      }
+      return { col, dir: 'asc' };
+    });
+  }
   filteredTestPlans() {
     const q = this.testPlanSearch().toLowerCase();
-    if (!q) return this.testPlans();
-    return this.testPlans().filter(p =>
-      p.id.toLowerCase().includes(q) ||
-      p.name.toLowerCase().includes(q) ||
-      p.project.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
-    );
+    const sort = this.testPlanSort();
+    let list = this.testPlans();
+    if (q) {
+      list = list.filter(p =>
+        p.id.toLowerCase().includes(q) ||
+        p.name.toLowerCase().includes(q) ||
+        p.project.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q)
+      );
+    }
+    if (sort) {
+      const dir = sort.dir === 'asc' ? 1 : -1;
+      const col = sort.col as keyof TestPlan;
+      list = [...list].sort((a, b) => {
+        const av = String(a[col] ?? '').toLowerCase();
+        const bv = String(b[col] ?? '').toLowerCase();
+        return av < bv ? -dir : av > bv ? dir : 0;
+      });
+    }
+    return list;
   }
   toggleTestPlanActive(id: string) {
     this.testPlans.update(list => list.map(p => p.id === id ? { ...p, active: !p.active } : p));
@@ -628,19 +751,32 @@ export class App implements OnInit {
   deleteTestPlan(id: string) {
     this.testPlans.update(list => list.filter(p => p.id !== id));
   }
+  duplicateTestPlan(id: string) {
+    const plan = this.testPlans().find(p => p.id === id);
+    if (!plan) return;
+    const newId = 'AL-' + Math.floor(1000 + Math.random() * 9000);
+    this.testPlans.update(list => [{ ...plan, id: newId, name: plan.name + ' (copy)', modifiedDate: this.nowStamp() }, ...list]);
+  }
   runTestPlan(id: string) {
     const plan = this.testPlans().find(p => p.id === id);
     if (!plan) return;
     const newId = 'tr-' + Date.now();
+    const planRuns = this.testRuns().filter(r => r.planId === id).length;
+    const totalRLoaders = plan.totalRLoaders ?? 5;
+    const durationMin = plan.durationMinutes ?? 3;
+    const totalDuration = this.formatMinutesHMS(durationMin);
     this.testRuns.update(runs => [{
       id: newId,
+      planId: id,
+      runNumber: planRuns + 1,
+      runDate: this.nowStamp(),
       name: plan.name,
       project: plan.project,
       status: 'running',
       rLoadersActive: 1,
-      rLoadersTotal: 5,
-      vUsers: 5,
-      duration: '15m',
+      rLoadersTotal: totalRLoaders,
+      vUsers: totalRLoaders,
+      duration: durationMin + 'm',
       elapsed: '00:00:05',
       progress: 1,
       responseTime: 0,
@@ -648,8 +784,210 @@ export class App implements OnInit {
       iterations: 0,
       errors: 0,
       startedAt: 'Just now',
-      processes: ['notepad']
+      processes: ['notepad'],
+      rampUpTime: this.rampUpHMS(plan.rampUpStart ?? 1, plan.rampUpEvery ?? 15, totalRLoaders),
+      steadyTime: '00:01:00',
+      totalDuration,
+      succeeded: 0,
+      failed: 0,
+      totalIterations: 0,
+      notes: ''
     }, ...runs]);
+  }
+
+  // --- Test Plan create / edit form ---
+  editingPlanId = signal<string | null>(null);
+  planDraft = signal<TestPlanDraft>(this.emptyPlanDraft());
+  planFormWebhook = signal<string>('');
+  planFormEmail = signal<string>('');
+  planFormEvents = signal<string[]>([]);
+
+  emptyPlanDraft(): TestPlanDraft {
+    return {
+      name: '',
+      project: '',
+      description: '',
+      distributionMethod: 'All Available BotManagers',
+      totalRLoaders: 5,
+      rampUpStart: 1,
+      rampUpEvery: 15,
+      durationType: 'fixed',
+      durationMinutes: 0,
+      iterations: 1,
+      stopOnFirstError: false,
+      processes: [],
+      notificationRules: []
+    };
+  }
+  patchDraft(patch: Partial<TestPlanDraft>) {
+    this.planDraft.update(d => ({ ...d, ...patch }));
+  }
+  beginNewPlan() {
+    this.editingPlanId.set(null);
+    this.planDraft.set(this.emptyPlanDraft());
+    this.planFormWebhook.set('');
+    this.planFormEmail.set('');
+    this.planFormEvents.set([]);
+  }
+  beginEditPlan(id: string) {
+    const p = this.testPlans().find(x => x.id === id);
+    if (!p) { this.beginNewPlan(); return; }
+    this.editingPlanId.set(id);
+    this.planDraft.set({
+      name: p.name,
+      project: p.project,
+      description: p.description,
+      distributionMethod: p.distributionMethod ?? 'All Available BotManagers',
+      totalRLoaders: p.totalRLoaders ?? 5,
+      rampUpStart: p.rampUpStart ?? 1,
+      rampUpEvery: p.rampUpEvery ?? 15,
+      durationType: p.durationType ?? 'fixed',
+      durationMinutes: p.durationMinutes ?? 0,
+      iterations: p.iterations ?? 1,
+      stopOnFirstError: !!p.stopOnFirstError,
+      processes: [...(p.processes ?? [])],
+      notificationRules: [...(p.notificationRules ?? [])]
+    });
+    this.planFormWebhook.set('');
+    this.planFormEmail.set('');
+    this.planFormEvents.set([]);
+  }
+  addPlanProcess() {
+    this.planDraft.update(d => ({
+      ...d,
+      processes: [...d.processes, { name: 'notepad', distributeBy: 'percentage', rLoaders: 100, pacing: 0, halt: 'continue' }]
+    }));
+  }
+  removePlanProcess(i: number) {
+    this.planDraft.update(d => ({ ...d, processes: d.processes.filter((_, idx) => idx !== i) }));
+  }
+  togglePlanEvent(event: string) {
+    this.planFormEvents.update(list => list.includes(event) ? list.filter(e => e !== event) : [...list, event]);
+  }
+  submitPlanNotification() {
+    const events = this.planFormEvents();
+    const webhook = this.planFormWebhook().trim();
+    const email = this.planFormEmail().trim();
+    if (!events.length || (!webhook && !email)) return;
+    const rules: TestPlanNotificationRule[] = [];
+    if (webhook) rules.push({ type: 'webhook', target: webhook, events: [...events] });
+    if (email) rules.push({ type: 'email', target: email, events: [...events] });
+    this.planDraft.update(d => ({ ...d, notificationRules: [...d.notificationRules, ...rules] }));
+    this.planFormWebhook.set('');
+    this.planFormEmail.set('');
+    this.planFormEvents.set([]);
+  }
+  removePlanNotification(i: number) {
+    this.planDraft.update(d => ({ ...d, notificationRules: d.notificationRules.filter((_, idx) => idx !== i) }));
+  }
+  canSavePlan() {
+    const d = this.planDraft();
+    return d.name.trim().length > 0 && d.project.trim().length > 0;
+  }
+  savePlan(thenPublish = false) {
+    if (!this.canSavePlan()) return;
+    const d = this.planDraft();
+    const editingId = this.editingPlanId();
+    const stamp = this.nowStamp();
+    if (editingId) {
+      this.testPlans.update(list => list.map(p => p.id === editingId ? {
+        ...p,
+        name: d.name, description: d.description, project: d.project,
+        distributionMethod: d.distributionMethod, totalRLoaders: d.totalRLoaders,
+        rampUpStart: d.rampUpStart, rampUpEvery: d.rampUpEvery,
+        durationType: d.durationType, durationMinutes: d.durationMinutes, iterations: d.iterations,
+        stopOnFirstError: d.stopOnFirstError, processes: [...d.processes],
+        notificationRules: [...d.notificationRules],
+        active: thenPublish ? true : p.active,
+        modifiedDate: stamp
+      } : p));
+    } else {
+      const newId = 'AL-' + Math.floor(1000 + Math.random() * 9000);
+      const plan: TestPlan = {
+        id: newId,
+        name: d.name, description: d.description, project: d.project,
+        modifiedDate: stamp, modifiedBy: 'admin', active: !!thenPublish,
+        distributionMethod: d.distributionMethod, totalRLoaders: d.totalRLoaders,
+        rampUpStart: d.rampUpStart, rampUpEvery: d.rampUpEvery,
+        durationType: d.durationType, durationMinutes: d.durationMinutes, iterations: d.iterations,
+        stopOnFirstError: d.stopOnFirstError, processes: [...d.processes],
+        notificationRules: [...d.notificationRules]
+      };
+      this.testPlans.update(list => [plan, ...list]);
+      this.editingPlanId.set(newId);
+    }
+    this.navigate('/test-plans');
+  }
+  private nowStamp(): string {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const yy = String(d.getFullYear()).slice(-2);
+    let h = d.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${mm}/${dd}/${yy} ${String(h).padStart(2, '0')}:${mins} ${ampm}`;
+  }
+  private formatMinutesHMS(mins: number): string {
+    const total = Math.max(0, Math.floor(mins * 60));
+    const hh = String(Math.floor(total / 3600)).padStart(2, '0');
+    const mm = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+    const ss = String(total % 60).padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  }
+  private rampUpHMS(start: number, every: number, total: number): string {
+    const steps = Math.max(0, total - start);
+    return this.formatMinutesHMS((steps * every) / 60);
+  }
+
+  // --- Test Runs page extras (filter by plan, selection for compare/delete) ---
+  testRunsSelectedPlanId = signal<string | null>(null);
+  testRunsCycle = signal<string>('Default');
+  setTestRunsPlan(id: string) {
+    this.testRunsSelectedPlanId.set(id ? id : null);
+    this.clearTestRunSelected();
+  }
+  testRunsSelected = signal<Set<string>>(new Set<string>());
+  toggleTestRunSelected(id: string) {
+    this.testRunsSelected.update(s => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  isTestRunSelected(id: string) {
+    return this.testRunsSelected().has(id);
+  }
+  clearTestRunSelected() {
+    this.testRunsSelected.set(new Set<string>());
+  }
+  testRunsForSelectedPlan() {
+    const id = this.testRunsSelectedPlanId();
+    if (!id) return [];
+    return this.testRuns().filter(r => r.planId === id);
+  }
+  testRunsSelectedPlan() {
+    const id = this.testRunsSelectedPlanId();
+    return id ? this.testPlans().find(p => p.id === id) ?? null : null;
+  }
+  testRunsLastRunDate() {
+    const runs = this.testRunsForSelectedPlan();
+    if (!runs.length) return '—';
+    return runs[0].runDate ?? runs[0].startedAt;
+  }
+  deleteSelectedTestRuns() {
+    const sel = this.testRunsSelected();
+    if (!sel.size) return;
+    this.testRuns.update(runs => runs.filter(r => !sel.has(r.id)));
+    this.clearTestRunSelected();
+  }
+  canCompareTestRuns() {
+    return this.testRunsSelected().size === 2;
+  }
+  clearTestRunsPlanFilter() {
+    this.testRunsSelectedPlanId.set(null);
+    this.clearTestRunSelected();
   }
 
   // --- Reports (Watcher mode) ---

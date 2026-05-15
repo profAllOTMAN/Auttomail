@@ -9,6 +9,8 @@ export const routes: Routes = [
   { path: 'projects', data: { tab: 'projects' }, children: [] },
   { path: 'reports', data: { tab: 'reports' }, children: [] },
   { path: 'test-plans', data: { tab: 'test-plans' }, children: [] },
+  { path: 'test-plans/new', data: { tab: 'test-plan-create' }, children: [] },
+  { path: 'test-plans/edit/:id', data: { tab: 'test-plan-create' }, children: [] },
   { path: 'test-runs', data: { tab: 'test-runs' }, children: [] },
   { path: 'botmanagers', data: { tab: 'botmanagers' }, children: [] },
   { path: 'admin/license', data: { tab: 'admin-license' }, children: [] },

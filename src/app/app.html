@@ -4179,348 +4179,595 @@
         </div>
       </div>
     } @else if (activeTab() === 'test-plans') {
-      <!-- Test Plans (Loader) -->
-      <div class="mt-6 space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900">Test Plans</h2>
-            <p class="text-sm text-slate-500 mt-1">Define what scenarios run, how many rLoaders, and the ramp-up policy.</p>
+      <!-- Test Plans (Loader) — table layout -->
+      <div class="mt-2 pb-12">
+        <!-- Title bar with right-aligned filter -->
+        <div class="flex items-center justify-between gap-4 pb-2 border-b-2 border-emerald-500/70">
+          <h2 class="text-lg font-semibold text-emerald-700">Test plans</h2>
+          <div class="relative w-full max-w-xs">
+            <input type="text" [value]="testPlanSearch()" (input)="testPlanSearch.set($any($event.target).value)"
+              placeholder="Filter"
+              class="block w-full pl-3 pr-9 py-1.5 text-sm text-slate-700 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-slate-400" />
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
           </div>
-          <button class="w-full sm:w-auto justify-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm shadow-primary/20">
-            <span class="material-symbols-outlined text-[18px]">add</span> New Test Plan
+        </div>
+
+        <!-- Toolbar -->
+        <div class="flex items-center gap-2 py-3">
+          <button (click)="navigate('/test-plans/new')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">add_circle</span> Test plan
+          </button>
+          <button class="size-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" title="Refresh">
+            <span class="material-symbols-outlined text-[20px]">refresh</span>
+          </button>
+          <button class="size-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" title="Clear filter" (click)="testPlanSearch.set('')">
+            <span class="material-symbols-outlined text-[20px]">layers_clear</span>
           </button>
         </div>
 
-        <!-- Search -->
-        <div class="relative w-full sm:max-w-md">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
-          </div>
-          <input type="text" [value]="testPlanSearch()" (input)="testPlanSearch.set($any($event.target).value)" class="block w-full pl-10 pr-4 py-2 text-sm text-slate-900 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Search by ID, name, or project..." />
+        <!-- Table -->
+        <div class="overflow-x-auto bg-white rounded-md border border-slate-200">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left text-slate-500 text-[12px] border-b border-slate-200">
+                <th class="px-3 py-2 font-medium w-[160px]">Actions</th>
+                <th class="px-3 py-2 font-medium w-[110px]">ID</th>
+                <th (click)="sortTestPlans('name')" class="px-3 py-2 font-medium cursor-pointer select-none">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span> Test plan name
+                  </span>
+                </th>
+                <th (click)="sortTestPlans('description')" class="px-3 py-2 font-medium cursor-pointer select-none">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span> Description
+                  </span>
+                </th>
+                <th (click)="sortTestPlans('project')" class="px-3 py-2 font-medium cursor-pointer select-none w-[140px]">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span> Project
+                  </span>
+                </th>
+                <th (click)="sortTestPlans('modifiedDate')" class="px-3 py-2 font-medium cursor-pointer select-none w-[180px]">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span> Modified date
+                  </span>
+                </th>
+                <th class="px-3 py-2 font-medium w-[120px]">Modified by</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (plan of filteredTestPlans(); track plan.id) {
+                <tr class="border-b border-slate-100 last:border-b-0 hover:bg-emerald-50/40 transition-colors"
+                    [class.bg-emerald-50]="plan.active && plan.id === 'AL-4917'">
+                  <td class="px-3 py-2">
+                    <div class="flex items-center gap-2">
+                      <!-- Active toggle pill -->
+                      <button (click)="toggleTestPlanActive(plan.id)" type="button"
+                              class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+                              [class.bg-blue-500]="plan.active" [class.bg-slate-300]="!plan.active"
+                              [title]="plan.active ? 'Disable' : 'Enable'">
+                        <span class="absolute size-4 rounded-full bg-white shadow transition-transform"
+                              [style.transform]="plan.active ? 'translateX(18px)' : 'translateX(2px)'">
+                          @if (plan.active) {
+                            <span class="material-symbols-outlined text-[12px] text-blue-500 leading-none">check</span>
+                          }
+                        </span>
+                      </button>
+                      <!-- Delete -->
+                      <button (click)="deleteTestPlan(plan.id)" title="Delete"
+                              class="size-7 inline-flex items-center justify-center rounded text-rose-500 hover:bg-rose-50">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                      <!-- Run / publish -->
+                      <button (click)="runTestPlan(plan.id); testRunsSelectedPlanId.set(plan.id); navigate('/test-runs')"
+                              [disabled]="!plan.active" title="Run"
+                              class="size-7 inline-flex items-center justify-center rounded text-emerald-600 hover:bg-emerald-50 disabled:text-slate-300 disabled:hover:bg-transparent">
+                        <span class="material-symbols-outlined text-[18px]">upload</span>
+                      </button>
+                      <!-- Duplicate -->
+                      <button (click)="duplicateTestPlan(plan.id)" title="Duplicate"
+                              class="size-7 inline-flex items-center justify-center rounded text-slate-500 hover:bg-slate-100">
+                        <span class="material-symbols-outlined text-[18px]">library_add</span>
+                      </button>
+                      <!-- View runs -->
+                      <button (click)="testRunsSelectedPlanId.set(plan.id); navigate('/test-runs')" title="View test runs"
+                              class="size-7 inline-flex items-center justify-center rounded text-slate-500 hover:bg-slate-100">
+                        <span class="material-symbols-outlined text-[18px]">article</span>
+                      </button>
+                    </div>
+                  </td>
+                  <td class="px-3 py-2 text-slate-700 font-mono text-[12px]">{{ plan.id }}</td>
+                  <td class="px-3 py-2">
+                    <a (click)="navigate('/test-plans/edit/' + plan.id)" class="text-emerald-700 underline underline-offset-2 cursor-pointer hover:text-emerald-800">{{ plan.name }}</a>
+                  </td>
+                  <td class="px-3 py-2 text-slate-700">{{ plan.description }}</td>
+                  <td class="px-3 py-2 text-slate-700">{{ plan.project }}</td>
+                  <td class="px-3 py-2">
+                    <span class="inline-flex items-center gap-1 text-[12px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                      <span class="material-symbols-outlined text-[14px]">schedule</span> {{ plan.modifiedDate }}
+                    </span>
+                  </td>
+                  <td class="px-3 py-2 text-slate-700">{{ plan.modifiedBy }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="px-3 py-10 text-center text-slate-400 text-sm">No test plans match your filter.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
 
-        <!-- Test plan cards -->
-        <div class="flex flex-col gap-3">
-          @for (plan of filteredTestPlans(); track plan.id) {
-            <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-                 [class.border-l-emerald-400]="plan.active"
-                 [class.border-l-slate-300]="!plan.active"
-                 style="border-left-width: 3px;">
-              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-                <!-- Identity -->
-                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
-                  <div class="size-10 flex items-center justify-center rounded-md shrink-0"
-                       [class.bg-emerald-50]="plan.active"
-                       [class.text-emerald-600]="plan.active"
-                       [class.bg-slate-100]="!plan.active"
-                       [class.text-slate-500]="!plan.active">
-                    <span class="material-symbols-outlined">assignment</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <h3 class="font-bold text-slate-900 text-sm">{{ plan.name }}</h3>
-                    <div class="flex items-center gap-2 mt-0.5">
-                      <span class="text-[11px] font-mono text-slate-500">{{ plan.id }}</span>
-                      <span class="flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-md"
-                            [class.text-emerald-700]="plan.active" [class.bg-emerald-100]="plan.active"
-                            [class.text-slate-600]="!plan.active" [class.bg-slate-100]="!plan.active">
-                        @if (plan.active) {
-                          <span class="size-1.5 rounded-full bg-emerald-500"></span> Active
-                        } @else {
-                          <span class="size-1.5 rounded-full bg-slate-400"></span> Disabled
-                        }
-                      </span>
-                    </div>
-                    @if (plan.description) {
-                      <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[260px]">{{ plan.description }}</p>
-                    }
-                  </div>
-                </div>
-
-                <!-- Quick stats (no-wrap, grid for stable alignment) -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[480px]">
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Project</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">{{ plan.project }}</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Modified</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">{{ plan.modifiedDate }}</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Modified by</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">{{ plan.modifiedBy }}</span>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
-                  <div class="flex items-center gap-1">
-                    <button (click)="toggleTestPlanActive(plan.id)"
-                            class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors"
-                            [class.text-slate-600]="plan.active"
-                            [class.hover:bg-slate-100]="plan.active"
-                            [class.text-emerald-600]="!plan.active"
-                            [class.hover:bg-emerald-50]="!plan.active">
-                      <span class="material-symbols-outlined text-[16px]">{{ plan.active ? 'do_not_disturb_on' : 'power' }}</span>
-                      {{ plan.active ? 'Deactivate' : 'Activate' }}
-                    </button>
-                    <button (click)="runTestPlan(plan.id); navigate('/test-runs')"
-                            [disabled]="!plan.active"
-                            class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors text-primary hover:bg-primary/10 disabled:text-slate-300 disabled:cursor-not-allowed disabled:hover:bg-transparent">
-                      <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
-                    </button>
-                  </div>
-                  <!-- Kebab -->
-                  <div class="relative">
-                    <button (click)="toggleKebab('plan:' + plan.id)" title="More"
-                            class="text-slate-400 hover:text-slate-600 transition-colors size-8 flex items-center justify-center rounded-md hover:bg-slate-100">
-                      <span class="material-symbols-outlined text-[20px]">more_vert</span>
-                    </button>
-                    @if (openKebabId() === 'plan:' + plan.id) {
-                      <div class="fixed inset-0 z-20" (click)="closeKebab()"></div>
-                      <div class="absolute right-0 mt-1 w-44 bg-white rounded-md shadow-lg border border-slate-200 z-30 py-1">
-                        <button (click)="closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                          <span class="material-symbols-outlined text-[16px]">edit</span> Edit test plan
-                        </button>
-                        <button (click)="closeKebab()" class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                          <span class="material-symbols-outlined text-[16px]">content_copy</span> Duplicate
-                        </button>
-                        <div class="my-1 border-t border-slate-100"></div>
-                        <button (click)="deleteTestPlan(plan.id); closeKebab()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
-                          <span class="material-symbols-outlined text-[16px]">delete</span> Delete
-                        </button>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
-              <div class="bg-emerald-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
-                <span class="material-symbols-outlined text-3xl">assignment</span>
-              </div>
-              <h3 class="text-lg font-bold text-slate-900 mb-2">No test plans yet</h3>
-              <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Create your first test plan to define what scenarios to load-test, how many rLoaders to use, and the ramp-up policy.</p>
-              <button class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors inline-flex items-center gap-2 shadow-sm shadow-primary/20">
-                <span class="material-symbols-outlined text-[18px]">add</span> New Test Plan
-              </button>
-            </div>
-          }
+        <!-- Pagination -->
+        <div class="flex items-center justify-end gap-4 py-2 text-xs text-slate-600">
+          <span>Items per page:</span>
+          <span class="inline-flex items-center gap-1 border border-slate-200 rounded px-2 py-1">
+            10 <span class="material-symbols-outlined text-[16px]">expand_more</span>
+          </span>
+          <span>1 – {{ filteredTestPlans().length }} of {{ filteredTestPlans().length }}</span>
+          <div class="flex items-center gap-1 text-slate-400">
+            <span class="material-symbols-outlined text-[18px]">first_page</span>
+            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            <span class="material-symbols-outlined text-[18px]">last_page</span>
+          </div>
         </div>
       </div>
     } @else if (activeTab() === 'test-runs') {
-      <!-- Test Runs (Loader) -->
-      <div class="mt-6 space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900">Test Runs</h2>
-            <p class="text-sm text-slate-500 mt-1">Live and historical executions of your test plans.</p>
-          </div>
-        </div>
-
-        <!-- KPI Row -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
-              <span class="material-symbols-outlined text-[14px] text-blue-500">play_circle</span> Running
-            </div>
-            <div class="text-2xl font-bold text-slate-900">{{ testRunsCountByStatus('running') }}</div>
-            <div class="text-[11px] text-slate-400 mt-1">active tests</div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
-              <span class="material-symbols-outlined text-[14px] text-amber-500">schedule</span> Queued
-            </div>
-            <div class="text-2xl font-bold text-slate-900">{{ testRunsCountByStatus('queued') }}</div>
-            <div class="text-[11px] text-slate-400 mt-1">waiting to start</div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
-              <span class="material-symbols-outlined text-[14px] text-violet-500">group</span> vUsers
-            </div>
-            <div class="text-2xl font-bold text-slate-900">{{ totalVUsersRunning() }}</div>
-            <div class="text-[11px] text-slate-400 mt-1">currently simulated</div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
-              <span class="material-symbols-outlined text-[14px] text-cyan-500">hub</span> rLoaders
-            </div>
-            <div class="text-2xl font-bold text-slate-900">{{ totalActiveRLoaders() }}</div>
-            <div class="text-[11px] text-slate-400 mt-1">active desktops</div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
-              <span class="material-symbols-outlined text-[14px] text-emerald-500">timer</span> Avg Response
-            </div>
-            <div class="text-2xl font-bold text-slate-900">{{ avgResponseTime() }}<span class="text-sm font-normal text-slate-400 ml-1">ms</span></div>
-            <div class="text-[11px] text-slate-400 mt-1">across active runs</div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <div class="flex items-center gap-2 text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-2">
-              <span class="material-symbols-outlined text-[14px] text-rose-500">error</span> Errors
-            </div>
-            <div class="text-2xl font-bold text-slate-900">{{ totalErrorsToday() }}</div>
-            <div class="text-[11px] text-slate-400 mt-1">today</div>
-          </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <div class="relative flex-1 min-w-[200px] max-w-sm">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-            <input type="text" [value]="testRunsSearch()" (input)="testRunsSearch.set($any($event.target).value)"
-              placeholder="Search tests or projects..."
-              class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-          </div>
-          <div class="inline-flex rounded-full bg-slate-100 p-1">
-            @for (opt of [
-              {value: 'all', label: 'All'},
-              {value: 'running', label: 'Running'},
-              {value: 'queued', label: 'Queued'},
-              {value: 'completed', label: 'Completed'},
-              {value: 'failed', label: 'Failed'},
-              {value: 'disabled', label: 'Disabled'}
-            ]; track opt.value) {
-              <button (click)="testRunsStatusFilter.set($any(opt.value))"
-                class="px-3 py-1 text-xs font-semibold rounded-full transition-colors"
-                [class.bg-white]="testRunsStatusFilter() === opt.value"
-                [class.text-slate-900]="testRunsStatusFilter() === opt.value"
-                [class.shadow-sm]="testRunsStatusFilter() === opt.value"
-                [class.text-slate-500]="testRunsStatusFilter() !== opt.value">
-                {{ opt.label }}
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Test run list (full-width rows) -->
-        <div class="flex flex-col gap-3">
-          @for (run of filteredTestRuns(); track run.id) {
-            <div class="bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-                 [class.border-l-blue-400]="run.status === 'running'"
-                 [class.border-l-amber-400]="run.status === 'queued'"
-                 [class.border-l-emerald-400]="run.status === 'completed'"
-                 [class.border-l-rose-400]="run.status === 'failed'"
-                 [class.border-l-slate-300]="run.status === 'disabled'"
-                 [class.opacity-60]="run.status === 'disabled'"
-                 style="border-left-width: 3px;">
-              <div class="p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-                <!-- Identity & Status -->
-                <div class="flex items-start sm:items-center gap-4 w-full xl:w-auto xl:min-w-[280px]">
-                  <div class="size-10 flex items-center justify-center rounded-md shrink-0"
-                       [ngClass]="testRunStatusColor(run.status)">
-                    <span class="material-symbols-outlined">{{ testRunStatusIcon(run.status) }}</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <h3 class="font-bold text-slate-900 text-sm truncate">{{ run.name }}</h3>
-                    <div class="flex items-center gap-2 mt-0.5">
-                      <span class="text-[11px] font-medium px-1.5 py-0.5 rounded-md inline-flex items-center gap-1"
-                            [ngClass]="testRunStatusColor(run.status)">
-                        {{ run.status }}
-                      </span>
-                      <span class="text-[11px] text-slate-500">{{ run.startedAt }}</span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-1 truncate max-w-[260px]">{{ run.project }} · {{ run.processes.join(', ') }}</p>
-                  </div>
-                </div>
-
-                <!-- Quick stats (no-wrap, grid for stable alignment) -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-3 w-full xl:flex-1 py-3 xl:py-0 border-y border-slate-100 xl:border-y-0 xl:px-4 xl:max-w-[760px]">
-                  <div class="flex flex-col min-w-0 col-span-2 sm:col-span-1">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Progress</span>
-                    <div class="flex items-center gap-2">
-                      <div class="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full transition-all duration-500"
-                             [ngClass]="{
-                               'bg-blue-500': run.status === 'running',
-                               'bg-emerald-500': run.status === 'completed',
-                               'bg-rose-500': run.status === 'failed',
-                               'bg-amber-400': run.status === 'queued',
-                               'bg-slate-300': run.status === 'disabled'
-                             }"
-                             [style.width.%]="run.progress"></div>
-                      </div>
-                      <span class="text-[11px] font-semibold text-slate-700">{{ run.progress }}%</span>
-                    </div>
-                    <span class="text-[10px] text-slate-400 mt-0.5 truncate">{{ run.elapsed }} / {{ run.duration }}</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">rLoaders</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">{{ run.rLoadersActive }}/{{ run.rLoadersTotal }}</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">vUsers</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">{{ run.vUsers }}</span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Response</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">{{ run.responseTime }}<span class="text-[10px] font-normal text-slate-400 ml-0.5">ms</span></span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Success</span>
-                    <span class="text-xs font-semibold truncate"
-                          [ngClass]="run.successRate >= 95 ? 'text-emerald-600' : run.successRate >= 80 ? 'text-amber-600' : 'text-rose-600'">
-                      {{ run.successRate }}%
-                    </span>
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Iter / Err</span>
-                    <span class="text-xs font-semibold text-slate-700 truncate">
-                      {{ run.iterations }}
-                      @if (run.errors > 0) {
-                        <span class="text-rose-600">· {{ run.errors }} err</span>
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
-                  <div class="flex items-center gap-1 flex-wrap">
-                    @if (run.status === 'running') {
-                      <button (click)="stopTestRun(run.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">stop</span> Stop
-                      </button>
-                    } @else if (run.status === 'queued') {
-                      <button (click)="runTestRun(run.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">play_arrow</span> Run
-                      </button>
-                    } @else if (run.status === 'failed') {
-                      <button (click)="retryTestRun(run.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">refresh</span> Retry
-                      </button>
-                    } @else if (run.status === 'completed') {
-                      <button (click)="retryTestRun(run.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">replay</span> Re-run
-                      </button>
-                    } @else if (run.status === 'disabled') {
-                      <button (click)="toggleTestRunDisabled(run.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">play_arrow</span> Enable
-                      </button>
-                    }
-                    @if (run.status !== 'disabled') {
-                      <button (click)="toggleTestRunDisabled(run.id)"
-                              class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
-                        <span class="material-symbols-outlined text-[16px]">do_not_disturb_on</span> Disable
-                      </button>
-                    }
-                  </div>
-                </div>
+      <!-- Test Runs (Loader) — table layout -->
+      <div class="mt-2 pb-12">
+        <!-- Filter row + right info -->
+        <div class="flex items-end justify-between gap-4 pb-3 border-b-2 border-emerald-500/70">
+          <div class="flex items-end gap-3 flex-wrap">
+            <!-- Test plan selector -->
+            <div class="relative">
+              <label class="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500">Select a test plan</label>
+              <div class="flex items-center bg-slate-100 rounded-md border border-slate-300">
+                <select [value]="testRunsSelectedPlanId() ?? ''"
+                        (change)="setTestRunsPlan($any($event.target).value)"
+                        class="appearance-none bg-transparent pl-3 pr-2 py-2 text-sm min-w-[180px] focus:outline-none">
+                  <option value="">All test plans</option>
+                  @for (plan of testPlans(); track plan.id) {
+                    <option [value]="plan.id">{{ plan.name }}</option>
+                  }
+                </select>
+                @if (testRunsSelectedPlanId()) {
+                  <button (click)="clearTestRunsPlanFilter()" class="px-2 text-slate-500 hover:text-rose-500" title="Clear">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                }
               </div>
+              @if (testRunsSelectedPlan()) {
+                <p class="text-[11px] text-slate-400 mt-1">
+                  {{ testRunsSelectedPlan()!.id }} &nbsp; Click <strong class="text-slate-600">X</strong> to clear filter and select another test plan
+                </p>
+              }
             </div>
-          } @empty {
-            <div class="bg-white border border-dashed border-slate-200 rounded-lg p-12 text-center">
-              <span class="material-symbols-outlined text-4xl text-slate-300">search_off</span>
-              <p class="text-sm text-slate-500 mt-2">No test runs match your filters</p>
+            <!-- Project test cycle -->
+            <div class="relative">
+              <label class="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500">Project test cycle</label>
+              <select [value]="testRunsCycle()" (change)="testRunsCycle.set($any($event.target).value)"
+                      class="appearance-none bg-slate-100 border border-slate-300 rounded-md pl-3 pr-8 py-2 text-sm min-w-[140px] focus:outline-none">
+                <option>Default</option>
+                <option>Smoke</option>
+                <option>Regression</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+            </div>
+          </div>
+          @if (testRunsSelectedPlan(); as selectedPlan) {
+            <div class="text-xs text-slate-500 pb-2 text-right">
+              Project: <span class="text-slate-700 font-medium">{{ selectedPlan.project }}</span>
+              <span class="text-slate-300 mx-1">|</span>
+              Last run date: <span class="text-slate-700 font-medium">{{ testRunsLastRunDate() }}</span>
             </div>
           }
         </div>
+
+        @if (!testRunsSelectedPlanId()) {
+          <!-- No plan selected: prompt -->
+          <div class="bg-white border border-dashed border-slate-200 rounded-md p-12 text-center mt-6">
+            <span class="material-symbols-outlined text-4xl text-emerald-500">filter_alt</span>
+            <p class="text-sm text-slate-600 mt-2 font-medium">Select a test plan to view its runs</p>
+            <p class="text-xs text-slate-400 mt-1">Or open the Test plans page and click <span class="font-mono">↑</span> on a row to launch a new run.</p>
+          </div>
+        } @else {
+          <!-- Toolbar -->
+          <div class="flex items-center gap-2 py-3">
+            <button [disabled]="!canCompareTestRuns()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-[16px]">compare_arrows</span> Compare two test runs
+            </button>
+            <button [disabled]="!testRunsSelected().size" (click)="deleteSelectedTestRuns()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-[16px]">delete</span> Delete test runs
+            </button>
+            <button class="size-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" title="Refresh">
+              <span class="material-symbols-outlined text-[20px]">refresh</span>
+            </button>
+            <button class="size-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100" title="Clear filter" (click)="clearTestRunSelected()">
+              <span class="material-symbols-outlined text-[20px]">layers_clear</span>
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto bg-white rounded-md border border-slate-200">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="text-left text-slate-500 text-[12px] border-b border-slate-200">
+                  <th class="px-3 py-2 w-[40px]"></th>
+                  <th class="px-3 py-2 font-medium w-[110px]">Test run</th>
+                  <th class="px-3 py-2 font-medium w-[170px]">Run date</th>
+                  <th class="px-3 py-2 font-medium">Run details</th>
+                  <th class="px-3 py-2 font-medium w-[110px]"><span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span># Succeeded</span></th>
+                  <th class="px-3 py-2 font-medium w-[100px]"><span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span># Failed</span></th>
+                  <th class="px-3 py-2 font-medium w-[80px]"><span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-slate-400">drag_indicator</span>Total</span></th>
+                  <th class="px-3 py-2 font-medium">Test run notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (run of testRunsForSelectedPlan(); track run.id) {
+                  <tr class="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
+                    <td class="px-3 py-2">
+                      <input type="checkbox" [checked]="isTestRunSelected(run.id)" (change)="toggleTestRunSelected(run.id)"
+                             class="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <span class="inline-flex items-center gap-1 bg-[#762D52] text-white text-[12px] font-semibold rounded-full px-3 py-1">
+                        Run <span class="font-mono">#{{ run.runNumber ?? 1 }}</span>
+                      </span>
+                    </td>
+                    <td class="px-3 py-2 text-slate-700">{{ run.runDate ?? run.startedAt }}</td>
+                    <td class="px-3 py-2">
+                      <div class="flex items-center gap-2 flex-wrap text-[11px]">
+                        <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">
+                          <span class="material-symbols-outlined text-[14px]">group</span> {{ run.rLoadersTotal }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                          <span class="material-symbols-outlined text-[14px]">trending_up</span> {{ run.rampUpTime ?? '00:00:00' }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 bg-fuchsia-50 text-fuchsia-700 px-2 py-0.5 rounded">
+                          <span class="material-symbols-outlined text-[14px]">more_horiz</span> {{ run.steadyTime ?? '00:00:00' }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-0.5 rounded">
+                          <span class="material-symbols-outlined text-[14px]">schedule</span> {{ run.totalDuration ?? run.duration }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-3 py-2">
+                      <span class="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                        <span class="material-symbols-outlined text-[16px]">check</span> {{ run.succeeded ?? 0 }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-2">
+                      <span class="inline-flex items-center gap-1 font-semibold"
+                            [class.text-rose-600]="(run.failed ?? 0) > 0"
+                            [class.text-slate-400]="(run.failed ?? 0) === 0">
+                        <span class="size-4 inline-flex items-center justify-center rounded-full text-white text-[10px]"
+                              [class.bg-rose-500]="(run.failed ?? 0) > 0"
+                              [class.bg-slate-300]="(run.failed ?? 0) === 0">!</span>
+                        {{ run.failed ?? 0 }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-2 text-slate-700 font-semibold">{{ run.totalIterations ?? run.iterations }}</td>
+                    <td class="px-3 py-2">
+                      @if (run.notes) {
+                        <span class="text-slate-700">{{ run.notes }}</span>
+                      } @else {
+                        <span class="text-slate-400 italic">click to add</span>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="8" class="px-3 py-10 text-center text-slate-400 text-sm">No runs recorded for this plan yet.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="flex items-center justify-end gap-4 py-2 text-xs text-slate-600">
+            <span>Items per page:</span>
+            <span class="inline-flex items-center gap-1 border border-slate-200 rounded px-2 py-1">
+              10 <span class="material-symbols-outlined text-[16px]">expand_more</span>
+            </span>
+            <span>1 – {{ testRunsForSelectedPlan().length }} of {{ testRunsForSelectedPlan().length }}</span>
+            <div class="flex items-center gap-1 text-slate-400">
+              <span class="material-symbols-outlined text-[18px]">first_page</span>
+              <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+              <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+              <span class="material-symbols-outlined text-[18px]">last_page</span>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (activeTab() === 'test-plan-create') {
+      <!-- New / Edit Test Plan (Loader) -->
+      <div class="mt-2 pb-12">
+        <!-- Title + top-right actions -->
+        <div class="flex items-center justify-between gap-4 pb-3 border-b-2 border-emerald-500/70">
+          <h2 class="text-lg font-semibold text-emerald-700">
+            {{ editingPlanId() ? 'Edit test plan' : 'New test plan' }}
+          </h2>
+          <div class="flex items-center gap-2">
+            <button (click)="navigate('/test-plans')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#9C7B1E] text-white text-xs font-semibold hover:bg-[#856815] transition-colors shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">arrow_back</span> Test plans
+            </button>
+            <button [disabled]="!canSavePlan()" (click)="savePlan(false)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-[16px]">list_alt</span> View execution plan
+            </button>
+            <button [disabled]="!canSavePlan()" (click)="savePlan(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-[16px]">save</span> Publish
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: Test plan information -->
+        <section class="bg-white border border-slate-200 rounded-md mt-4">
+          <header class="px-4 pt-4 pb-1 border-b border-slate-100">
+            <h3 class="text-emerald-700 font-semibold text-base">1. Test plan information</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Select a project, rLoader distribution and ramp-up policy</p>
+          </header>
+          <div class="px-4 py-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Test plan name -->
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">Test plan name<span class="text-rose-500">*</span></label>
+              <input type="text" [value]="planDraft().name" (input)="patchDraft({ name: $any($event.target).value })"
+                     placeholder=""
+                     class="w-full bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            </div>
+            <!-- Project -->
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">Project<span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <select [value]="planDraft().project" (change)="patchDraft({ project: $any($event.target).value })"
+                        class="w-full appearance-none bg-slate-100 border border-slate-300 rounded px-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                  <option value=""></option>
+                  <option value="myproject">myproject</option>
+                  @for (p of projects(); track p.id) {
+                    <option [value]="p.name">{{ p.name }}</option>
+                  }
+                </select>
+                <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+              </div>
+            </div>
+            <!-- Description -->
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">Description</label>
+              <textarea [value]="planDraft().description" (input)="patchDraft({ description: $any($event.target).value })" rows="1"
+                        class="w-full bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"></textarea>
+            </div>
+          </div>
+
+          <div class="px-4 pb-2">
+            <p class="text-sm font-medium text-slate-700">rLoader distribution method
+              <span class="inline-flex items-center justify-center size-4 rounded-full bg-blue-100 text-blue-600 ml-1" title="How rLoaders are picked across BotManagers">
+                <span class="material-symbols-outlined text-[12px]">info</span>
+              </span>
+            </p>
+          </div>
+          <div class="px-4 pb-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">Select distribution type to be used in this test<span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <select [value]="planDraft().distributionMethod" (change)="patchDraft({ distributionMethod: $any($event.target).value })"
+                        class="w-full appearance-none bg-slate-100 border border-slate-300 rounded px-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                  <option>All Available BotManagers</option>
+                  <option>Manual Selection</option>
+                  <option>Specific BotManager Group</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-4 pb-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <p class="text-sm font-medium text-slate-700 mb-2">Total number of rLoaders to run this test</p>
+              <input type="number" min="1" [value]="planDraft().totalRLoaders" (input)="patchDraft({ totalRLoaders: +$any($event.target).value || 0 })"
+                     class="w-full bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            </div>
+            <div class="md:col-span-2">
+              <p class="text-sm font-medium text-slate-700 mb-2">Ramp-up policy</p>
+              <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex flex-col">
+                  <input type="number" min="0" [value]="planDraft().rampUpStart" (input)="patchDraft({ rampUpStart: +$any($event.target).value || 0 })"
+                         class="w-20 bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                  <span class="text-[11px] text-slate-500 mt-1">Start</span>
+                </div>
+                <div class="flex flex-col">
+                  <input type="number" min="0" [value]="planDraft().rampUpEvery" (input)="patchDraft({ rampUpEvery: +$any($event.target).value || 0 })"
+                         class="w-20 bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                  <span class="text-[11px] text-slate-500 mt-1">rLoader every</span>
+                </div>
+                <div class="flex flex-col">
+                  <input type="number" value="15" disabled
+                         class="w-20 bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm" />
+                  <span class="text-[11px] text-slate-500 mt-1">seconds</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Set test plan duration (split section) -->
+        <section class="bg-white border border-slate-200 rounded-md mt-4">
+          <header class="px-4 pt-4 pb-3">
+            <h3 class="text-slate-800 font-semibold text-base">Set test plan duration</h3>
+          </header>
+          <div class="px-4 pb-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Fixed time -->
+            <div>
+              <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                <input type="radio" name="duration-type" class="size-4 text-emerald-600 focus:ring-emerald-500"
+                       [checked]="planDraft().durationType === 'fixed'"
+                       (change)="patchDraft({ durationType: 'fixed' })" />
+                <span class="text-sm text-slate-700">Fixed time (minutes) for all rLoaders to run concurrently</span>
+              </label>
+              <input type="number" min="0" [value]="planDraft().durationMinutes"
+                     (input)="patchDraft({ durationMinutes: +$any($event.target).value || 0 })"
+                     [disabled]="planDraft().durationType !== 'fixed'"
+                     class="w-full bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              <p class="text-[11px] text-slate-500 mt-1">This is knowns as Steady State Time (SST)</p>
+            </div>
+            <!-- Iterations -->
+            <div>
+              <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                <input type="radio" name="duration-type" class="size-4 text-emerald-600 focus:ring-emerald-500"
+                       [checked]="planDraft().durationType === 'iterations'"
+                       (change)="patchDraft({ durationType: 'iterations' })" />
+                <span class="text-sm text-slate-700">Number of iterations for each rLoader to run</span>
+              </label>
+              <input type="number" min="1" [value]="planDraft().iterations"
+                     (input)="patchDraft({ iterations: +$any($event.target).value || 1 })"
+                     [disabled]="planDraft().durationType !== 'iterations'"
+                     class="w-full bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              <p class="text-[11px] text-slate-500 mt-1">This is more used for a quick test</p>
+            </div>
+            <!-- Stop on first error -->
+            <div class="md:pt-7">
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="planDraft().stopOnFirstError" (change)="patchDraft({ stopOnFirstError: $any($event.target).checked })"
+                       class="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                <span class="text-sm text-slate-700">Stop test run after first error</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Manage test plan processes -->
+        <section class="bg-white border border-slate-200 rounded-md mt-4">
+          <header class="px-4 pt-4 pb-1 border-b border-slate-100">
+            <h3 class="text-emerald-700 font-semibold text-base">2. Manage test plan processes</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Manager process settings, data files, and rendezvous points</p>
+          </header>
+          <div class="px-4 py-3 flex items-center gap-2">
+            <button (click)="addPlanProcess()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">code</span> Add new
+            </button>
+            <button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white text-xs font-semibold rounded-full hover:bg-rose-600 transition-colors shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">description</span> RDV/data files
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="text-left text-slate-500 text-[12px] border-y border-slate-200 bg-slate-50/60">
+                  <th class="px-3 py-2 font-medium">Process</th>
+                  <th class="px-3 py-2 font-medium">Distribute by</th>
+                  <th class="px-3 py-2 font-medium">
+                    <span class="inline-flex items-center gap-1"># of rLoaders
+                      <span class="material-symbols-outlined text-[14px] text-blue-500">info</span>
+                    </span>
+                  </th>
+                  <th class="px-3 py-2 font-medium">
+                    <span class="inline-flex items-center gap-1">Pacing
+                      <span class="material-symbols-outlined text-[14px] text-blue-500">info</span>
+                    </span>
+                  </th>
+                  <th class="px-3 py-2 font-medium">
+                    <span class="inline-flex items-center gap-1">Halt
+                      <span class="material-symbols-outlined text-[14px] text-blue-500">info</span>
+                    </span>
+                  </th>
+                  <th class="px-3 py-2 w-[60px]"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (proc of planDraft().processes; track $index; let i = $index) {
+                  <tr class="border-b border-slate-100">
+                    <td class="px-3 py-2 text-slate-700">{{ proc.name }}</td>
+                    <td class="px-3 py-2 text-slate-700">{{ proc.distributeBy === 'percentage' ? 'Percentage (%)' : 'rLoaders' }}</td>
+                    <td class="px-3 py-2 text-slate-700">{{ proc.rLoaders }}</td>
+                    <td class="px-3 py-2 text-slate-700">{{ proc.pacing }} s</td>
+                    <td class="px-3 py-2 text-slate-700">{{ proc.halt === 'first-error' ? 'Stop on error' : 'Continue' }}</td>
+                    <td class="px-3 py-2">
+                      <button (click)="removePlanProcess(i)" class="text-rose-500 hover:text-rose-700">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="px-3 py-6 text-slate-400 italic text-sm">No process selected. Click on "Add new" button to add one.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 3: Notifications -->
+        <section class="bg-white border border-slate-200 rounded-md mt-4">
+          <header class="px-4 pt-4 pb-1 border-b border-slate-100">
+            <h3 class="text-emerald-700 font-semibold text-base">3. Set notifications</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Use webhook or email when test plan run starts, ends, and more...</p>
+          </header>
+          <div class="px-4 py-5 space-y-4">
+            <div class="relative max-w-2xl">
+              <label class="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500">Select a webhook</label>
+              <select [value]="planFormWebhook()" (change)="planFormWebhook.set($any($event.target).value)"
+                      class="w-full appearance-none bg-slate-100 border border-slate-300 rounded px-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                <option value=""></option>
+                <option value="slack-ops">Slack — #ops</option>
+                <option value="pagerduty">PagerDuty</option>
+                <option value="teams-qa">Microsoft Teams — QA</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
+            </div>
+            <div class="flex items-end gap-2 max-w-2xl">
+              <div class="flex-1 relative">
+                <label class="absolute -top-2 left-2 px-1 bg-white text-[10px] text-slate-500">Enter recipient email address</label>
+                <input type="text" [value]="planFormEmail()" (input)="planFormEmail.set($any($event.target).value)"
+                       class="w-full bg-slate-100 border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              </div>
+              <button (click)="submitPlanNotification()"
+                      [disabled]="(!planFormWebhook() && !planFormEmail().trim()) || !planFormEvents().length"
+                      class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                Submit
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-500">use comma to list more than one email: i.e. john&#64;doe.com,jane&#64;doe.com</p>
+
+            <div>
+              <p class="text-sm font-semibold text-slate-700 border-b border-slate-200 pb-2">List of available notifications</p>
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-2 pt-3">
+                @for (opt of [
+                  { key: 'started', label: 'Test has started' },
+                  { key: 'finished', label: 'Test has finished' },
+                  { key: 'ramping-down', label: 'Test is ramping down' },
+                  { key: 'all-failures', label: 'Notify all failures' },
+                  { key: 'all-in-system', label: 'All users are in the system' }
+                ]; track opt.key) {
+                  <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                    <input type="checkbox"
+                           [checked]="planFormEvents().includes(opt.key)"
+                           (change)="togglePlanEvent(opt.key)"
+                           class="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    <span [class.text-slate-700]="planFormEvents().includes(opt.key)">{{ opt.label }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+
+            @if (planDraft().notificationRules.length) {
+              <div class="border border-slate-200 rounded-md divide-y divide-slate-100 max-w-2xl">
+                @for (rule of planDraft().notificationRules; track $index; let i = $index) {
+                  <div class="flex items-center gap-3 px-3 py-2 text-sm">
+                    <span class="material-symbols-outlined text-[18px] text-emerald-600">{{ rule.type === 'webhook' ? 'webhook' : 'mail' }}</span>
+                    <span class="font-medium text-slate-700 truncate flex-1">{{ rule.target }}</span>
+                    <span class="text-[11px] text-slate-500 truncate">{{ rule.events.join(', ') }}</span>
+                    <button (click)="removePlanNotification(i)" class="text-rose-500 hover:text-rose-700">
+                      <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
       </div>
     } @else if (activeTab() === 'botmanagers') {
       <!-- BotManagers (Loader) -->
