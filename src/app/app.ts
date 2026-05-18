@@ -2667,6 +2667,17 @@ export class App implements OnInit {
     return this.licenseUploadStatus() === 'valid' || this.licenseExpiry() !== null;
   }
 
+  // True when the Loader user has finished initial setup and has at least one
+  // user-generated test run. Used to gate the populated Loader dashboard —
+  // first-time Loader users see the welcome empty state instead, matching the
+  // Watcher behaviour.
+  loaderHasUserSetup(): boolean {
+    if (!this.licenseAlreadyValid()) return false;
+    // Demo runs are pre-seeded; only count the wizard's testRunGenerated flag
+    // (flipped when the user runs their first plan through the guided tour).
+    return this.loaderActions().testRunGenerated;
+  }
+
   // Kick off the full guided tour. If the license is already valid, skip step 1
   // and start at BotManager configuration.
   //
