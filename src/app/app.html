@@ -434,41 +434,38 @@
           </div>
           <h1 class="text-2xl font-bold text-slate-900 mb-2">Welcome to Automai {{ appMode() === 'loader' ? 'Loader' : 'Watcher' }}</h1>
           @if (appMode() === 'loader') {
-            <p class="text-sm text-slate-500 mb-8">Your dashboard is empty until you finish the initial setup. The guided tour walks you through the four parts: license &amp; BotManager, reload bots, test plan, and run the test.</p>
+            <p class="text-sm text-slate-500 mb-8">Your dashboard is empty until you publish your first test plan. The guided Loader tour walks you through initial setup, building a test plan, and launching a test run.</p>
           } @else {
-            <p class="text-sm text-slate-500 mb-8">Your dashboard is empty until you finish the initial setup. The guided tour walks you through the four parts: license &amp; BotManager, watcher, schedule &amp; monitor, and run.</p>
+            <p class="text-sm text-slate-500 mb-8">Your dashboard is empty until you finish the initial setup. The guided Watcher tour walks you through license &amp; BotManager, watcher activation, schedule, and creating a process monitor.</p>
           }
 
-          <!-- 4 part summary cards (mode-aware) -->
+          <!-- Part summary cards — each product gets its own count + labels that
+               line up with the matching tour parts in the Guided Tour panel. -->
           @if (appMode() === 'loader') {
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-left">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 text-left">
               <div class="rounded-lg border border-slate-200 bg-white p-3">
                 <div class="size-8 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center mb-2">
                   <span class="material-symbols-outlined text-[18px]">verified</span>
                 </div>
                 <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 1</p>
-                <p class="text-xs text-slate-500 leading-snug">License &amp; BotManager</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Initial setup</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">License, BotManager, reload bots.</p>
               </div>
               <div class="rounded-lg border border-slate-200 bg-white p-3">
                 <div class="size-8 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
-                  <span class="material-symbols-outlined text-[18px]">refresh</span>
-                </div>
-                <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 2</p>
-                <p class="text-xs text-slate-500 leading-snug">Reload bots online</p>
-              </div>
-              <div class="rounded-lg border border-slate-200 bg-white p-3">
-                <div class="size-8 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
                   <span class="material-symbols-outlined text-[18px]">science</span>
                 </div>
-                <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 3</p>
-                <p class="text-xs text-slate-500 leading-snug">Test plan setup</p>
+                <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 2</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Test plan</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Create + configure the plan.</p>
               </div>
               <div class="rounded-lg border border-slate-200 bg-white p-3">
                 <div class="size-8 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center mb-2">
-                  <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                  <span class="material-symbols-outlined text-[18px]">analytics</span>
                 </div>
-                <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 4</p>
-                <p class="text-xs text-slate-500 leading-snug">Run the test</p>
+                <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 3</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Test run &amp; analysis</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Launch + inspect results.</p>
               </div>
             </div>
           } @else {
@@ -478,28 +475,32 @@
                   <span class="material-symbols-outlined text-[18px]">verified</span>
                 </div>
                 <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 1</p>
-                <p class="text-xs text-slate-500 leading-snug">License &amp; BotManager</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Initial setup</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">License + BotManager + scenario check.</p>
               </div>
               <div class="rounded-lg border border-slate-200 bg-white p-3">
                 <div class="size-8 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
                   <span class="material-symbols-outlined text-[18px]">desktop_windows</span>
                 </div>
                 <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 2</p>
-                <p class="text-xs text-slate-500 leading-snug">Add &amp; activate watcher</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Watcher agent</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Register and activate an rWatcher.</p>
               </div>
               <div class="rounded-lg border border-slate-200 bg-white p-3">
                 <div class="size-8 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center mb-2">
                   <span class="material-symbols-outlined text-[18px]">schedule</span>
                 </div>
                 <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 3</p>
-                <p class="text-xs text-slate-500 leading-snug">Schedule &amp; monitor</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Schedule</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Define cadence + activate.</p>
               </div>
               <div class="rounded-lg border border-slate-200 bg-white p-3">
                 <div class="size-8 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center mb-2">
-                  <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                  <span class="material-symbols-outlined text-[18px]">monitoring</span>
                 </div>
                 <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Part 4</p>
-                <p class="text-xs text-slate-500 leading-snug">Run the monitor</p>
+                <p class="text-sm font-semibold text-slate-900 leading-snug">Process monitor</p>
+                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">Tie scenario + watcher + schedule, then run.</p>
               </div>
             </div>
           }
