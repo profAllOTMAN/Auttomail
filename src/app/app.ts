@@ -318,11 +318,19 @@ export class App implements OnInit {
     if (id !== 'watcher' && id !== 'loader') return;
     if (this.appMode() === id) return;
     this.appMode.set(id);
-    // Both products land on /dashboard. The dashboard renders a welcome empty
-    // state until the user finishes setup (watcher: no license; loader: no test
-    // plans), so first-time users in either product see the same kind of guided
-    // welcome screen before they have any real data.
-    this.navigate('/dashboard');
+    // Close any open drawer + the previous product's guided-tour panel so the
+    // user lands on a clean dashboard. The panel is product-specific (watcher
+    // steps vs loader steps), so leaving it open after a switch would show
+    // mismatched content.
+    this.activeDrawer.set(null);
+    this.wizardChainActive.set(false);
+    this.tourPeekPartId.set(null);
+    // Also reset the activeTab so the dashboard renders even if the router
+    // doesn't fire NavigationEnd (same-URL navigation is a no-op by default).
+    this.activeTab.set('dashboard');
+    // Use navigateByUrl so we always end up on /dashboard regardless of where
+    // we were; the router treats this as an explicit navigation.
+    this.router.navigateByUrl('/dashboard');
   }
 
   setAppMode(mode: 'watcher' | 'loader') {
