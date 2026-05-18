@@ -5563,11 +5563,13 @@
                 </div>
               }
             }
-            @if (visible.part.id === 'setup' && wizardTourActiveSubId() === 'license') {
+            @if (visible.part.id === 'setup'
+                 && (wizardTourActiveSubId() === 'setup-sb-license' || wizardTourActiveSubId() === 'setup-director-license')) {
               <button (click)="wizardSkipLicenseForTrial()"
-                class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors inline-flex items-center justify-center gap-1.5">
+                class="w-full mt-1 px-2.5 py-1.5 rounded text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors inline-flex items-center justify-center gap-1.5"
+                title="Skip both license rows — required only if you have a paid license">
                 <span class="material-symbols-outlined text-[14px]">skip_next</span>
-                Skip — I'm on trial
+                Skip — I'm on trial (no license needed)
               </button>
             }
             @if (visible.part.id === 'schedule' && !isDone) {
