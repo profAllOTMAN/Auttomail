@@ -965,6 +965,12 @@ export class App implements OnInit {
       };
       this.testPlans.update(list => [plan, ...list]);
       this.editingPlanId.set(newId);
+      // Mark the loader tour's "Add a test plan" sub-step done so:
+      // (a) the guided tour advances if the user is inside the chain, and
+      // (b) loaderHasUserSetup() returns true → dashboard flips from welcome
+      //     empty state to the populated overview after the user creates their
+      //     first real plan, even outside the tour.
+      this.wizardAckLoader('testPlanAdded');
     }
     this.navigate('/test-plans');
   }
@@ -2667,15 +2673,23 @@ export class App implements OnInit {
     return this.licenseUploadStatus() === 'valid' || this.licenseExpiry() !== null;
   }
 
-  // True when the Loader user has finished initial setup and has at least one
-  // user-generated test run. Used to gate the populated Loader dashboard —
-  // first-time Loader users see the welcome empty state instead, matching the
-  // Watcher behaviour.
+  // True once the Loader user has finished initial setup. Flips the dashboard
+  // from the welcome empty state to the populated overview. Demo data is
+  // pre-seeded, so we can't rely on counts — we use signals that only flip
+  // through real user actions (savePlan, run-a-test in the tour).
   loaderHasUserSetup(): boolean {
     if (!this.licenseAlreadyValid()) return false;
-    // Demo runs are pre-seeded; only count the wizard's testRunGenerated flag
-    // (flipped when the user runs their first plan through the guided tour).
-    return this.loaderActions().testRunGenerated;
+    const l = this.loaderActions();
+    return l.testPlanAdded || l.testRunGenerated;
+  }
+
+  // Same idea for Watcher: only show the active overview once the user has
+  // created their first process monitor (handleNextStep marks monitorAdded)
+  // or run one through the tour (monitorRun).
+  watcherHasUserSetup(): boolean {
+    if (!this.licenseAlreadyValid()) return false;
+    const a = this.wizardActionsDone();
+    return a.monitorAdded || a.monitorRun;
   }
 
   // Kick off the full guided tour. If the license is already valid, skip step 1
