@@ -838,6 +838,20 @@ export class App implements OnInit {
   }
   patchDraft(patch: Partial<TestPlanDraft>) {
     this.planDraft.update(d => ({ ...d, ...patch }));
+    // Tick off guided-tour sub-steps as the user fills required fields. We only
+    // mark forward (markTourActionDone is a no-op if already done) so going back
+    // and clearing a field doesn't un-tick the tour.
+    const d = this.planDraft();
+    if (d.name.trim().length > 0 && d.project.trim().length > 0) {
+      this.wizardAckLoader('testPlanBasicsFilled');
+    }
+    if (d.distributionMethod.trim().length > 0 && d.totalRLoaders > 0 && d.rampUpEvery > 0) {
+      this.wizardAckLoader('testPlanDistributionDefined');
+    }
+    if ((d.durationType === 'fixed' && d.durationMinutes > 0)
+        || (d.durationType === 'iterations' && d.iterations > 0)) {
+      this.wizardAckLoader('testPlanDurationSet');
+    }
   }
   beginNewPlan() {
     this.editingPlanId.set(null);
@@ -902,6 +916,9 @@ export class App implements OnInit {
       return { ...d, processes: next };
     });
     this.closeProcessDrawer();
+    if (this.planDraft().processes.length > 0) {
+      this.wizardAckLoader('testPlanProcessSelected');
+    }
   }
   removePlanProcess(i: number) {
     this.planDraft.update(d => ({ ...d, processes: d.processes.filter((_, idx) => idx !== i) }));
@@ -972,6 +989,9 @@ export class App implements OnInit {
       //     first real plan, even outside the tour.
       this.wizardAckLoader('testPlanAdded');
     }
+    if (thenPublish) {
+      this.wizardAckLoader('testPlanPublished');
+    }
     this.navigate('/test-plans');
   }
   private nowStamp(): string {
@@ -1003,6 +1023,9 @@ export class App implements OnInit {
   setTestRunsPlan(id: string) {
     this.testRunsSelectedPlanId.set(id ? id : null);
     this.clearTestRunSelected();
+    if (id) {
+      this.wizardAckLoader('testRunPlanSelected');
+    }
   }
   testRunsSelected = signal<Set<string>>(new Set<string>());
   toggleTestRunSelected(id: string) {
@@ -1011,6 +1034,9 @@ export class App implements OnInit {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
+    if (this.testRunsSelected().size > 0) {
+      this.wizardAckLoader('testRunInspected');
+    }
   }
   isTestRunSelected(id: string) {
     return this.testRunsSelected().has(id);
@@ -2469,16 +2495,25 @@ export class App implements OnInit {
   // Which product the active tour is guiding (watcher or loader).
   wizardTourType = signal<'watcher' | 'loader'>('watcher');
   // Loader-specific sub-step flags (separate from monitor flags so each tour is independent).
+  // testPlan* flags follow the Test Plan creation form. testRun* flags follow the
+  // Test Runs page workflow.
   loaderActions = signal<{
     botsReloaded: boolean;
-    testPlanAdded: boolean;
-    testPlanProcessSelected: boolean;
-    testPlanDistributionDefined: boolean;
-    testRunGenerated: boolean;
+    testPlanAdded: boolean;              // opened the "+ Test plan" form
+    testPlanBasicsFilled: boolean;       // name + project filled (both required)
+    testPlanDistributionDefined: boolean; // distribution + rLoader count + ramp-up
+    testPlanDurationSet: boolean;        // fixed minutes OR iterations set
+    testPlanProcessSelected: boolean;    // added at least one process row
+    testPlanPublished: boolean;          // clicked Publish (savePlan with thenPublish)
+    testRunPlanSelected: boolean;        // picked a plan in the Test Runs filter
+    testRunGenerated: boolean;           // ran a plan from the panel or page
+    testRunInspected: boolean;           // selected a run row to view it
   }>({
-    botsReloaded: false, testPlanAdded: false,
-    testPlanProcessSelected: false, testPlanDistributionDefined: false,
-    testRunGenerated: false
+    botsReloaded: false,
+    testPlanAdded: false, testPlanBasicsFilled: false,
+    testPlanDistributionDefined: false, testPlanDurationSet: false,
+    testPlanProcessSelected: false, testPlanPublished: false,
+    testRunPlanSelected: false, testRunGenerated: false, testRunInspected: false
   });
   wizardLastRefresh = signal<Date>(new Date());
   wizardProcessName = signal<string>('');
@@ -2676,11 +2711,12 @@ export class App implements OnInit {
   // True once the Loader user has finished initial setup. Flips the dashboard
   // from the welcome empty state to the populated overview. Demo data is
   // pre-seeded, so we can't rely on counts — we use signals that only flip
-  // through real user actions (savePlan, run-a-test in the tour).
+  // through real user actions (publish a plan, run a test). testPlanAdded
+  // alone isn't enough since it ticks the moment the form is opened.
   loaderHasUserSetup(): boolean {
     if (!this.licenseAlreadyValid()) return false;
     const l = this.loaderActions();
-    return l.testPlanAdded || l.testRunGenerated;
+    return l.testPlanPublished || l.testRunGenerated;
   }
 
   // Same idea for Watcher: only show the active overview once the user has
@@ -2718,9 +2754,11 @@ export class App implements OnInit {
       monitorAdded: false, monitorRun: false, eventAdded: false
     });
     this.loaderActions.set({
-      botsReloaded: false, testPlanAdded: false,
-      testPlanProcessSelected: false, testPlanDistributionDefined: false,
-      testRunGenerated: false
+      botsReloaded: false,
+      testPlanAdded: false, testPlanBasicsFilled: false,
+      testPlanDistributionDefined: false, testPlanDurationSet: false,
+      testPlanProcessSelected: false, testPlanPublished: false,
+      testRunPlanSelected: false, testRunGenerated: false, testRunInspected: false
     });
     this.wizardLastRefresh.set(new Date());
     if (opts.land === 'dashboard') return;
@@ -2997,16 +3035,31 @@ export class App implements OnInit {
         return {title: 'Part 1 — Reload BotManager', text: 'Click <strong>Reload</strong> on BotManagers until every bot reports Online &amp; Available.', targetPage: '/botmanagers'};
       }
       if (!l.testPlanAdded) {
-        return {title: 'Part 2 — Add a test plan', text: 'Open <strong>Test Plans</strong> and click <strong>+ Add Test Plan</strong>.', targetPage: '/test-plans'};
+        return {title: 'Part 2 — Open the create-plan form', text: 'Open <strong>Test Plans</strong> and click the green <strong>+ Test plan</strong> pill.', targetPage: '/test-plans/new'};
       }
-      if (!l.testPlanProcessSelected) {
-        return {title: 'Part 2 — Pick process &amp; rLoader session', text: 'In the test-plan editor, pick the process and the rLoader session.', targetPage: '/test-plans'};
+      if (!l.testPlanBasicsFilled) {
+        return {title: 'Part 2 — Required basics', text: 'In Section 1, fill <strong>Test plan name</strong> and pick a <strong>Project</strong>. Both are required.', targetPage: '/test-plans/new'};
       }
       if (!l.testPlanDistributionDefined) {
-        return {title: 'Part 2 — Distribution &amp; ramp-up', text: 'Set the distribution + ramp-up policy and save the test plan.', targetPage: '/test-plans'};
+        return {title: 'Part 2 — Distribution &amp; ramp-up', text: 'Set the distribution method, <strong>Total rLoaders</strong>, and <strong>Ramp-up policy</strong>.', targetPage: '/test-plans/new'};
+      }
+      if (!l.testPlanDurationSet) {
+        return {title: 'Part 2 — Test plan duration', text: 'Pick <strong>Fixed time (minutes)</strong> or <strong>Number of iterations</strong> and enter a value.', targetPage: '/test-plans/new'};
+      }
+      if (!l.testPlanProcessSelected) {
+        return {title: 'Part 2 — Add a process', text: 'Section 2: click <strong>Add new</strong>, pick a scenario, set distribute-by + pacing + halt, save.', targetPage: '/test-plans/new'};
+      }
+      if (!l.testPlanPublished) {
+        return {title: 'Part 2 — Publish the plan', text: 'Click <strong>Publish</strong> in the top-right. The Publish button enables once all required fields are filled.', targetPage: '/test-plans/new'};
+      }
+      if (!l.testRunPlanSelected) {
+        return {title: 'Part 3 — Pick your plan', text: 'Open <strong>Test Runs</strong> and pick your plan from the <em>Select a test plan</em> dropdown.', targetPage: '/test-runs'};
       }
       if (!l.testRunGenerated) {
-        return {title: 'Part 3 — Generate a test run', text: 'Click <strong>Run</strong> on your test plan to generate the test run and view its analysis.', targetPage: '/test-runs'};
+        return {title: 'Part 3 — Generate a run', text: 'Go to <strong>Test Plans</strong> and click the upload (▲) icon on your plan to launch a run.', targetPage: '/test-plans'};
+      }
+      if (!l.testRunInspected) {
+        return {title: 'Part 3 — Inspect the run', text: 'On <strong>Test Runs</strong>, tick a row to see rLoaders, ramp-up, steady time, duration. Add a note or compare two runs.', targetPage: '/test-runs'};
       }
       return {title: 'All set!', text: 'Loader tour complete. Read more in the <a href="https://help.automai.com/s/article/create-a-test-plan" target="_blank" class="underline">test-plan guide</a>.', targetPage: '/help/new'};
     }
@@ -3162,42 +3215,78 @@ export class App implements OnInit {
             {
               id: 'test-plan',
               label: 'Test plan',
-              description: 'Create + configure the plan.',
+              description: 'Fill the required fields, then publish your first plan.',
               icon: 'science',
               subSteps: [
                 {
                   id: 'loader-test-plan-add',
-                  label: 'Click "+ Add Test Plan"',
+                  label: 'Open the create-plan form',
                   done: l.testPlanAdded,
-                  action: () => { this.navigate('/test-plans'); this.wizardAckLoader('testPlanAdded'); },
+                  action: () => { this.navigate('/test-plans/new'); this.wizardAckLoader('testPlanAdded'); },
                   hint: [
-                    'Click “Test Plans” in the sidebar (or the button above).',
-                    'Click the “+ Add Test Plan” button in the page header.',
-                    'Give the plan a name and continue.'
+                    'Click "Test Plans" in the sidebar (or the button above).',
+                    'Click the green "+ Test plan" pill in the toolbar.',
+                    'You land on the New test plan form.'
                   ]
                 },
                 {
-                  id: 'loader-test-plan-process',
-                  label: 'Select process & rLoader session',
-                  done: l.testPlanProcessSelected,
-                  action: () => { this.navigate('/test-plans'); this.wizardAckLoader('testPlanProcessSelected'); },
+                  id: 'loader-test-plan-basics',
+                  label: 'Fill required basics — name + project',
+                  done: l.testPlanBasicsFilled,
+                  action: () => { this.navigate('/test-plans/new'); },
                   hint: [
-                    'In the test-plan editor, pick the recorded process.',
-                    'Pick the rLoader session that will drive the load.',
-                    'Click this row again to confirm and advance.'
+                    'Section 1 — Test plan information.',
+                    'Type a Test plan name (required, red *).',
+                    'Pick a Project from the dropdown (required, red *).',
+                    'Description is optional and ticks nothing.'
                   ]
                 },
                 {
                   id: 'loader-test-plan-distribution',
-                  label: 'Define distribution & ramp-up policy',
+                  label: 'Set distribution + total rLoaders + ramp-up',
                   done: l.testPlanDistributionDefined,
-                  action: () => { this.navigate('/test-plans'); this.wizardAckLoader('testPlanDistributionDefined'); },
+                  action: () => { this.navigate('/test-plans/new'); },
                   helpLink: 'https://help.automai.com/s/article/create-a-test-plan',
                   hint: [
-                    'Open the Distribution section of the test plan.',
-                    'Set how the load distributes across bots.',
-                    'Set the ramp-up policy (start users + step increase).',
-                    'Save, then click this row again to confirm.'
+                    'rLoader distribution method: keep "All Available BotManagers" or pick a group.',
+                    'Total number of rLoaders to run this test (required).',
+                    'Ramp-up policy: Start, rLoader every X seconds (required).',
+                    'Values flip this row to "Done" automatically.'
+                  ]
+                },
+                {
+                  id: 'loader-test-plan-duration',
+                  label: 'Set test plan duration (fixed time or iterations)',
+                  done: l.testPlanDurationSet,
+                  action: () => { this.navigate('/test-plans/new'); },
+                  hint: [
+                    'In "Set test plan duration", pick a mode:',
+                    'Fixed time (minutes) — concurrent steady state, OR',
+                    'Number of iterations — each rLoader runs N times.',
+                    'Enter a positive number; the row ticks off automatically.'
+                  ]
+                },
+                {
+                  id: 'loader-test-plan-process',
+                  label: 'Add at least one process',
+                  done: l.testPlanProcessSelected,
+                  action: () => { this.navigate('/test-plans/new'); },
+                  hint: [
+                    'Section 2 — Manage test plan processes.',
+                    'Click the green "Add new" pill to open the process drawer.',
+                    'Pick a scenario, distribute by %, rLoaders, pacing, halt.',
+                    'Save the process; the row ticks off automatically.'
+                  ]
+                },
+                {
+                  id: 'loader-test-plan-publish',
+                  label: 'Publish the test plan',
+                  done: l.testPlanPublished,
+                  action: () => { this.navigate('/test-plans/new'); },
+                  hint: [
+                    'Once every required field above is filled, the Publish button enables.',
+                    'Click "Publish" in the top-right corner.',
+                    'You land back on the Test Plans table with your plan active.'
                   ]
                 }
               ]
@@ -3205,20 +3294,42 @@ export class App implements OnInit {
             {
               id: 'test-run',
               label: 'Test run & analysis',
-              description: 'Launch the plan and inspect the results.',
+              description: 'Launch the plan and inspect the run details.',
               icon: 'analytics',
               subSteps: [
                 {
+                  id: 'loader-test-run-plan-select',
+                  label: 'Pick your plan in the Test Runs filter',
+                  done: l.testRunPlanSelected,
+                  action: () => { this.navigate('/test-runs'); },
+                  hint: [
+                    'Click "Test Runs" in the sidebar.',
+                    'Use the "Select a test plan" dropdown at the top.',
+                    'Choose the plan you just published.'
+                  ]
+                },
+                {
                   id: 'loader-test-run-generate',
-                  label: 'Generate a test run & view analysis',
+                  label: 'Run the plan to generate a test run',
                   done: l.testRunGenerated,
-                  action: () => { this.navigate('/test-runs'); this.wizardAckLoader('testRunGenerated'); },
+                  action: () => { this.navigate('/test-plans'); },
+                  hint: [
+                    'Go back to "Test Plans" in the sidebar.',
+                    'Click the upload (▲) icon on your plan row to launch it.',
+                    'A new run appears in the Test Runs table.'
+                  ]
+                },
+                {
+                  id: 'loader-test-run-inspect',
+                  label: 'Inspect a run (open + view stats)',
+                  done: l.testRunInspected,
+                  action: () => { this.navigate('/test-runs'); },
                   helpLink: 'https://help.automai.com/s/article/create-a-test-plan',
                   hint: [
-                    'Click “Test Runs” in the sidebar (or the button above).',
-                    'Click Run on your test plan to generate a run.',
-                    'Open the run to view its analysis & charts.',
-                    'Click this row again to complete the tour.'
+                    'Open Test Runs and tick the checkbox on a run row.',
+                    'Run details show rLoaders, ramp-up, steady time, duration.',
+                    'Pick a second run to enable Compare two test runs.',
+                    'Click "click to add" in the notes column to leave a note.'
                   ]
                 }
               ]
@@ -3367,8 +3478,10 @@ export class App implements OnInit {
     if (this.wizardTourType() === 'loader') {
       if (!a.scenarioBuilderLicensed || !a.directorLicensed
           || !a.botManagerConfigured || !l.botsReloaded) return 'setup';
-      if (!l.testPlanAdded || !l.testPlanProcessSelected || !l.testPlanDistributionDefined) return 'test-plan';
-      if (!l.testRunGenerated) return 'test-run';
+      if (!l.testPlanAdded || !l.testPlanBasicsFilled
+          || !l.testPlanDistributionDefined || !l.testPlanDurationSet
+          || !l.testPlanProcessSelected || !l.testPlanPublished) return 'test-plan';
+      if (!l.testRunPlanSelected || !l.testRunGenerated || !l.testRunInspected) return 'test-run';
       return 'done';
     }
     if (!a.scenarioBuilderLicensed || !a.directorLicensed
@@ -3392,9 +3505,14 @@ export class App implements OnInit {
     if (this.wizardTourType() === 'loader') {
       if (!l.botsReloaded) return 'loader-bots-reloaded';
       if (!l.testPlanAdded) return 'loader-test-plan-add';
-      if (!l.testPlanProcessSelected) return 'loader-test-plan-process';
+      if (!l.testPlanBasicsFilled) return 'loader-test-plan-basics';
       if (!l.testPlanDistributionDefined) return 'loader-test-plan-distribution';
+      if (!l.testPlanDurationSet) return 'loader-test-plan-duration';
+      if (!l.testPlanProcessSelected) return 'loader-test-plan-process';
+      if (!l.testPlanPublished) return 'loader-test-plan-publish';
+      if (!l.testRunPlanSelected) return 'loader-test-run-plan-select';
       if (!l.testRunGenerated) return 'loader-test-run-generate';
+      if (!l.testRunInspected) return 'loader-test-run-inspect';
       return 'done';
     }
     if (!a.scenarioVerified) return 'scenario-verify';
