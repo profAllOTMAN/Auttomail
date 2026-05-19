@@ -5622,6 +5622,64 @@
   <div class="tour-spotlight-overlay tour-spotlight-soft"></div>
 }
 
+<!-- Scenario Builder license upload popup — opened from the Guided Tour panel
+     so the user picks the .lic file inline; the wizard simulates dropping it in
+     the install folder, then ticks the sub-step done. -->
+@if (sbLicensePopupOpen()) {
+  <div class="fixed inset-0 z-[210] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4" (click)="closeSbLicenseUpload()">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden" (click)="$event.stopPropagation()">
+      <header class="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-100">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[22px]">vpn_key</span>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-base font-bold text-slate-900 truncate">Upload Scenario Builder license</h3>
+            <p class="text-[11px] text-slate-500 leading-snug">The wizard will drop the .lic in the Scenario Builder install folder automatically.</p>
+          </div>
+        </div>
+        <button (click)="closeSbLicenseUpload()" class="size-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </header>
+
+      <div class="px-5 py-5">
+        @if (sbLicenseStatus() === 'idle') {
+          <label for="sb-license-input" class="block border-2 border-dashed border-slate-300 rounded-xl px-4 py-8 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[28px] text-slate-400">upload_file</span>
+            <p class="text-sm font-semibold text-slate-700 mt-1">Drop the .lic file here</p>
+            <p class="text-[11px] text-slate-500">or click to browse</p>
+            <input id="sb-license-input" type="file" accept=".lic" class="hidden" (change)="onSbLicenseFile($event)" />
+          </label>
+        } @else if (sbLicenseStatus() === 'uploading' || sbLicenseStatus() === 'placing') {
+          <div class="flex items-start gap-3 px-3 py-4 rounded-xl bg-primary/5 border border-primary/20">
+            <span class="material-symbols-outlined text-primary text-[22px] animate-spin">progress_activity</span>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-slate-900">{{ sbLicenseFileName() }}</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">
+                {{ sbLicenseStatus() === 'uploading' ? 'Reading file…' : 'Placing the .lic in the Scenario Builder install folder…' }}
+              </p>
+            </div>
+          </div>
+        } @else if (sbLicenseStatus() === 'valid') {
+          <div class="flex items-start gap-3 px-3 py-4 rounded-xl bg-emerald-50 border border-emerald-200">
+            <span class="material-symbols-outlined text-emerald-600 text-[22px]">check_circle</span>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-emerald-800">{{ sbLicenseFileName() }} installed</p>
+              <p class="text-[11px] text-emerald-700 mt-0.5">Scenario Builder license is in place. Closing in a moment…</p>
+            </div>
+          </div>
+        }
+
+        <p class="text-[11px] text-slate-500 mt-4 flex items-start gap-1.5">
+          <span class="material-symbols-outlined text-[14px] text-slate-400 mt-0.5">info</span>
+          On a trial? You can close this popup and use the "Skip — I'm on trial" pill in the tour panel instead.
+        </p>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- Floating tour hint tooltip — rendered at app shell level so it never gets
      clipped by the tour panel's overflow-y-auto. -->
 @if (hoverHintPos(); as pos) {

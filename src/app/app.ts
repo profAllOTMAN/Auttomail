@@ -2811,6 +2811,43 @@ export class App implements OnInit {
     this.openDrawer('botmanager', 'onboarding');
   }
 
+  // ── Scenario Builder license upload popup (inline in the Guided Tour) ──
+  // The user picks the .lic file right inside the wizard. The wizard simulates
+  // placing the file in the correct install folder, then ticks the SB license
+  // sub-step done. No navigation to /admin/license needed.
+  sbLicensePopupOpen = signal<boolean>(false);
+  sbLicenseFileName = signal<string | null>(null);
+  sbLicenseStatus = signal<'idle' | 'uploading' | 'placing' | 'valid' | 'invalid'>('idle');
+  openSbLicenseUpload() {
+    this.sbLicensePopupOpen.set(true);
+    if (this.sbLicenseStatus() !== 'valid') {
+      this.sbLicenseStatus.set('idle');
+      this.sbLicenseFileName.set(null);
+    }
+  }
+  closeSbLicenseUpload() {
+    this.sbLicensePopupOpen.set(false);
+  }
+  onSbLicenseFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.uploadSbLicense(input.files?.[0] ?? null);
+  }
+  uploadSbLicense(file: File | null) {
+    if (!file) return;
+    this.sbLicenseFileName.set(file.name);
+    this.sbLicenseStatus.set('uploading');
+    // Simulate upload → "placing in install folder" → valid.
+    setTimeout(() => {
+      this.sbLicenseStatus.set('placing');
+      setTimeout(() => {
+        this.sbLicenseStatus.set('valid');
+        this.wizardAckLicense('scenarioBuilderLicensed');
+        // Auto-close shortly after success so the user can see the confirmation.
+        setTimeout(() => this.sbLicensePopupOpen.set(false), 900);
+      }, 700);
+    }, 500);
+  }
+
   // Loader sub-step acknowledgments. Each one stamps the loaderActions signal
   // and bumps wizardLastRefresh so the panel + active-sub-id advance.
   wizardAckLoader(key: keyof ReturnType<typeof this.loaderActions>) {
@@ -3124,12 +3161,11 @@ export class App implements OnInit {
             id: 'setup-sb-license',
             label: 'Upload the Scenario Builder license',
             done: a.scenarioBuilderLicensed,
-            action: () => { this.navigate('/admin/license'); this.wizardAckLicense('scenarioBuilderLicensed'); },
-            helpLink: '/admin/license',
+            action: () => this.openSbLicenseUpload(),
             hint: [
-              'Click the row to open Admin → License.',
-              'Upload the Scenario Builder .lic — the wizard places the file in the right install folder for you.',
-              'No manual file copying required.',
+              'Click the row to open the upload popup right here in the wizard.',
+              'Drop or pick your Scenario Builder .lic file.',
+              'The wizard places the file in the install folder automatically — no manual copying.',
               'On a trial? Use "Skip — I\'m on trial" below.'
             ]
           },
