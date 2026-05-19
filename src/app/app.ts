@@ -1934,9 +1934,13 @@ export class App implements OnInit {
   openProjectDetail(id: string) {
     this.selectedProjectId.set(id);
     // Tour hook — opening a project's detail panel counts as "scenario verified",
-    // which auto-advances the tour to the next sub-step.
-    if (this.wizardChainActive() && this.wizardTourActiveSubId() === 'scenario-verify') {
-      this.markTourActionDone('scenarioVerified');
+    // which auto-advances the tour to the next sub-step AND navigates to the
+    // next page (rWatchers → Add Watcher) so the user doesn't have to hunt for it.
+    if (this.wizardChainActive() && this.wizardTourActiveSubId() === 'scenario-verify'
+        && this.markTourActionDone('scenarioVerified')) {
+      this.selectedProjectId.set(null);
+      this.tourPeekPartId.set(null);
+      setTimeout(() => this.navigate('/rwatchers'), 350);
     }
   }
 
@@ -2465,13 +2469,12 @@ export class App implements OnInit {
   // Each sub-action advances independently; the user navigates the sidebar between pages.
   wizardChainActive = signal<boolean>(false);
   wizardActionsDone = signal<{
-    scenarioCreated: boolean;       // Prereq: Create the scenario in Scenario Builder
-    scenarioSent: boolean;          // Prereq: Send the scenario to Director
-    scenarioBuilderLicensed: boolean; // Part 1: Update the Scenario Builder license
-    directorLicensed: boolean;        // Part 1: Update the Director license
+    directorLicensed: boolean;        // Part 1: Upload Director license (skippable on trial)
+    scenarioBuilderLicensed: boolean; // Part 1: Upload Scenario Builder license (wizard places file)
     licenseUploaded: boolean;         // Internal: derived from both licenses (kept for the upload-page hook)
-    botManagerConfigured: boolean;    // Part 1: Configure BotManager
-    scenarioVerified: boolean;        // Part 1: Verify the scenario arrived
+    botManagerOpened: boolean;        // Part 1: Open BotManager configuration
+    botManagerConfigured: boolean;    // Part 1: Save BotManager credentials
+    scenarioVerified: boolean;        // Part 1: Verify the scenario arrived in Projects
     watcherAdded: boolean;
     watcherActivated: boolean;
     scheduleAdded: boolean;
@@ -2482,9 +2485,8 @@ export class App implements OnInit {
     monitorRun: boolean;
     eventAdded: boolean;
   }>({
-    scenarioCreated: false, scenarioSent: false,
-    scenarioBuilderLicensed: false, directorLicensed: false, licenseUploaded: false,
-    botManagerConfigured: false, scenarioVerified: false,
+    directorLicensed: false, scenarioBuilderLicensed: false, licenseUploaded: false,
+    botManagerOpened: false, botManagerConfigured: false, scenarioVerified: false,
     watcherAdded: false, watcherActivated: false,
     scheduleAdded: false, scheduleActivated: false,
     monitorScenarioAssigned: false, monitorScheduleAssigned: false,
@@ -2609,9 +2611,8 @@ export class App implements OnInit {
     this.wizardType.set(null);
     this.wizardChainActive.set(false);
     this.wizardActionsDone.set({
-      scenarioCreated: false, scenarioSent: false,
-      scenarioBuilderLicensed: false, directorLicensed: false, licenseUploaded: false,
-      botManagerConfigured: false, scenarioVerified: false,
+      directorLicensed: false, scenarioBuilderLicensed: false, licenseUploaded: false,
+      botManagerOpened: false, botManagerConfigured: false, scenarioVerified: false,
       watcherAdded: false, watcherActivated: false,
       scheduleAdded: false, scheduleActivated: false,
       monitorScenarioAssigned: false, monitorScheduleAssigned: false,
@@ -2743,10 +2744,9 @@ export class App implements OnInit {
     else this.setAppMode('watcher');
     const licensePreDone = this.licenseAlreadyValid();
     this.wizardActionsDone.set({
-      scenarioCreated: false, scenarioSent: false,
-      scenarioBuilderLicensed: licensePreDone, directorLicensed: licensePreDone,
+      directorLicensed: licensePreDone, scenarioBuilderLicensed: licensePreDone,
       licenseUploaded: licensePreDone,
-      botManagerConfigured: false,
+      botManagerOpened: false, botManagerConfigured: false,
       scenarioVerified: false,
       watcherAdded: false, watcherActivated: false,
       scheduleAdded: false, scheduleActivated: false,
@@ -2791,24 +2791,24 @@ export class App implements OnInit {
     return `${min} min ago`;
   }
 
-  // Prerequisite confirmations: each one ticks a checkbox in the Guided Tour panel.
-  wizardAckPrereq(key: 'scenarioCreated' | 'scenarioSent') {
-    this.markTourActionDone(key);
-    // When both prereqs are checked off, jump the user to Part 1
-    // (License upload) so they don't have to hunt for it.
-    const a = this.wizardActionsDone();
-    if (a.scenarioCreated && a.scenarioSent && !a.licenseUploaded && this.wizardChainActive()) {
-      this.tourPeekPartId.set(null);
-      this.navigate('/admin/license');
-    }
-  }
   // Part 1 license confirmations (manual tick) — independent for SB vs Director.
+  // Either side flipping advances the tour; both flipped sets the legacy
+  // licenseUploaded flag for the /admin/license upload-zone hook.
   wizardAckLicense(key: 'scenarioBuilderLicensed' | 'directorLicensed') {
     this.markTourActionDone(key);
     const a = this.wizardActionsDone();
     if (a.scenarioBuilderLicensed && a.directorLicensed) {
       this.markTourActionDone('licenseUploaded');
     }
+  }
+
+  // "Click Watchers → BotManagers" sub-step: navigate to the right page and
+  // open the BotManager drawer in one shot so the user sees the form they
+  // need to fill on the next sub-step.
+  wizardOpenBotManagerStep() {
+    this.markTourActionDone('botManagerOpened');
+    this.navigate(this.wizardTourType() === 'loader' ? '/botmanagers' : '/rwatchers');
+    this.openDrawer('botmanager', 'onboarding');
   }
 
   // Loader sub-step acknowledgments. Each one stamps the loaderActions signal
@@ -3014,20 +3014,17 @@ export class App implements OnInit {
   // Tour widget content based on current sub-state
   wizardChainHint(): {title: string; text: string; targetPage: string} {
     const a = this.wizardActionsDone();
-    if (!a.scenarioCreated) {
-      return {title: 'Prereq — Create a scenario', text: 'Open <strong>Scenario Builder</strong> on your machine and record the scenario you want to monitor. Tick the checkbox when done.', targetPage: ''};
-    }
-    if (!a.scenarioSent) {
-      return {title: 'Prereq — Send the scenario', text: 'In Scenario Builder, click <strong>Send to Director</strong>. Tick the checkbox once the upload succeeds.', targetPage: ''};
+    if (!a.directorLicensed) {
+      return {title: 'Part 1 — Director license', text: 'Upload the <strong>Director</strong> license on the Admin → License page. On a trial? Tap <em>Skip — I\'m on trial</em> in the panel.', targetPage: '/admin/license'};
     }
     if (!a.scenarioBuilderLicensed) {
-      return {title: 'Part 1 — Scenario Builder license', text: 'Update the <strong>Scenario Builder</strong> license. On a trial? Tap <em>Skip — I\'m on trial</em> in the panel.', targetPage: '/admin/license'};
+      return {title: 'Part 1 — Scenario Builder license', text: 'Upload the <strong>Scenario Builder</strong> license — the wizard places it in the install folder for you.', targetPage: '/admin/license'};
     }
-    if (!a.directorLicensed) {
-      return {title: 'Part 1 — Director license', text: 'Update the <strong>Director</strong> license. On a trial? Tap <em>Skip — I\'m on trial</em> in the panel.', targetPage: '/admin/license'};
+    if (!a.botManagerOpened) {
+      return {title: 'Part 1 — Open BotManager setup', text: 'Click <strong>Watchers</strong> in the sidebar, then the <strong>BotManagers</strong> sub-tab to open the configuration drawer.', targetPage: '/rwatchers'};
     }
     if (!a.botManagerConfigured) {
-      return {title: 'Part 1 — Configure BotManager', text: 'Set credentials and (optional) advanced settings, then save.', targetPage: ''};
+      return {title: 'Part 1 — Configure BotManager', text: 'Fill the Launcher credentials (username + password) and click <strong>Next Step</strong>.', targetPage: ''};
     }
     if (this.wizardTourType() === 'loader') {
       const l = this.loaderActions();
@@ -3106,80 +3103,55 @@ export class App implements OnInit {
     const isLoader = this.wizardTourType() === 'loader';
     return [
       {
-        id: 'prereq',
-        label: 'Prerequisites',
-        description: 'Get the scenario into Director before starting the tour.',
-        icon: 'fact_check',
-        subSteps: [
-          {
-            id: 'prereq-scenario-create',
-            label: 'Create the scenario in Scenario Builder',
-            done: a.scenarioCreated,
-            action: () => this.wizardAckPrereq('scenarioCreated'),
-            helpLink: '/help/new3',
-            hint: [
-              'Open Scenario Builder on your machine.',
-              'Record the scenario you want to monitor.',
-              'Save the scenario locally.',
-              'Tick this checkbox to confirm.'
-            ]
-          },
-          {
-            id: 'prereq-scenario-sent',
-            label: 'Send the scenario to Director',
-            done: a.scenarioSent,
-            action: () => this.wizardAckPrereq('scenarioSent'),
-            helpLink: '/help/new3',
-            hint: [
-              'In Scenario Builder, click "Send to Director".',
-              'Confirm the upload succeeds.',
-              'You will verify it landed in Part 1 — Verify scenario.',
-              'Tick this checkbox to confirm.'
-            ]
-          }
-        ]
-      },
-      {
         id: 'setup',
         label: 'Initial setup',
-        description: 'Licenses + BotManager + scenario check. Skip licenses if you are on a trial.',
+        description: 'Director license → Scenario Builder license → BotManager → verify scenario.',
         icon: 'verified',
         subSteps: [
           {
-            id: 'setup-sb-license',
-            label: 'Update the Scenario Builder license',
-            done: a.scenarioBuilderLicensed,
-            action: () => { this.navigate('/admin/license'); this.wizardAckLicense('scenarioBuilderLicensed'); },
-            helpLink: '/admin/license',
-            hint: [
-              'Open Admin → License.',
-              'Place the Scenario Builder .lic in the install folder.',
-              'Reopen Scenario Builder and confirm it loads.',
-              'On a trial? Use "Skip — I\'m on trial" below.'
-            ]
-          },
-          {
             id: 'setup-director-license',
-            label: 'Update the Director license',
+            label: 'Upload the Director license',
             done: a.directorLicensed,
             action: () => { this.navigate('/admin/license'); this.wizardAckLicense('directorLicensed'); },
             helpLink: '/admin/license',
             hint: [
-              'Open Admin → License.',
+              'Click the row to open Admin → License.',
               'Drop the Director .lic into the upload zone.',
-              'Restart the Director service if needed.',
+              'On a trial? Use "Skip — I\'m on trial" below to skip both licenses.'
+            ]
+          },
+          {
+            id: 'setup-sb-license',
+            label: 'Upload the Scenario Builder license',
+            done: a.scenarioBuilderLicensed,
+            action: () => { this.navigate('/admin/license'); this.wizardAckLicense('scenarioBuilderLicensed'); },
+            helpLink: '/admin/license',
+            hint: [
+              'Click the row to open Admin → License.',
+              'Upload the Scenario Builder .lic — the wizard places the file in the right install folder for you.',
+              'No manual file copying required.',
               'On a trial? Use "Skip — I\'m on trial" below.'
             ]
           },
           {
+            id: 'botmanager-open',
+            label: 'Click Watchers → BotManagers',
+            done: a.botManagerOpened,
+            action: () => this.wizardOpenBotManagerStep(),
+            hint: [
+              'Click "Watchers" (rWatchers) in the sidebar.',
+              'Open the BotManagers sub-tab in the page header.',
+              'The BotManager setup drawer opens for you.'
+            ]
+          },
+          {
             id: 'botmanager',
-            label: 'Configure BotManager',
+            label: 'Configure BotManager credentials',
             done: a.botManagerConfigured,
             action: () => this.openDrawer('botmanager', 'onboarding'),
             hint: [
-              'Click "Configure BotManager" above to open the drawer.',
-              'Fill the Launcher username and password (required).',
-              'Optionally expand Advanced settings to set RDP/timeout/etc.',
+              'Fill the Launcher username and password (both required).',
+              'Optionally expand Advanced settings (RDP, timeout, …).',
               'Click "Next Step" to save and continue.'
             ]
           },
@@ -3474,18 +3446,17 @@ export class App implements OnInit {
   wizardTourActivePart(): string {
     const a = this.wizardActionsDone();
     const l = this.loaderActions();
-    if (!a.scenarioCreated || !a.scenarioSent) return 'prereq';
     if (this.wizardTourType() === 'loader') {
-      if (!a.scenarioBuilderLicensed || !a.directorLicensed
-          || !a.botManagerConfigured || !l.botsReloaded) return 'setup';
+      if (!a.directorLicensed || !a.scenarioBuilderLicensed
+          || !a.botManagerOpened || !a.botManagerConfigured || !l.botsReloaded) return 'setup';
       if (!l.testPlanAdded || !l.testPlanBasicsFilled
           || !l.testPlanDistributionDefined || !l.testPlanDurationSet
           || !l.testPlanProcessSelected || !l.testPlanPublished) return 'test-plan';
       if (!l.testRunPlanSelected || !l.testRunGenerated || !l.testRunInspected) return 'test-run';
       return 'done';
     }
-    if (!a.scenarioBuilderLicensed || !a.directorLicensed
-        || !a.botManagerConfigured || !a.scenarioVerified) return 'setup';
+    if (!a.directorLicensed || !a.scenarioBuilderLicensed
+        || !a.botManagerOpened || !a.botManagerConfigured || !a.scenarioVerified) return 'setup';
     if (!a.watcherAdded || !a.watcherActivated) return 'watcher';
     if (!a.scheduleAdded || !a.scheduleActivated) return 'schedule';
     if (!a.monitorAdded || !a.monitorRun) return 'monitor';
@@ -3495,12 +3466,10 @@ export class App implements OnInit {
   wizardTourActiveSubId(): string {
     const a = this.wizardActionsDone();
     const l = this.loaderActions();
-    // Prereq: create + send the scenario.
-    if (!a.scenarioCreated) return 'prereq-scenario-create';
-    if (!a.scenarioSent) return 'prereq-scenario-sent';
-    // Part 1: licenses, BotManager, verify scenario.
-    if (!a.scenarioBuilderLicensed) return 'setup-sb-license';
+    // Part 1: licenses (Director first), open BotManager, configure, verify scenario.
     if (!a.directorLicensed) return 'setup-director-license';
+    if (!a.scenarioBuilderLicensed) return 'setup-sb-license';
+    if (!a.botManagerOpened) return 'botmanager-open';
     if (!a.botManagerConfigured) return 'botmanager';
     if (this.wizardTourType() === 'loader') {
       if (!l.botsReloaded) return 'loader-bots-reloaded';
@@ -3534,14 +3503,14 @@ export class App implements OnInit {
   wizardTourCompleted() {
     const a = this.wizardActionsDone();
     const l = this.loaderActions();
-    const prereqAndSetup = a.scenarioSent && a.directorLicensed && a.scenarioBuilderLicensed &&
-      a.licenseUploaded && a.botManagerConfigured;
+    const setupDone = a.directorLicensed && a.scenarioBuilderLicensed && a.licenseUploaded
+      && a.botManagerOpened && a.botManagerConfigured;
     if (this.wizardTourType() === 'loader') {
-      return prereqAndSetup && l.botsReloaded &&
+      return setupDone && l.botsReloaded &&
         l.testPlanAdded && l.testPlanProcessSelected && l.testPlanDistributionDefined &&
         l.testRunGenerated;
     }
-    return prereqAndSetup && a.scenarioVerified &&
+    return setupDone && a.scenarioVerified &&
       a.watcherAdded && a.watcherActivated &&
       a.scheduleAdded && a.scheduleActivated &&
       a.monitorScenarioAssigned && a.monitorScheduleAssigned &&
