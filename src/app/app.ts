@@ -166,6 +166,15 @@ export interface TestPlanNotificationRule {
   events: string[];
 }
 
+export interface RLoaderForm {
+  count: number;
+  delay: number;
+  mode: 'incremental' | 'concurrent';
+  usernamePrefix: string;
+  password: string;
+  domain: string;
+}
+
 export interface TestPlanDraft {
   name: string;
   project: string;
@@ -1271,6 +1280,45 @@ export class App implements OnInit {
   }
   startRLoaderDesktops(id: string) {
     this.botManagers.update(list => list.map(b => b.id === id ? { ...b, status: 'connected', connectedRLoaders: 5, availableRLoaders: 5, lastStatusMessage: '5 rLoaders started' } : b));
+  }
+
+  // ── "Start rLoader desktops" drawer (BotManagers page) ──
+  // Opened by clicking the row action; lets the user define rLoader users
+  // (count, delay, mode, credentials, domain) before starting them. Each
+  // interaction also feeds the loader tour's three rLoader sub-steps.
+  rloaderDrawerOpenFor = signal<string | null>(null); // BotManager id being configured
+  rloaderForm = signal<RLoaderForm>(
+    { count: 5, delay: 15, mode: 'incremental', usernamePrefix: 'rLoader', password: '', domain: '' }
+  );
+  openRLoaderDesktopDrawer(bmId: string) {
+    const bm = this.botManagers().find(b => b.id === bmId);
+    this.rloaderDrawerOpenFor.set(bmId);
+    this.rloaderForm.update(f => ({ ...f, domain: bm?.hostname ?? f.domain }));
+    this.wizardAckLoader('rloaderDrawerOpened');
+  }
+  closeRLoaderDesktopDrawer() {
+    this.rloaderDrawerOpenFor.set(null);
+  }
+  patchRLoaderForm(patch: Partial<RLoaderForm>) {
+    this.rloaderForm.update(f => ({ ...f, ...patch }));
+    const v = this.rloaderForm();
+    if (v.count > 0 && v.usernamePrefix.trim().length > 0
+        && v.password.length > 0 && v.domain.trim().length > 0) {
+      this.wizardAckLoader('rloaderConfigured');
+    }
+  }
+  canStartRLoaders() {
+    const v = this.rloaderForm();
+    return v.count > 0 && v.usernamePrefix.trim().length > 0
+      && v.password.length > 0 && v.domain.trim().length > 0;
+  }
+  startRLoadersFromDrawer() {
+    if (!this.canStartRLoaders()) return;
+    const id = this.rloaderDrawerOpenFor();
+    if (id) this.startRLoaderDesktops(id);
+    this.wizardAckLoader('rloaderConfigured');
+    this.wizardAckLoader('botsReloaded');
+    this.closeRLoaderDesktopDrawer();
   }
   botManagerStatusColor(s: BotManager['status']) {
     switch (s) {
@@ -2500,7 +2548,9 @@ export class App implements OnInit {
   // testPlan* flags follow the Test Plan creation form. testRun* flags follow the
   // Test Runs page workflow.
   loaderActions = signal<{
-    botsReloaded: boolean;
+    rloaderDrawerOpened: boolean;        // opened the "Start rLoader desktops" drawer
+    rloaderConfigured: boolean;          // filled the rLoader form (count + credentials + domain)
+    botsReloaded: boolean;               // clicked Start, bots are connected & online
     testPlanAdded: boolean;              // opened the "+ Test plan" form
     testPlanBasicsFilled: boolean;       // name + project filled (both required)
     testPlanDistributionDefined: boolean; // distribution + rLoader count + ramp-up
@@ -2511,7 +2561,7 @@ export class App implements OnInit {
     testRunGenerated: boolean;           // ran a plan from the panel or page
     testRunInspected: boolean;           // selected a run row to view it
   }>({
-    botsReloaded: false,
+    rloaderDrawerOpened: false, rloaderConfigured: false, botsReloaded: false,
     testPlanAdded: false, testPlanBasicsFilled: false,
     testPlanDistributionDefined: false, testPlanDurationSet: false,
     testPlanProcessSelected: false, testPlanPublished: false,
@@ -2754,7 +2804,7 @@ export class App implements OnInit {
       monitorAdded: false, monitorRun: false, eventAdded: false
     });
     this.loaderActions.set({
-      botsReloaded: false,
+      rloaderDrawerOpened: false, rloaderConfigured: false, botsReloaded: false,
       testPlanAdded: false, testPlanBasicsFilled: false,
       testPlanDistributionDefined: false, testPlanDurationSet: false,
       testPlanProcessSelected: false, testPlanPublished: false,
@@ -3065,8 +3115,14 @@ export class App implements OnInit {
     }
     if (this.wizardTourType() === 'loader') {
       const l = this.loaderActions();
+      if (!l.rloaderDrawerOpened) {
+        return {title: 'Part 1 — Start rLoader desktops', text: 'On <strong>BotManagers</strong>, tick a row and click <strong>Start rLoader desktops</strong> to open the setup drawer.', targetPage: '/botmanagers'};
+      }
+      if (!l.rloaderConfigured) {
+        return {title: 'Part 1 — Define rLoader users', text: 'Set count, delay, mode, username prefix, password, domain in the drawer.', targetPage: '/botmanagers'};
+      }
       if (!l.botsReloaded) {
-        return {title: 'Part 1 — Reload BotManager', text: 'Click <strong>Reload</strong> on BotManagers until every bot reports Online &amp; Available.', targetPage: '/botmanagers'};
+        return {title: 'Part 1 — Start the rLoaders', text: 'Click <strong>Start rLoader Desktops</strong> and wait until the row reports Connected.', targetPage: '/botmanagers'};
       }
       if (!l.testPlanAdded) {
         return {title: 'Part 2 — Open the create-plan form', text: 'Open <strong>Test Plans</strong> and click the green <strong>+ Test plan</strong> pill.', targetPage: '/test-plans/new'};
@@ -3192,25 +3248,50 @@ export class App implements OnInit {
             ]
           },
           ...(isLoader
-            ? [{
-                id: 'loader-bots-reloaded',
-                label: 'Reload BotManager until all bots online',
-                done: l.botsReloaded,
-                action: () => { this.navigate('/botmanagers'); this.wizardAckLoader('botsReloaded'); },
-                hint: [
-                  'Click “BotManagers” in the sidebar (or the button above).',
-                  'On each BotManager row, click the Reload action.',
-                  'Wait until all bots report Online & Available.',
-                  'Click this row again to confirm and advance.'
-                ]
-              }]
+            ? [
+                {
+                  id: 'loader-rloader-open',
+                  label: 'Select a BotManager → click Start rLoader desktops',
+                  done: l.rloaderDrawerOpened,
+                  action: () => this.navigate('/botmanagers'),
+                  hint: [
+                    'Click "BotManagers" in the sidebar.',
+                    'Tick the checkbox next to the BotManager you want to use.',
+                    'Click the "Start rLoader desktops" action on that row — the setup drawer opens.'
+                  ]
+                },
+                {
+                  id: 'loader-rloader-configure',
+                  label: 'Define rLoader users (count, delay, mode, credentials, domain)',
+                  done: l.rloaderConfigured,
+                  action: () => this.navigate('/botmanagers'),
+                  hint: [
+                    'Set the Number of rLoader desktops (e.g. 5).',
+                    'Pick a Delay between starting each rLoader (e.g. 15s).',
+                    'Choose the Mode — Incremental or Concurrent.',
+                    'Fill the Username prefix, Password, and Domain (required).'
+                  ]
+                },
+                {
+                  id: 'loader-bots-reloaded',
+                  label: 'Click Start rLoader Desktops — wait until bots are online',
+                  done: l.botsReloaded,
+                  action: () => this.navigate('/botmanagers'),
+                  helpLink: 'https://help.automai.com/s/article/create-a-test-plan',
+                  hint: [
+                    'In the drawer, click the green "Start rLoader Desktops" button.',
+                    'Watch the BotManager row flip to Connected with all bots Available.',
+                    'Now you are ready to build your first test plan.'
+                  ]
+                }
+              ]
             : [{
                 id: 'scenario-verify',
                 label: 'Verify scenario in Projects',
                 done: a.scenarioVerified,
                 action: () => this.navigate('/projects'),
                 hint: [
-                  'Click “Projects” in the sidebar (or use the button above).',
+                  'Click "Projects" in the sidebar (or use the button above).',
                   'Find the scenario you sent from Scenario Builder.',
                   'Click its green tree icon to open the details panel.',
                   'Confirm the version list shows what you expect, then close it.'
@@ -3484,7 +3565,8 @@ export class App implements OnInit {
     const l = this.loaderActions();
     if (this.wizardTourType() === 'loader') {
       if (!a.directorLicensed || !a.scenarioBuilderLicensed
-          || !a.botManagerOpened || !a.botManagerConfigured || !l.botsReloaded) return 'setup';
+          || !a.botManagerOpened || !a.botManagerConfigured
+          || !l.rloaderDrawerOpened || !l.rloaderConfigured || !l.botsReloaded) return 'setup';
       if (!l.testPlanAdded || !l.testPlanBasicsFilled
           || !l.testPlanDistributionDefined || !l.testPlanDurationSet
           || !l.testPlanProcessSelected || !l.testPlanPublished) return 'test-plan';
@@ -3508,6 +3590,8 @@ export class App implements OnInit {
     if (!a.botManagerOpened) return 'botmanager-open';
     if (!a.botManagerConfigured) return 'botmanager';
     if (this.wizardTourType() === 'loader') {
+      if (!l.rloaderDrawerOpened) return 'loader-rloader-open';
+      if (!l.rloaderConfigured) return 'loader-rloader-configure';
       if (!l.botsReloaded) return 'loader-bots-reloaded';
       if (!l.testPlanAdded) return 'loader-test-plan-add';
       if (!l.testPlanBasicsFilled) return 'loader-test-plan-basics';

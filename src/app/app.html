@@ -4944,7 +4944,7 @@
 
                 <div class="flex items-center justify-between sm:justify-end gap-2 w-full xl:w-auto pt-2 xl:pt-0 xl:pl-4 xl:border-l border-slate-100 shrink-0">
                   <div class="flex items-center gap-1 flex-wrap">
-                    <button (click)="startRLoaderDesktops(bm.id)"
+                    <button (click)="openRLoaderDesktopDrawer(bm.id)"
                             class="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">play_arrow</span> Start rLoaders
                     </button>
@@ -5620,6 +5620,93 @@
   <div class="tour-spotlight-overlay"></div>
 } @else if (activeCoach() !== null) {
   <div class="tour-spotlight-overlay tour-spotlight-soft"></div>
+}
+
+<!-- "Start rLoader desktops" drawer (BotManagers page). Mirrors the design
+     from the Loader spec: number/delay/mode + Username prefix + password +
+     domain. Filling the form ticks the loader tour's rLoader sub-steps;
+     clicking Start ticks botsReloaded and flips the BotManager to Connected. -->
+@if (rloaderDrawerOpenFor()) {
+  <div class="fixed inset-0 z-[150] bg-slate-900/30 backdrop-blur-sm flex justify-end" (click)="closeRLoaderDesktopDrawer()">
+    <div class="w-full max-w-[560px] bg-white h-full shadow-2xl flex flex-col drawer-slide-in" (click)="$event.stopPropagation()">
+      <header class="flex items-start justify-between gap-3 px-6 py-4 border-b border-slate-100 bg-white">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="size-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[20px]">play_circle</span>
+          </span>
+          <div class="min-w-0">
+            <h3 class="text-base font-bold text-slate-900 truncate">Start rLoader desktops on selected BotManagers</h3>
+            <p class="text-[11px] text-slate-500 leading-snug">Define and start rLoader desktops</p>
+          </div>
+        </div>
+        <button (click)="closeRLoaderDesktopDrawer()" class="size-8 rounded-md flex items-center justify-center text-rose-500 hover:bg-rose-50 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="rloader-count" class="block text-[11px] text-slate-500 mb-1">Number of rLoader desktops<span class="text-rose-500">*</span></label>
+            <input id="rloader-count" type="number" min="1" required [value]="rloaderForm().count"
+                   (input)="patchRLoaderForm({ count: +$any($event.target).value || 0 })"
+                   class="w-full bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+          <div>
+            <label for="rloader-delay" class="block text-[11px] text-slate-500 mb-1">Delay (sec) before next rLoader<span class="text-rose-500">*</span></label>
+            <input id="rloader-delay" type="number" min="0" required [value]="rloaderForm().delay"
+                   (input)="patchRLoaderForm({ delay: +$any($event.target).value || 0 })"
+                   class="w-full bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+        </div>
+
+        <div>
+          <p class="text-sm font-semibold text-primary mb-2">Select the mode used to define the rLoader users</p>
+          <label for="rloader-mode" class="block text-[11px] text-slate-500 mb-1">Mode<span class="text-rose-500">*</span></label>
+          <select id="rloader-mode" required [value]="rloaderForm().mode" (change)="patchRLoaderForm({ mode: $any($event.target).value })"
+                  class="w-full bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none">
+            <option value="incremental">Incremental</option>
+            <option value="concurrent">Concurrent</option>
+          </select>
+        </div>
+
+        <p class="text-[11px] text-slate-500 flex items-start gap-1.5">
+          <span class="material-symbols-outlined text-[14px] text-slate-400 mt-0.5">info</span>
+          If users don&apos;t exist, the BotManager will create them, unless a domain is indicated.
+        </p>
+
+        <div>
+          <label for="rloader-prefix" class="block text-[11px] text-slate-500 mb-1">Username prefix<span class="text-rose-500">*</span></label>
+          <input id="rloader-prefix" type="text" required [value]="rloaderForm().usernamePrefix"
+                 (input)="patchRLoaderForm({ usernamePrefix: $any($event.target).value })"
+                 class="w-full bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="rloader-pass" class="block text-[11px] text-slate-500 mb-1">Password<span class="text-rose-500">*</span></label>
+            <input id="rloader-pass" type="password" required [value]="rloaderForm().password"
+                   (input)="patchRLoaderForm({ password: $any($event.target).value })"
+                   class="w-full bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+          <div>
+            <label for="rloader-domain" class="block text-[11px] text-slate-500 mb-1">Domain<span class="text-rose-500">*</span></label>
+            <input id="rloader-domain" type="text" required [value]="rloaderForm().domain"
+                   (input)="patchRLoaderForm({ domain: $any($event.target).value })"
+                   class="w-full bg-slate-100 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+        </div>
+      </div>
+
+      <footer class="border-t border-slate-100 px-6 py-4 bg-white flex items-center justify-end gap-3">
+        <button (click)="closeRLoaderDesktopDrawer()" class="px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">Cancel</button>
+        <button (click)="startRLoadersFromDrawer()" [disabled]="!canStartRLoaders()"
+                class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-[16px]">play_circle</span> Start rLoader Desktops
+        </button>
+      </footer>
+    </div>
+  </div>
 }
 
 <!-- Scenario Builder license upload popup — opened from the Guided Tour panel
