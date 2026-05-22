@@ -327,11 +327,14 @@ export class App implements OnInit {
     if (id !== 'watcher' && id !== 'loader') return;
     if (this.appMode() === id) return;
     this.appMode.set(id);
-    // Close any open drawer + the previous product's guided-tour panel so the
-    // user lands on a clean dashboard. The panel is product-specific (watcher
-    // steps vs loader steps), so leaving it open after a switch would show
-    // mismatched content.
+    // Close any open drawer/popup + the previous product's guided-tour panel
+    // so the user lands on a clean dashboard. The panel is product-specific
+    // (watcher steps vs loader steps); leaving it open after a switch would
+    // show mismatched content. The user can start a fresh tour for the new
+    // product from the welcome empty state.
     this.activeDrawer.set(null);
+    this.sbLicensePopupOpen.set(false);
+    this.rloaderDrawerOpenFor.set(null);
     this.wizardChainActive.set(false);
     this.tourPeekPartId.set(null);
     // Also reset the activeTab so the dashboard renders even if the router
@@ -3101,16 +3104,18 @@ export class App implements OnInit {
   // Tour widget content based on current sub-state
   wizardChainHint(): {title: string; text: string; targetPage: string} {
     const a = this.wizardActionsDone();
+    const isLoader = this.wizardTourType() === 'loader';
     if (!a.directorLicensed) {
       return {title: 'Part 1 — Director license', text: 'Upload the <strong>Director</strong> license on the Admin → License page. On a trial? Tap <em>Skip — I\'m on trial</em> in the panel.', targetPage: '/admin/license'};
     }
     if (!a.scenarioBuilderLicensed) {
       return {title: 'Part 1 — Scenario Builder license', text: 'Upload the <strong>Scenario Builder</strong> license — the wizard places it in the install folder for you.', targetPage: '/admin/license'};
     }
-    if (!a.botManagerOpened) {
+    // Watcher-only BotManager steps (Loader skips these entirely).
+    if (!isLoader && !a.botManagerOpened) {
       return {title: 'Part 1 — Open BotManager setup', text: 'Click <strong>Watchers</strong> in the sidebar, then the <strong>BotManagers</strong> sub-tab to open the configuration drawer.', targetPage: '/rwatchers'};
     }
-    if (!a.botManagerConfigured) {
+    if (!isLoader && !a.botManagerConfigured) {
       return {title: 'Part 1 — Configure BotManager', text: 'Fill the Launcher credentials (username + password) and click <strong>Next Step</strong>.', targetPage: ''};
     }
     if (this.wizardTourType() === 'loader') {
@@ -3198,8 +3203,13 @@ export class App implements OnInit {
       {
         id: 'setup',
         label: 'Initial setup',
-        description: 'Director license → Scenario Builder license → BotManager → verify scenario.',
+        description: isLoader
+          ? 'Licenses → BotManagers page → rLoader setup & start.'
+          : 'Licenses → BotManager configuration → verify scenario.',
         icon: 'verified',
+        // License rows are identical for both products (they hit the same
+        // Admin → License page). Everything below is product-specific so no
+        // Watcher wording leaks into the Loader tour, and vice versa.
         subSteps: [
           {
             id: 'setup-director-license',
@@ -3225,37 +3235,18 @@ export class App implements OnInit {
               'On a trial? Use "Skip — I\'m on trial" below.'
             ]
           },
-          {
-            id: 'botmanager-open',
-            label: 'Click Watchers → BotManagers',
-            done: a.botManagerOpened,
-            action: () => this.wizardOpenBotManagerStep(),
-            hint: [
-              'Click "Watchers" (rWatchers) in the sidebar.',
-              'Open the BotManagers sub-tab in the page header.',
-              'The BotManager setup drawer opens for you.'
-            ]
-          },
-          {
-            id: 'botmanager',
-            label: 'Configure BotManager credentials',
-            done: a.botManagerConfigured,
-            action: () => this.openDrawer('botmanager', 'onboarding'),
-            hint: [
-              'Fill the Launcher username and password (both required).',
-              'Optionally expand Advanced settings (RDP, timeout, …).',
-              'Click "Next Step" to save and continue.'
-            ]
-          },
           ...(isLoader
             ? [
+                // Loader path: BotManagers are already registered; the user
+                // opens the BotManagers page and starts rLoader desktops on
+                // them. No BotManager-credentials step.
                 {
                   id: 'loader-rloader-open',
-                  label: 'Select a BotManager → click Start rLoader desktops',
+                  label: 'Open BotManagers → Start rLoader desktops',
                   done: l.rloaderDrawerOpened,
                   action: () => this.navigate('/botmanagers'),
                   hint: [
-                    'Click "BotManagers" in the sidebar.',
+                    'Click "BotManagers" in the sidebar (Loader top nav).',
                     'Tick the checkbox next to the BotManager you want to use.',
                     'Click the "Start rLoader desktops" action on that row — the setup drawer opens.'
                   ]
@@ -3285,18 +3276,45 @@ export class App implements OnInit {
                   ]
                 }
               ]
-            : [{
-                id: 'scenario-verify',
-                label: 'Verify scenario in Projects',
-                done: a.scenarioVerified,
-                action: () => this.navigate('/projects'),
-                hint: [
-                  'Click "Projects" in the sidebar (or use the button above).',
-                  'Find the scenario you sent from Scenario Builder.',
-                  'Click its green tree icon to open the details panel.',
-                  'Confirm the version list shows what you expect, then close it.'
-                ]
-              }])
+            : [
+                // Watcher path: user has to register & configure a BotManager
+                // from the Watchers → BotManagers sub-tab, then verify the
+                // scenario arrived in Projects.
+                {
+                  id: 'botmanager-open',
+                  label: 'Click Watchers → BotManagers',
+                  done: a.botManagerOpened,
+                  action: () => this.wizardOpenBotManagerStep(),
+                  hint: [
+                    'Click "Watchers" (rWatchers) in the sidebar.',
+                    'Open the BotManagers sub-tab in the page header.',
+                    'The BotManager setup drawer opens for you.'
+                  ]
+                },
+                {
+                  id: 'botmanager',
+                  label: 'Configure BotManager credentials',
+                  done: a.botManagerConfigured,
+                  action: () => this.openDrawer('botmanager', 'onboarding'),
+                  hint: [
+                    'Fill the Launcher username and password (both required).',
+                    'Optionally expand Advanced settings (RDP, timeout, …).',
+                    'Click "Next Step" to save and continue.'
+                  ]
+                },
+                {
+                  id: 'scenario-verify',
+                  label: 'Verify scenario in Projects',
+                  done: a.scenarioVerified,
+                  action: () => this.navigate('/projects'),
+                  hint: [
+                    'Click "Projects" in the sidebar (or use the button above).',
+                    'Find the scenario you sent from Scenario Builder.',
+                    'Click its green tree icon to open the details panel.',
+                    'Confirm the version list shows what you expect, then close it.'
+                  ]
+                }
+              ])
         ]
       },
       ...(isLoader
@@ -3564,8 +3582,8 @@ export class App implements OnInit {
     const a = this.wizardActionsDone();
     const l = this.loaderActions();
     if (this.wizardTourType() === 'loader') {
+      // Loader does NOT use the Watcher BotManager-credentials flow.
       if (!a.directorLicensed || !a.scenarioBuilderLicensed
-          || !a.botManagerOpened || !a.botManagerConfigured
           || !l.rloaderDrawerOpened || !l.rloaderConfigured || !l.botsReloaded) return 'setup';
       if (!l.testPlanAdded || !l.testPlanBasicsFilled
           || !l.testPlanDistributionDefined || !l.testPlanDurationSet
@@ -3584,12 +3602,11 @@ export class App implements OnInit {
   wizardTourActiveSubId(): string {
     const a = this.wizardActionsDone();
     const l = this.loaderActions();
-    // Part 1: licenses (Director first), open BotManager, configure, verify scenario.
+    // Part 1: licenses are the same in both tours.
     if (!a.directorLicensed) return 'setup-director-license';
     if (!a.scenarioBuilderLicensed) return 'setup-sb-license';
-    if (!a.botManagerOpened) return 'botmanager-open';
-    if (!a.botManagerConfigured) return 'botmanager';
     if (this.wizardTourType() === 'loader') {
+      // Loader: BotManagers page → rLoader drawer → configure → start.
       if (!l.rloaderDrawerOpened) return 'loader-rloader-open';
       if (!l.rloaderConfigured) return 'loader-rloader-configure';
       if (!l.botsReloaded) return 'loader-bots-reloaded';
