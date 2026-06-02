@@ -400,6 +400,10 @@ export class App implements OnInit {
         this.activeTab.set('help-new3');
         return;
       }
+      if (url.startsWith('/help/new2')) {
+        this.activeTab.set('help-new2');
+        return;
+      }
       if (url.startsWith('/help/new')) {
         this.activeTab.set('help-new');
         return;

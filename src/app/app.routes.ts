@@ -17,6 +17,7 @@ export const routes: Routes = [
   { path: 'help/documentation2', data: { tab: 'help-documentation2' }, children: [] },
   { path: 'help/kb-chat', data: { tab: 'help-kb-chat' }, children: [] },
   { path: 'help/new', data: { tab: 'help-new' }, children: [] },
+  { path: 'help/new2', data: { tab: 'help-new2' }, children: [] },
   { path: 'help/new3', data: { tab: 'help-new3' }, children: [] },
   { path: 'help/new4', data: { tab: 'help-new4' }, children: [] },
   { path: 'help', data: { tab: 'help' }, children: [] },
