@@ -355,15 +355,20 @@ export class App implements OnInit {
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
-      // First-time-user: start the guided tour on the dashboard. The tour panel
-      // stays open and the user clicks the License sub-step to navigate to
-      // /admin/license when they're ready. We do NOT auto-redirect to admin.
+      // First-time-user: start the guided tour on the dashboard, but ONLY if the
+      // user landed on the default shell URL. If they typed a specific URL like
+      // /help/new3 or /admin/license, respect that and let the regular handler
+      // below resolve it — otherwise the unconditional navigate('/dashboard')
+      // bounced every fresh deep link back to the dashboard.
       if (!this.firstNavHandled) {
         this.firstNavHandled = true;
         if (!this.licenseAlreadyValid()) {
           this.wizardStartTour('watcher', { land: 'dashboard' });
-          this.navigate('/dashboard');
-          return;
+          const isDefaultLanding = url === '/' || url === '' || url === '/help' || url.startsWith('/help?');
+          if (isDefaultLanding) {
+            this.navigate('/dashboard');
+            return;
+          }
         }
       }
       // Check for multi-segment paths first
